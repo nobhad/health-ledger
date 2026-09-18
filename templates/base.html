@@ -4,12 +4,22 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>{% block title %}Health Ledger{% endblock %}</title>
-    {# Resolve the saved theme before the stylesheet paints, so there is no flash. #}
+    {# Resolve the saved theme and sidebar state before the stylesheet paints, so nothing flashes. #}
     <script>
         (function () {
+            var root = document.documentElement;
             var theme = 'light';
-            try { if (localStorage.getItem('health-ledger-theme') === 'dark') { theme = 'dark'; } } catch (e) { /* storage unavailable */ }
-            document.documentElement.setAttribute('data-theme', theme);
+            var sidebar = null;
+            try {
+                if (localStorage.getItem('health-ledger-theme') === 'dark') { theme = 'dark'; }
+                sidebar = localStorage.getItem('health-ledger-sidebar');
+            } catch (e) { /* storage unavailable */ }
+            root.setAttribute('data-theme', theme);
+            /* No saved choice: open on wide screens, a rail below --wide (1200px). */
+            if (sidebar !== 'open' && sidebar !== 'collapsed') {
+                sidebar = window.matchMedia('(min-width: 1200px)').matches ? 'open' : 'collapsed';
+            }
+            root.setAttribute('data-sidebar', sidebar);
         })();
     </script>
     {# Built from static/css/health-ledger.css by `npm run build:css` #}
@@ -20,25 +30,41 @@
 </head>
 {# data-page="ledger" is the surface the vendored portal theme keys its palette to. #}
 <body data-page="ledger">
-    {% include 'header.html' %}
+    <div class="app-shell" id="appShell">
+        {% include 'sidebar.html' %}
 
-    <main class="main-content">
-        {% if self.page_title() | trim %}
-        <div class="page-header">
-            <h2>{% block page_title %}{% endblock %}</h2>
-            <p class="page-description">{% block page_description %}{% endblock %}</p>
+        <div class="app-main">
+            {# Phones only: the brand and the drawer toggle. #}
+            <header class="topbar">
+                <a href="/" class="topbar-brand">Health Ledger</a>
+                <button type="button" class="icon-btn sidebar-toggle" id="sidebarToggle" aria-label="Menu" aria-controls="sidebar" aria-expanded="false">
+                    <i data-lucide="menu" class="sidebar-toggle-icon--open"></i>
+                    <i data-lucide="x" class="sidebar-toggle-icon--close"></i>
+                </button>
+            </header>
+
+            <main class="main-content">
+                {% if self.page_title() | trim %}
+                <div class="page-header">
+                    <h2>{% block page_title %}{% endblock %}</h2>
+                    <p class="page-description">{% block page_description %}{% endblock %}</p>
+                </div>
+                {% endif %}
+                <div class="page-body{% block page_body_class %}{% endblock %}">
+                    {% block content %}{% endblock %}
+                </div>
+            </main>
         </div>
-        {% endif %}
-        <div class="page-body{% block page_body_class %}{% endblock %}">
-            {% block content %}{% endblock %}
-        </div>
-    </main>
+    </div>
+
+    {# The drawer's backdrop on phones. #}
+    <div class="sidebar-backdrop" id="sidebarBackdrop" hidden></div>
 
     {% include 'footer.html' %}
 
     {% block scripts %}{% endblock %}
     <script src="{{ url_for('static', filename='js/theme.js') }}"></script>
-    <script src="{{ url_for('static', filename='js/nav.js') }}"></script>
+    <script src="{{ url_for('static', filename='js/sidebar.js') }}"></script>
     <script src="{{ url_for('static', filename='js/dropdown.js') }}"></script>
     <script>
         lucide.createIcons();

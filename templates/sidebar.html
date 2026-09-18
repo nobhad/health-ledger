@@ -1,0 +1,45 @@
+{#
+  Sidebar navigation (the portal's .sidebar / .nav-btn). Open by default on
+  wide screens, an icon rail in between, and an off-canvas drawer on phones
+  opened from the top bar. static/js/sidebar.ts wires the toggles.
+#}
+{% set links = [
+    ('/', 'layout-dashboard', 'Overview'),
+    ('/query', 'search', 'Query'),
+    ('/summary', 'bar-chart-3', 'Summary'),
+    ('/profile', 'file-text', 'Profile'),
+    ('/metrics', 'activity', 'Metrics'),
+    ('/sources', 'folder-open', 'Sources'),
+    ('/doctor-docs', 'stethoscope', 'Doctor Docs'),
+    ('/backup', 'download', 'Backup'),
+] %}
+<aside class="sidebar" id="sidebar" aria-label="Main navigation">
+    <a href="/" class="sidebar-brand" aria-label="Health Ledger, overview">
+        <i data-lucide="heart-pulse" class="sidebar-brand-mark"></i>
+        <span class="sidebar-brand-name">Health Ledger</span>
+    </a>
+    <nav class="sidebar-nav">
+        <ul class="sidebar-buttons">
+            {% for href, icon, label in links %}
+            <li>
+                <a href="{{ href }}" class="nav-btn{% if request.path == href %} is-active{% endif %}"{% if request.path == href %} aria-current="page"{% endif %} title="{{ label }}">
+                    <i data-lucide="{{ icon }}" class="nav-icon"></i>
+                    <span class="nav-label">{{ label }}</span>
+                </a>
+            </li>
+            {% endfor %}
+        </ul>
+    </nav>
+    <div class="sidebar-footer">
+        <button type="button" class="nav-btn theme-toggle" id="themeToggle" aria-label="Switch to dark mode" title="Theme">
+            <i data-lucide="moon" class="nav-icon theme-toggle-icon--dark"></i>
+            <i data-lucide="sun" class="nav-icon theme-toggle-icon--light"></i>
+            <span class="nav-label">Theme</span>
+        </button>
+        <button type="button" class="nav-btn sidebar-collapse" id="sidebarCollapse" aria-label="Collapse sidebar" aria-expanded="true" title="Collapse">
+            <i data-lucide="panel-left-close" class="nav-icon sidebar-collapse-icon--open"></i>
+            <i data-lucide="panel-left-open" class="nav-icon sidebar-collapse-icon--closed"></i>
+            <span class="nav-label">Collapse</span>
+        </button>
+    </div>
+</aside>

@@ -2479,6 +2479,9 @@ body[data-page="ledger"] {
   /* Open multiselect list before it scrolls. */
   --app-dropdown-max-height: calc(var(--space-base) * 30); /* 240px */
 
+  /* The phone drawer's width. */
+  --app-sidebar-drawer-width: var(--aside-width-medium);
+
   /* Column ceilings for the sources workspace. */
   --app-sources-list-width: var(--aside-width-medium);
   --app-sources-list-min-width: var(--aside-width-narrow);
@@ -2741,10 +2744,50 @@ small {
   height: var(--icon-size-lg);
 }
 
-/* Theme toggle shows the icon for the mode you would switch TO. */
-html[data-theme="light"] .theme-toggle-icon--light,
-html[data-theme="dark"] .theme-toggle-icon--dark {
-  display: none;
+/* Sidebar navigation button — the portal's .nav-btn. */
+.nav-btn {
+  display: flex;
+  align-items: center;
+  gap: var(--icon-gap-md);
+  width: 100%;
+  min-height: var(--space-5);
+  padding: 0 var(--space-3);
+  border: none;
+  border-radius: 0;
+  background: transparent;
+  box-shadow: none;
+  font-family: var(--font-family-mono);
+  font-size: var(--font-size-base);
+  font-weight: var(--font-weight-medium);
+  letter-spacing: var(--letter-spacing-wider);
+  text-transform: uppercase;
+  text-align: left;
+  text-decoration: none;
+  color: var(--color-text-primary);
+  cursor: pointer;
+  overflow: hidden;
+  transition: color var(--transition-fast);
+}
+
+.nav-btn:hover,
+.nav-btn.is-active,
+.nav-btn:focus-visible {
+  color: var(--color-accent);
+  text-decoration: none;
+  box-shadow: none;
+}
+
+.nav-btn .nav-icon {
+  flex-shrink: 0;
+  width: var(--sidebar-icon-size);
+  height: var(--sidebar-icon-size);
+}
+
+.nav-btn .nav-label {
+  flex: 0 1 auto;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
 }
 
 /* ============================================
@@ -3666,7 +3709,7 @@ input[type="date"] {
   display: flex;
   flex-direction: column;
   gap: var(--space-0-5);
-  padding: var(--portal-card-padding) var(--portal-content-padding);
+  padding: var(--space-2) var(--portal-content-padding);
   border: var(--portal-border);
   color: inherit;
   text-decoration: none;
@@ -3794,120 +3837,158 @@ a.list-item:hover {
  * ===============================================
  * @file static/css/layout.css  (@layer layouts)
  *
- * Header, navigation, the page shell, the footer curtain, grids and the row
- * patterns pages compose with. Nothing in here paints a component; that is
- * components.css.
+ * The app shell (sidebar + main column), the page shell, the footer
+ * curtain, grids and the row patterns pages compose with. Nothing in here
+ * paints a component; that is components.css.
  *
  * THE SHELL
- * The header is sticky. Below it, <main> is exactly the rest of the viewport
- * and does not scroll as a whole: its page header is a fixed bar and its
- * body holds the page, with any region that can outgrow it scrolling inside
- * itself. The footer is the portfolio site's curtain: a band pinned behind
- * the page at the bottom of the viewport. The document is taller than the
- * viewport by exactly the band's height, so scrolling to the end slides the
- * page up off the band (no-bhad-codes components/footer.css: "the curtain
- * never moves — the page slides up off it").
+ * The shell is exactly the viewport and does not scroll as a whole: the
+ * sidebar stands on the left, the main column holds the page header as a
+ * fixed bar and the page body below it, with any region that can outgrow
+ * the page scrolling inside itself. The footer is the portfolio site's
+ * curtain: a band pinned behind the shell at the bottom of the viewport.
+ * The document is taller than the viewport by exactly the band's height, so
+ * scrolling to the end slides the shell up off the band (no-bhad-codes
+ * components/footer.css: "the curtain never moves — the page slides up off
+ * it"). Phones switch all of this off — see RESPONSIVE.
  */
 
 /* ============================================
- * HEADER + NAVIGATION
+ * APP SHELL — sidebar + main column
+ * The shell is the viewport. It sits above the fixed footer curtain and
+ * slides up off it (see FOOTER CURTAIN). Below --mobile none of this
+ * applies: the page scrolls normally and the sidebar is a drawer.
  * ============================================ */
-.main-header {
-  position: sticky;
-  top: 0;
-  z-index: var(--z-index-nav-header);
-  width: 100%;
-  min-height: var(--app-header-height);
-  background: var(--color-bg-primary);
-  border-bottom: var(--portal-border);
-}
-
-.header-container {
+.app-shell {
+  position: relative;
+  z-index: var(--z-index-content); /* above the fixed curtain */
   display: flex;
-  align-items: center;
-  justify-content: space-between;
-  gap: var(--space-3);
+  height: 100dvh;
   width: 100%;
-  padding: var(--space-1-5) var(--portal-page-gutter);
+  overflow: hidden;
+  background: var(--color-bg-primary);
 }
 
-.header-brand {
+.app-main {
+  display: flex;
+  flex: 1 1 auto;
+  flex-direction: column;
+  min-width: 0;
+  min-height: 0;
+}
+
+/* ============================================
+ * SIDEBAR — the portal's .sidebar
+ * Open at --sidebar-width-open, a rail at --sidebar-collapsed-width.
+ * html[data-sidebar] carries the state (base.html sets it before paint;
+ * sidebar.ts toggles it).
+ * ============================================ */
+.sidebar {
+  display: flex;
   flex: 0 0 auto;
+  flex-direction: column;
+  width: var(--sidebar-width-open);
+  min-height: 0;
+  overflow: hidden;
+  background: var(--color-bg-primary);
+  border-right: var(--portal-border);
+  transition: width var(--transition-fast) ease-out;
 }
 
-.brand-link {
+html[data-sidebar="collapsed"] .sidebar {
+  width: var(--sidebar-collapsed-width);
+}
+
+.sidebar-brand {
+  display: flex;
+  flex-shrink: 0;
+  align-items: center;
+  gap: var(--icon-gap-md);
+  min-height: var(--app-header-height);
+  padding: 0 var(--space-3);
+  border-bottom: var(--portal-border);
+  color: var(--heading-card-color);
   text-decoration: none;
-  color: inherit;
+  white-space: nowrap;
 }
 
-.site-title {
-  margin: 0;
+.sidebar-brand:hover {
+  color: var(--color-accent);
+  text-decoration: none;
+}
+
+.sidebar-brand-mark {
+  flex-shrink: 0;
+  width: var(--sidebar-icon-size);
+  height: var(--sidebar-icon-size);
+}
+
+.sidebar-brand-name {
   font-family: var(--font-family-mono);
   font-size: var(--heading-card-font-size);
   font-weight: var(--heading-card-font-weight);
   letter-spacing: var(--heading-card-letter-spacing);
   text-transform: var(--heading-text-transform);
-  color: var(--heading-card-color);
 }
 
-.header-actions {
+.sidebar-nav {
+  flex: 1 1 auto;
+  min-height: 0;
+  overflow-y: auto;
+  padding: var(--space-2) 0;
+}
+
+.sidebar-buttons {
   display: flex;
-  align-items: center;
-  gap: var(--space-2);
-}
-
-/* Hamburger: hidden until the nav becomes a drawer (see RESPONSIVE). */
-.nav-toggle {
-  display: none;
-}
-
-.nav-toggle[aria-expanded="false"] .nav-toggle-icon--close,
-.nav-toggle[aria-expanded="true"] .nav-toggle-icon--open {
-  display: none;
-}
-
-.main-nav {
-  flex: 0 1 auto;
-  min-width: 0;
-}
-
-.nav-list {
-  display: flex;
-  flex-wrap: nowrap;
-  align-items: center;
-  gap: var(--space-0-5);
+  flex-direction: column;
+  gap: var(--space-1);
   list-style: none;
   margin: 0;
   padding: 0;
 }
 
-.nav-item {
-  margin: 0;
+.sidebar-footer {
+  display: flex;
+  flex-shrink: 0;
+  flex-direction: column;
+  gap: var(--space-1);
+  margin-top: auto;
+  padding: var(--space-2) 0;
+  border-top: var(--portal-border);
 }
 
-.nav-link {
-  display: inline-flex;
-  align-items: center;
-  gap: var(--icon-gap);
-  min-height: var(--app-control-height);
-  padding: 0 var(--space-1-5);
-  font-size: var(--font-size-sm);
-  font-weight: var(--font-weight-medium);
-  letter-spacing: var(--letter-spacing-label);
-  text-transform: uppercase;
-  text-decoration: none;
-  color: var(--color-text-secondary);
-  transition: color var(--transition-fast);
+/* Collapsed: icons centred on the rail, labels and wordmark gone. */
+html[data-sidebar="collapsed"] .sidebar :is(.nav-label, .sidebar-brand-name) {
+  display: none;
 }
 
-.nav-link:hover {
-  color: var(--color-text-primary);
-  text-decoration: none;
+html[data-sidebar="collapsed"] .sidebar :is(.nav-btn, .sidebar-brand) {
+  justify-content: center;
+  padding: 0;
 }
 
-.nav-link.active {
-  color: var(--color-accent);
-  box-shadow: inset 0 calc(-1 * var(--border-width)) 0 var(--color-accent);
+html[data-sidebar="collapsed"] .sidebar-collapse-icon--open,
+html[data-sidebar="open"] .sidebar-collapse-icon--closed {
+  display: none;
+}
+
+/* Theme toggle shows the icon for the mode you would switch TO. */
+html[data-theme="light"] .theme-toggle-icon--light,
+html[data-theme="dark"] .theme-toggle-icon--dark {
+  display: none;
+}
+
+/* ============================================
+ * TOP BAR — phones only (see RESPONSIVE)
+ * ============================================ */
+.topbar,
+.sidebar-backdrop {
+  display: none;
+}
+
+.sidebar-toggle[aria-expanded="false"] .sidebar-toggle-icon--close,
+.sidebar-toggle[aria-expanded="true"] .sidebar-toggle-icon--open {
+  display: none;
 }
 
 /* ============================================
@@ -3920,15 +4001,12 @@ body[data-page="ledger"] {
 }
 
 .main-content {
-  position: relative;
-  z-index: var(--z-index-content); /* above the fixed curtain */
   display: flex;
+  flex: 1 1 auto;
   flex-direction: column;
-  flex: 0 0 auto;
-  height: calc(100dvh - var(--app-header-height));
+  min-height: 0;
   width: 100%;
   overflow: hidden;
-  background: var(--color-bg-primary);
 }
 
 /* Tier 1 — the container's own top bar, not a floating heading. */
@@ -4258,49 +4336,6 @@ body[data-page="ledger"] {
  * RESPONSIVE
  * ============================================ */
 
-/* Below 1300px the eight links no longer fit on one row beside the brand
-   and the actions, so the nav becomes a drawer under the header, opened by
-   the hamburger (static/js/nav.ts). The breakpoint is --wide-down; nav.ts
-   carries the same figure. */
-@media (max-width: 1300px) {
-  .nav-toggle {
-    display: inline-flex;
-  }
-
-  .main-nav {
-    position: fixed;
-    top: var(--app-header-height);
-    right: 0;
-    bottom: 0;
-    left: 0;
-    z-index: var(--z-index-nav-menu);
-    display: none;
-    overflow-y: auto;
-    background: var(--color-bg-primary);
-  }
-
-  .main-nav.is-open {
-    display: block;
-  }
-
-  .nav-list {
-    flex-direction: column;
-    align-items: stretch;
-    gap: 0;
-  }
-
-  .nav-link {
-    min-height: var(--space-7);
-    padding: 0 var(--portal-page-gutter);
-    font-size: var(--font-size-base);
-    border-bottom: var(--portal-input-border);
-  }
-
-  .nav-link.active {
-    box-shadow: var(--app-edge-mark) var(--color-accent);
-  }
-}
-
 /* Tablet and down: three-up grids become two-up. */
 @media (max-width: 991px) {
   .grid-3 {
@@ -4316,43 +4351,181 @@ body[data-page="ledger"] {
   }
 }
 
-/* Phones: single-column grids, split panels stack, the band stacks its
-   note over the mark. */
+/* Phones. The viewport shell is switched off wholesale: the document
+   scrolls, every region is in normal flow, the footer band sits at the end
+   of the page, and the sidebar is a drawer opened from the top bar. */
 @media (max-width: 767px) {
+  body[data-page="ledger"] {
+    padding-bottom: 0;
+  }
+
+  .app-shell {
+    display: block;
+    height: auto;
+    overflow: visible;
+  }
+
+  .topbar {
+    position: sticky;
+    top: 0;
+    z-index: var(--z-index-nav-header);
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    min-height: var(--app-header-height);
+    padding: 0 var(--portal-page-gutter);
+    background: var(--color-bg-primary);
+    border-bottom: var(--portal-border);
+  }
+
+  .topbar-brand {
+    font-family: var(--font-family-mono);
+    font-size: var(--heading-card-font-size);
+    font-weight: var(--heading-card-font-weight);
+    letter-spacing: var(--heading-card-letter-spacing);
+    text-transform: var(--heading-text-transform);
+    color: var(--heading-card-color);
+    text-decoration: none;
+  }
+
+  .sidebar {
+    position: fixed;
+    top: var(--app-header-height);
+    bottom: 0;
+    left: 0;
+    z-index: var(--z-index-nav-menu);
+    width: var(--app-sidebar-drawer-width);
+    transform: translateX(-100%);
+    transition: transform var(--transition-fast) ease-out;
+  }
+
+  .sidebar.is-open {
+    transform: none;
+  }
+
+  .sidebar-backdrop {
+    position: fixed;
+    inset: var(--app-header-height) 0 0 0;
+    z-index: var(--z-index-nav-overlay);
+    display: block;
+    background: var(--overlay-backdrop);
+  }
+
+  .sidebar-backdrop[hidden] {
+    display: none;
+  }
+
+  /* The drawer is always the open sidebar; the rail state is a desktop idea. */
+  .sidebar-brand,
+  .sidebar-collapse {
+    display: none;
+  }
+
+  html[data-sidebar="collapsed"] .sidebar .nav-label {
+    display: inline;
+  }
+
+  html[data-sidebar="collapsed"] .sidebar .nav-btn {
+    justify-content: flex-start;
+    padding: 0 var(--space-3);
+  }
+
+  .main-content,
+  .page-body,
+  .page-body--flush,
+  .container,
+  .is-fill,
+  .is-fill > :is(.table-container, .card-body, .panel-content),
+  .grid--fill > .card > .card-body,
+  .profile-content,
+  .summary-content,
+  .panel-content {
+    flex: 0 0 auto;
+    min-height: auto;
+    height: auto;
+    max-height: none;
+    overflow: visible;
+  }
+
+  .table-container,
+  .results-table-wrapper {
+    overflow-x: auto;
+  }
+
   .grid-2,
   .grid-3,
   .stat-grid {
     grid-template-columns: 1fr;
   }
 
-  .grid > :is(.card, .section, .stat-card) {
+  .grid > :is(.card, .section, .stat-card),
+  .stat-grid > .stat-card {
     border-right-width: 0;
   }
 
   .grid--fill {
+    flex: 0 0 auto;
     grid-auto-rows: auto;
+    min-height: auto;
   }
 
-  .grid--fill > .card > .card-body {
-    overflow: visible;
-  }
-
-  .page-body--flush {
-    overflow: auto;
+  .grid--fill > .card {
+    min-height: auto;
   }
 
   .doc-layout {
-    grid-template-columns: minmax(0, 1fr);
+    display: block;
     flex: 0 0 auto;
+    min-height: auto;
   }
 
   .doc-nav {
+    max-height: none;
     border-right: none;
     border-bottom: var(--portal-border);
   }
 
+  .doc-nav-list {
+    max-height: none;
+    overflow: visible;
+  }
+
+  .panel-container {
+    flex-direction: column;
+    height: auto;
+    min-height: auto;
+    overflow: visible;
+  }
+
+  .sources-panel-left,
+  .sources-panel-middle,
+  .sources-panel-right {
+    width: 100%;
+    min-width: 100%;
+    max-width: 100%;
+  }
+
+  .panel-splitter {
+    display: none;
+  }
+
   .form-row :is(.form-input, .dropdown) {
     flex-basis: 100%;
+  }
+
+  .results-controls .filter-input {
+    min-width: 0;
+    width: 100%;
+  }
+
+  /* The band travels with the content. */
+  .footer {
+    position: static;
+    height: auto;
+  }
+
+  .footer-curtain {
+    min-height: var(--footer-curtain-height);
   }
 
   .footer-curtain__inner {

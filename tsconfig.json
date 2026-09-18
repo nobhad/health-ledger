@@ -2,7 +2,10 @@
   "compilerOptions": {
     "target": "ES2020",
     "module": "None",
-    "lib": ["ES2020", "DOM"],
+    "lib": [
+      "ES2020",
+      "DOM"
+    ],
     "moduleResolution": "node",
     "strict": true,
     "skipLibCheck": true,
@@ -11,7 +14,9 @@
     "noEmit": false,
     "checkJs": false,
     "allowJs": false,
-    "typeRoots": ["./static/js", "./node_modules/@types"],
+    "typeRoots": [
+      "./node_modules/@types"
+    ],
     "noImplicitAny": true,
     "strictNullChecks": true,
     "strictFunctionTypes": true,
@@ -25,7 +30,9 @@
     "noFallthroughCasesInSwitch": true,
     "baseUrl": ".",
     "paths": {
-      "@/*": ["static/js/*"]
+      "@/*": [
+        "static/js/*"
+      ]
     }
   },
   "include": [
@@ -34,8 +41,8 @@
   ],
   "exclude": [
     "node_modules",
+    "output/**",
     "primary_sources/**",
-    "output/**"
+    "static/js/vendor/**"
   ]
 }
-

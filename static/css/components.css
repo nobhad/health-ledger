@@ -113,10 +113,50 @@
   height: var(--icon-size-lg);
 }
 
-/* Theme toggle shows the icon for the mode you would switch TO. */
-html[data-theme="light"] .theme-toggle-icon--light,
-html[data-theme="dark"] .theme-toggle-icon--dark {
-  display: none;
+/* Sidebar navigation button — the portal's .nav-btn. */
+.nav-btn {
+  display: flex;
+  align-items: center;
+  gap: var(--icon-gap-md);
+  width: 100%;
+  min-height: var(--space-5);
+  padding: 0 var(--space-3);
+  border: none;
+  border-radius: 0;
+  background: transparent;
+  box-shadow: none;
+  font-family: var(--font-family-mono);
+  font-size: var(--font-size-base);
+  font-weight: var(--font-weight-medium);
+  letter-spacing: var(--letter-spacing-wider);
+  text-transform: uppercase;
+  text-align: left;
+  text-decoration: none;
+  color: var(--color-text-primary);
+  cursor: pointer;
+  overflow: hidden;
+  transition: color var(--transition-fast);
+}
+
+.nav-btn:hover,
+.nav-btn.is-active,
+.nav-btn:focus-visible {
+  color: var(--color-accent);
+  text-decoration: none;
+  box-shadow: none;
+}
+
+.nav-btn .nav-icon {
+  flex-shrink: 0;
+  width: var(--sidebar-icon-size);
+  height: var(--sidebar-icon-size);
+}
+
+.nav-btn .nav-label {
+  flex: 0 1 auto;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
 }
 
 /* ============================================
@@ -1023,7 +1063,7 @@ input[type="date"] {
   display: flex;
   flex-direction: column;
   gap: var(--space-0-5);
-  padding: var(--portal-card-padding) var(--portal-content-padding);
+  padding: var(--space-2) var(--portal-content-padding);
   border: var(--portal-border);
   color: inherit;
   text-decoration: none;

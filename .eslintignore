@@ -5,3 +5,4 @@ output/
 genetic_profile.db*
 static/js/*.js
 
+static/js/vendor/
