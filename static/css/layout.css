@@ -47,6 +47,8 @@
 /* ============================================
  * SIDEBAR — the portal's .sidebar
  * Open at --sidebar-width-open, a rail at --sidebar-collapsed-width.
+ * One rule only, on its right edge, where it meets the page; the portal's
+ * sidebar draws none inside itself, and neither does this.
  * html[data-sidebar] carries the state (base.html sets it before paint;
  * sidebar.ts toggles it).
  * ============================================ */
@@ -73,7 +75,6 @@ html[data-sidebar="collapsed"] .sidebar {
   gap: var(--icon-gap-md);
   min-height: var(--app-header-height);
   padding: 0 var(--space-3);
-  border-bottom: var(--portal-border);
   color: var(--heading-card-color);
   text-decoration: none;
   white-space: nowrap;
@@ -121,7 +122,6 @@ html[data-sidebar="collapsed"] .sidebar {
   gap: var(--space-1);
   margin-top: auto;
   padding: var(--space-2) 0;
-  border-top: var(--portal-border);
 }
 
 /* Collapsed: icons centred on the rail, labels and wordmark gone. */
