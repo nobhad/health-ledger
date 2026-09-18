@@ -9,17 +9,17 @@
 {% block content %}
 <div class="grid grid-3">
     {% call card("Find Genes by Health Condition", "query-card") %}
-        {{ multiselect("condition", "Health Condition(s)", "Click here or type to search conditions... (e.g., ADHD, anxiety, depression)", "condition") }}
+        {{ multiselect("condition", "Health Condition(s)", "Search conditions", "condition") }}
         {{ button("Search", "queryByCondition()", class="btn-primary btn-block") }}
     {% endcall %}
 
     {% call card("Find Genes by Trait", "query-card") %}
-        {{ multiselect("trait", "Trait(s)", "Click here or type to search traits... (e.g., pain sensitivity, stress response)", "trait") }}
+        {{ multiselect("trait", "Trait(s)", "Search traits", "trait") }}
         {{ button("Search", "queryByTrait()", class="btn-primary btn-block") }}
     {% endcall %}
 
     {% call card("Get Gene Information", "query-card") %}
-        {{ multiselect("gene", "Gene(s)", "Click here or type to search genes... (e.g., ADRA2A, COMT, HTR2A)", "gene") }}
+        {{ multiselect("gene", "Gene(s)", "Search genes", "gene") }}
         {{ button("Get Gene Info", "queryByGene()", class="btn-primary btn-block") }}
     {% endcall %}
 </div>
