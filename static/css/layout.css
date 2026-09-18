@@ -515,10 +515,12 @@ html[data-theme="dark"] .theme-toggle-icon--dark {
   gap: var(--space-1);
 }
 
-/* A label and its control on one line. */
+/* A label and its control on one line. The label column is a fixed width,
+   so the controls of stacked rows line up, and the control takes the rest
+   of the row. */
 .form-row {
-  display: flex;
-  flex-wrap: wrap;
+  display: grid;
+  grid-template-columns: var(--detail-row-label-width) minmax(0, 1fr);
   align-items: center;
   gap: var(--space-1-5);
   margin-bottom: var(--field-group-gap);
@@ -529,8 +531,11 @@ html[data-theme="dark"] .theme-toggle-icon--dark {
 }
 
 .form-row :is(.form-input, .dropdown) {
-  width: auto;
-  flex: 0 1 var(--app-inline-input-width);
+  width: 100%;
+}
+
+.form-row .helper-text {
+  grid-column: 2;
 }
 
 /* ============================================
@@ -724,8 +729,12 @@ html[data-theme="dark"] .theme-toggle-icon--dark {
     display: none;
   }
 
-  .form-row :is(.form-input, .dropdown) {
-    flex-basis: 100%;
+  .form-row {
+    grid-template-columns: minmax(0, 1fr);
+  }
+
+  .form-row .helper-text {
+    grid-column: 1;
   }
 
   .results-controls .filter-input {

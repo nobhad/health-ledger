@@ -31,10 +31,6 @@ body[data-page="ledger"] {
     var(--search-icon-inset) + var(--icon-size-md) + var(--search-icon-gap)
   );
 
-  /* A text control sitting inline beside its label (export path, custom
-     save folder). */
-  --app-inline-input-width: calc(var(--space-base) * 37.5); /* 300px */
-
   /* Open multiselect list before it scrolls. */
   --app-dropdown-max-height: calc(var(--space-base) * 30); /* 240px */
 
