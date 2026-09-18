@@ -2867,6 +2867,12 @@ label:has(> input[type="checkbox"]) {
   margin-bottom: var(--field-group-gap);
 }
 
+/* An aside within running text: a step smaller, a step quieter. */
+.note {
+  font-size: var(--font-size-sm);
+  color: var(--color-text-secondary);
+}
+
 .helper-text {
   display: block;
   margin-top: var(--space-0-5);
