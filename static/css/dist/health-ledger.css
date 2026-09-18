@@ -2635,12 +2635,11 @@ pre {
   word-wrap: break-word;
 }
 
-/* A rule inside content is the same hairline as every other in-content
-   divider (table rows, list rows): thin and faint, so it separates without
-   competing with the 2px rules that frame the panels around it. */
+/* A rule in a document divides sections the way the panel rules divide the
+   page: the same 2px, full width. */
 hr {
   border: none;
-  border-top: var(--border-width-thin) solid var(--portal-alpha-white-20);
+  border-top: var(--portal-border);
   margin: var(--space-3) 0;
 }
 
