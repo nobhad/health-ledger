@@ -47,7 +47,7 @@
   display: flex;
   align-items: center;
   height: calc(var(--space-2) + var(--space-5) + var(--space-2));
-  padding: 0 var(--content-gutter);
+  padding: 0 var(--space-3);
   border-bottom: var(--portal-border);
   font-size: var(--heading-section-font-size);
   font-weight: var(--heading-section-font-weight);
@@ -55,18 +55,25 @@
   text-transform: var(--heading-text-transform);
 }
 
+/* The same rhythm as the sidebar's list: the list's own top and bottom
+   padding, a row height, and one gap between rows. */
 .doc-nav-list {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-1);
   list-style: none;
   margin: 0;
-  padding: var(--space-1) 0;
+  padding: var(--space-2) 0;
   flex: 1 1 auto;
   min-height: 0;
   overflow-y: auto;
 }
 
 .doc-nav-link {
-  display: block;
-  padding: var(--space-0-5) var(--content-gutter);
+  display: flex;
+  align-items: center;
+  min-height: var(--space-5);
+  padding: var(--space-0-5) var(--space-3);
   font-family: var(--portal-subtab-family);
   font-size: var(--font-size-sm);
   font-weight: var(--portal-subtab-weight);
