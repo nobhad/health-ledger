@@ -34,6 +34,9 @@
   width: 100%;
   overflow: hidden;
   background: var(--color-bg-primary);
+  /* One rule along the shell's bottom edge, under the sidebar and the page
+     alike, so the edge reads even when the band below is the same ink. */
+  border-bottom: var(--portal-border);
 }
 
 .app-main {
