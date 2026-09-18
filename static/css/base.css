@@ -8,6 +8,13 @@
  * anything reusable by class belongs in components.css.
  */
 
+/* No rubber-band overscroll: the document ends exactly where the footer
+   band ends, and macOS's elastic bounce was pulling the page past it and
+   showing bare ground above and below. */
+html {
+  overscroll-behavior-y: none;
+}
+
 body {
   color: var(--color-text-primary);
   font-size: var(--font-size-base);

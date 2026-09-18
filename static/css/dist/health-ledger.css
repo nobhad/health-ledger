@@ -2578,6 +2578,13 @@ body[data-page="ledger"] {
  * anything reusable by class belongs in components.css.
  */
 
+/* No rubber-band overscroll: the document ends exactly where the footer
+   band ends, and macOS's elastic bounce was pulling the page past it and
+   showing bare ground above and below. */
+html {
+  overscroll-behavior-y: none;
+}
+
 body {
   color: var(--color-text-primary);
   font-size: var(--font-size-base);
@@ -3759,11 +3766,14 @@ a.stat-card:hover {
   padding: 0;
 }
 
+/* Rows bleed to the card's edges so their rules span the whole card; the
+   card's horizontal padding comes back as the row's own. */
 .list-item {
   display: flex;
   flex-direction: column;
   gap: var(--space-0-25);
-  padding: var(--space-1) 0;
+  margin-inline: calc(-1 * var(--portal-content-padding));
+  padding: var(--space-1) var(--portal-content-padding);
   border-bottom: var(--border-width-thin) solid var(--portal-alpha-white-10);
   color: inherit;
   text-decoration: none;
@@ -3793,7 +3803,8 @@ a.list-item:hover {
   display: flex;
   align-items: center;
   gap: var(--icon-gap-md);
-  padding: var(--space-1) 0;
+  margin-inline: calc(-1 * var(--portal-content-padding));
+  padding: var(--space-1) var(--portal-content-padding);
   border-bottom: var(--border-width-thin) solid var(--portal-alpha-white-10);
   color: inherit;
   text-decoration: none;
@@ -4000,12 +4011,6 @@ html[data-theme="dark"] .theme-toggle-icon--dark {
 /* ============================================
  * PAGE SHELL
  * ============================================ */
-body[data-page="ledger"] {
-  /* The scroll room that reveals the curtain — nothing else scrolls the
-     document. */
-  padding-bottom: var(--footer-curtain-height);
-}
-
 .main-content {
   display: flex;
   flex: 1 1 auto;
@@ -4089,16 +4094,19 @@ body[data-page="ledger"] {
 
 /* ============================================
  * FOOTER CURTAIN
- * Rules follow no-bhad-codes components/footer.css. The band is fixed to
- * the viewport bottom beneath the page; body's bottom padding above gives
- * the scroll that uncovers it.
+ * Rules follow no-bhad-codes components/footer.css. The band follows the
+ * shell in flow and sticks to the viewport bottom: below the fold it is
+ * pinned there behind the shell, and the last stretch of scroll — exactly
+ * the band's height, since the document ends with it — slides the shell up
+ * off it. Nothing is padded or fixed, so the shell's bottom edge and the
+ * band's top edge are the same line by construction.
  * ============================================ */
 .footer {
-  position: fixed;
+  position: sticky;
   bottom: 0;
-  left: 0;
-  right: 0;
   z-index: var(--z-index-base);
+  flex: 0 0 auto;
+  width: 100%;
   height: var(--footer-curtain-height);
 }
 
@@ -4235,6 +4243,14 @@ body[data-page="ledger"] {
   border-right-width: 0;
 }
 
+/* Whatever sits last on a page meets the band below it, not a rule. */
+.page-body > :is(.card, .section):last-child,
+.container > :is(.card, .section):last-child,
+.grid-2.grid--fill > .card:nth-last-child(-n + 2),
+.grid-3.grid--fill > .card:nth-last-child(-n + 3) {
+  border-bottom-width: 0;
+}
+
 .grid-2 {
   grid-template-columns: repeat(2, 1fr);
 }
@@ -4361,10 +4377,6 @@ body[data-page="ledger"] {
    scrolls, every region is in normal flow, the footer band sits at the end
    of the page, and the sidebar is a drawer opened from the top bar. */
 @media (max-width: 767px) {
-  body[data-page="ledger"] {
-    padding-bottom: 0;
-  }
-
   .app-shell {
     display: block;
     height: auto;
@@ -4477,6 +4489,11 @@ body[data-page="ledger"] {
 
   .grid--fill > .card {
     min-height: auto;
+    border-bottom-width: var(--border-width);
+  }
+
+  .grid--fill > .card:last-child {
+    border-bottom-width: 0;
   }
 
   .doc-layout {
@@ -4656,12 +4673,22 @@ body[data-page="ledger"] {
   font-weight: var(--font-weight-bold);
 }
 
+/* The document pads its TEXT, not its box, so a rule inside it runs the
+   full width of the column. */
 .profile-content,
 .summary-content {
   min-width: 0;
   min-height: 0;
   overflow-y: auto;
-  padding: var(--portal-card-padding);
+  padding: var(--portal-card-padding) 0;
+}
+
+:is(.profile-content, .summary-content) > :not(hr) {
+  padding-inline: var(--portal-content-padding);
+}
+
+:is(.profile-content, .summary-content) hr {
+  margin: var(--space-3) 0;
 }
 
 :is(.profile-content, .summary-content, .card-body, .source-details, .preview-panel) p {

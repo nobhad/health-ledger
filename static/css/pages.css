@@ -81,12 +81,22 @@
   font-weight: var(--font-weight-bold);
 }
 
+/* The document pads its TEXT, not its box, so a rule inside it runs the
+   full width of the column. */
 .profile-content,
 .summary-content {
   min-width: 0;
   min-height: 0;
   overflow-y: auto;
-  padding: var(--portal-card-padding);
+  padding: var(--portal-card-padding) 0;
+}
+
+:is(.profile-content, .summary-content) > :not(hr) {
+  padding-inline: var(--portal-content-padding);
+}
+
+:is(.profile-content, .summary-content) hr {
+  margin: var(--space-3) 0;
 }
 
 :is(.profile-content, .summary-content, .card-body, .source-details, .preview-panel) p {
