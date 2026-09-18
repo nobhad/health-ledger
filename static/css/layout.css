@@ -73,7 +73,7 @@ html[data-sidebar="collapsed"] .sidebar {
   flex-shrink: 0;
   align-items: center;
   gap: var(--icon-gap-md);
-  min-height: var(--app-header-height);
+  height: var(--app-header-height);
   padding: 0 var(--space-3);
   color: var(--heading-card-color);
   text-decoration: none;
@@ -93,8 +93,8 @@ html[data-sidebar="collapsed"] .sidebar {
 
 .sidebar-brand-name {
   font-family: var(--font-family-mono);
-  font-size: var(--heading-card-font-size);
-  font-weight: var(--heading-card-font-weight);
+  font-size: var(--heading-page-font-size);
+  font-weight: var(--heading-page-font-weight);
   letter-spacing: var(--heading-card-letter-spacing);
   text-transform: var(--heading-text-transform);
 }
@@ -171,15 +171,29 @@ html[data-theme="dark"] .theme-toggle-icon--dark {
 }
 
 /* Tier 1 — the container's own top bar, not a floating heading. */
+/* The same height as the sidebar's brand row, so the two top bars are one
+   band across the page. */
 .page-header {
   flex-shrink: 0;
   display: flex;
-  flex-wrap: wrap;
   align-items: baseline;
-  gap: var(--space-0-5) var(--space-3);
+  gap: var(--space-3);
+  height: var(--app-header-height);
   margin: 0;
-  padding: var(--space-2) var(--portal-content-padding);
+  padding: 0 var(--portal-content-padding);
   border-bottom: var(--portal-border);
+  overflow: hidden;
+}
+
+.page-header h2 {
+  white-space: nowrap;
+}
+
+.page-description {
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
 }
 
 .page-header h2 {
@@ -595,6 +609,19 @@ html[data-theme="dark"] .theme-toggle-icon--dark {
   html[data-sidebar="collapsed"] .sidebar .nav-btn {
     justify-content: flex-start;
     padding: 0 var(--space-3);
+  }
+
+  .page-header {
+    flex-wrap: wrap;
+    align-items: baseline;
+    gap: var(--space-0-5) var(--space-3);
+    height: auto;
+    padding-block: var(--space-2);
+  }
+
+  .page-header h2,
+  .page-description {
+    white-space: normal;
   }
 
   .main-content,
