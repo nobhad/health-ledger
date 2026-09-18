@@ -4359,22 +4359,10 @@ html[data-theme="dark"] .theme-toggle-icon--dark {
   gap: var(--space-1);
 }
 
-/* A checkbox filter has no control box; its row stands the control height
-   so the checkbox sits on the same line as the inputs beside it. */
+/* A checkbox filter takes a row of its own under the fields, above the
+   buttons. */
 .filter-group--check {
-  justify-content: center;
-  min-height: var(--app-control-height);
-}
-
-/* When the label wraps, the box stays on its first line — the portal's
-   status-dot arithmetic: top-aligned, then offset to the centre of one
-   line box. */
-.filter-group--check .check-label {
-  align-items: flex-start;
-}
-
-.filter-group--check input[type="checkbox"] {
-  margin-top: calc((1lh - var(--space-2)) / 2);
+  grid-column: 1 / -1;
 }
 
 /* A label and its control on one line. */
