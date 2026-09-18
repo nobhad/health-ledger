@@ -4799,6 +4799,12 @@ html[data-theme="dark"] .theme-toggle-icon--dark {
   margin: var(--space-3) 0;
 }
 
+/* The block after a rule keeps one step from it; margins collapse, so the
+   rule's step and the heading's step are the same 24px, not 24 + 40. */
+:is(.profile-content, .summary-content) hr + :is(h2, h3, p, ul, ol) {
+  margin-top: var(--space-3);
+}
+
 :is(.profile-content, .summary-content, .card-body, .source-details, .preview-panel) p {
   margin: 0 0 var(--space-2);
   line-height: var(--line-height-relaxed);
@@ -4854,8 +4860,11 @@ html[data-theme="dark"] .theme-toggle-icon--dark {
   line-height: var(--line-height-tight);
 }
 
+/* Vertical rhythm in a document: one step (24px) above a section heading,
+   collapsing with the rule before it, and one step below the heading's
+   line, so a heading never sits at the bottom of a hole. */
 :is(.profile-content, .summary-content, .preview-panel) h2 {
-  margin: var(--space-5) 0 var(--space-2);
+  margin: var(--space-3) 0 var(--space-2);
   font-size: var(--heading-card-font-size);
   font-weight: var(--heading-card-font-weight);
   letter-spacing: var(--heading-card-letter-spacing);
@@ -4864,7 +4873,7 @@ html[data-theme="dark"] .theme-toggle-icon--dark {
 }
 
 :is(.profile-content, .summary-content, .preview-panel, .card-body) :is(h3, h4) {
-  margin: var(--space-3) 0 var(--space-1);
+  margin: var(--space-3) 0 var(--space-1-5);
   font-size: var(--heading-section-font-size);
   font-weight: var(--heading-section-font-weight);
   letter-spacing: var(--heading-section-letter-spacing);
