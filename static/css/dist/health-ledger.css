@@ -4795,12 +4795,6 @@ html[data-theme="dark"] .theme-toggle-icon--dark {
   padding-inline: var(--portal-content-padding);
 }
 
-/* A list at the document's top level keeps its indent ON TOP of the text
-   gutter, so its markers sit in the text column, not out in the gutter. */
-:is(.profile-content, .summary-content) > :is(ul, ol):not([class]) {
-  padding-left: calc(var(--portal-content-padding) + var(--space-3));
-}
-
 :is(.profile-content, .summary-content) hr {
   margin: var(--space-3) 0;
 }
@@ -4828,6 +4822,13 @@ html[data-theme="dark"] .theme-toggle-icon--dark {
 :is(.profile-content, .summary-content, .card-body, .source-details, .preview-panel) :is(ul, ol):not([class]) > li {
   margin-bottom: var(--space-0-5);
   line-height: var(--line-height-relaxed);
+}
+
+/* A list at the document's top level keeps its indent ON TOP of the text
+   gutter, so its markers sit in the text column, not out in the gutter.
+   After the prose rule above, which it ties on specificity. */
+:is(.profile-content, .summary-content) > :is(ul, ol):not([class]) {
+  padding-left: calc(var(--portal-content-padding) + var(--space-3));
 }
 
 /* The last block's bottom margin is empty space that a scrolling box still
