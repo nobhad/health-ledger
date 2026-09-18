@@ -4376,11 +4376,14 @@ html[data-theme="dark"] .theme-toggle-icon--dark {
   border-right-width: 0;
 }
 
-/* A card grid that is the whole page: it takes the remaining height, its
-   rows share it, and a card that outgrows its row scrolls inside. */
+/* A card grid that is the whole page: it takes the remaining height. Rows
+   are sized by their content and the spare height is shared equally
+   between them (stretch on auto tracks), so a short row and a tall row
+   carry the same amount of air rather than the same height. */
 .grid--fill {
   flex: 1 1 auto;
-  grid-auto-rows: minmax(0, 1fr);
+  grid-auto-rows: auto;
+  align-content: stretch;
   min-height: 0;
 }
 
