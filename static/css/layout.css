@@ -176,7 +176,7 @@ html[data-theme="dark"] .theme-toggle-icon--dark {
 .page-header {
   flex-shrink: 0;
   display: flex;
-  align-items: baseline;
+  align-items: center;
   gap: var(--space-3);
   height: var(--app-header-height);
   margin: 0;

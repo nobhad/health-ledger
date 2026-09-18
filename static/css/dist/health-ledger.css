@@ -2479,6 +2479,12 @@ body[data-page="ledger"] {
   /* Open multiselect list before it scrolls. */
   --app-dropdown-max-height: calc(var(--space-base) * 30); /* 240px */
 
+  /* The open sidebar is wide enough for the wordmark at the page-title size
+     beside its mark: 13 characters of the mono face at that size, the icon,
+     the gap and the inset. The portal's 212px was measured for its own
+     labels. */
+  --sidebar-width-open: calc(var(--space-base) * 32); /* 256px */
+
   /* The phone drawer's width. */
   --app-sidebar-drawer-width: var(--aside-width-medium);
 
@@ -4026,7 +4032,7 @@ html[data-theme="dark"] .theme-toggle-icon--dark {
 .page-header {
   flex-shrink: 0;
   display: flex;
-  align-items: baseline;
+  align-items: center;
   gap: var(--space-3);
   height: var(--app-header-height);
   margin: 0;
