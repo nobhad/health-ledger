@@ -3895,9 +3895,9 @@ a.list-item:hover {
   width: 100%;
   overflow: hidden;
   background: var(--color-bg-primary);
-  /* One rule along the shell's bottom edge, under the sidebar and the page
-     alike, so the edge reads even when the band below is the same ink. */
-  border-bottom: var(--portal-border);
+  /* The shell is framed on all four sides, so its edge reads against the
+     window and against the band below even when both are the same ink. */
+  border: var(--portal-border);
 }
 
 .app-main {
