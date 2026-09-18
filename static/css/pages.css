@@ -78,7 +78,7 @@
 
 .doc-nav-link.is-active {
   color: var(--color-accent);
-  box-shadow: var(--app-edge-mark) var(--color-accent);
+  font-weight: var(--font-weight-bold);
 }
 
 .profile-content,

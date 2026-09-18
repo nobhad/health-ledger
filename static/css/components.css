@@ -146,6 +146,12 @@
   box-shadow: none;
 }
 
+/* The active item is the bold one. No edge mark: the weight and the accent
+   are the whole signal. */
+.nav-btn.is-active {
+  font-weight: var(--font-weight-bold);
+}
+
 .nav-btn .nav-icon {
   flex-shrink: 0;
   width: var(--sidebar-icon-size);
@@ -872,7 +878,7 @@ input[type="date"] {
 
 .sources-list-item.active {
   background: var(--color-bg-active);
-  box-shadow: var(--app-edge-mark) var(--color-accent);
+  font-weight: var(--font-weight-bold);
 }
 
 .source-details {
