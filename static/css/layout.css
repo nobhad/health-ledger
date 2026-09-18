@@ -85,10 +85,22 @@ html[data-sidebar="collapsed"] .sidebar {
   text-decoration: none;
 }
 
+/* The mark is the avatar silhouette masked with the current colour — the
+   portal-global-header recipe — so it takes the theme and the hover accent. */
 .sidebar-brand-mark {
+  display: inline-block;
   flex-shrink: 0;
-  width: var(--sidebar-icon-size);
-  height: var(--sidebar-icon-size);
+  width: var(--app-brand-mark-size);
+  height: var(--app-brand-mark-size);
+  background-color: currentColor;
+  mask-image: var(--app-brand-mark);
+  mask-size: contain;
+  mask-repeat: no-repeat;
+  mask-position: center;
+  -webkit-mask-image: var(--app-brand-mark);
+  -webkit-mask-size: contain;
+  -webkit-mask-repeat: no-repeat;
+  -webkit-mask-position: center;
 }
 
 .sidebar-brand-name {

@@ -64,6 +64,11 @@ body[data-page="ledger"] {
      The portal's own highlight pattern: an inset edge, not a fill. */
   --app-edge-mark: inset var(--border-width-thick) 0 0;
 
+  /* Arrow, the site's avatar, as the brand mark: the portal masks the same
+     file with the current text colour so it follows the theme. */
+  --app-brand-mark: url("/static/images/avatar_small_sidebar.svg");
+  --app-brand-mark-size: var(--icon-size-2xl);
+
   /* The native <select> caret follows the theme. */
   --app-select-caret: var(--select-caret-light);
 }

@@ -35,6 +35,8 @@ mkdir -p "$FONTS_DST/Acme" "$(dirname "$FONTS_DST")/images"
 cp "$SRC/public/fonts/Acme/Acme-Regular.woff2" "$SRC/public/fonts/Acme/Acme-Regular.ttf" "$FONTS_DST/Acme/"
 # The footer band reuses the site's avatar art
 cp "$SRC/public/images/avatar.svg" "$(dirname "$FONTS_DST")/images/avatar.svg"
+# The sidebar brand mark (masked with the current text colour)
+cp "$SRC/public/images/avatar_small_sidebar.svg" "$(dirname "$FONTS_DST")/images/avatar_small_sidebar.svg"
 
 # Patch 1: font paths
 sed -i '' 's|url("/fonts/|url("/static/fonts/|g' "$DST/fonts.css"
