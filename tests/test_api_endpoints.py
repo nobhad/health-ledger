@@ -13,7 +13,7 @@ from pathlib import Path
 sys.path.insert(0, str(Path(__file__).parent.parent))
 
 import config
-from app import app
+from app import app, resolve_data_path, PathOutsideDataDir
 from database_manager import GeneticProfileDB
 
 
@@ -137,6 +137,49 @@ class TestAPIEndpoints(unittest.TestCase):
         self.assertEqual(response.status_code, 400)
         data = response.get_json()
         self.assertIn('error', data)
+    
+    def test_doctor_specialties_come_from_templates(self):
+        """The Doctor Docs page and API describe the same templates"""
+        from doctor_templates import get_available_specialties
+        api = self.client.get('/api/doctor-specialties').get_json()
+        self.assertEqual([s['id'] for s in api], get_available_specialties())
+        page = self.client.get('/doctor-docs').get_data(as_text=True)
+        for specialty in api:
+            self.assertIn(f'<option value="{specialty["id"]}">', page)
+        self.assertNotIn("'cardiologist': {", page)
+
+
+class TestDataDirectoryPaths(unittest.TestCase):
+    """Request-supplied paths must stay inside HEALTH_LEDGER_DATA_DIR"""
+    
+    def setUp(self):
+        self.tmp = tempfile.TemporaryDirectory()
+        self._original_root = config.DATA_ROOT
+        config.DATA_ROOT = Path(self.tmp.name)
+        app.config['TESTING'] = True
+        self.client = app.test_client()
+    
+    def tearDown(self):
+        config.DATA_ROOT = self._original_root
+        self.tmp.cleanup()
+    
+    def test_relative_paths_resolve_under_data_dir(self):
+        self.assertEqual(resolve_data_path('backups/export.db'),
+                         Path(self.tmp.name).resolve() / 'backups' / 'export.db')
+    
+    def test_paths_outside_are_refused(self):
+        for bad in ['../elsewhere.db', '/tmp/somewhere.db', '~/Desktop/x.db', 'backups/../../x.db']:
+            with self.assertRaises(PathOutsideDataDir, msg=bad):
+                resolve_data_path(bad)
+    
+    def test_export_refuses_outside_path(self):
+        response = self.client.post('/api/backup/export', json={'format': 'json', 'path': '/tmp/leak.json'})
+        self.assertEqual(response.status_code, 400)
+        self.assertFalse(os.path.exists('/tmp/leak.json'))
+    
+    def test_doctor_pdf_refuses_outside_save_path(self):
+        response = self.client.post('/api/pdf/doctor/geneticist', json={'save_path': '../outside'})
+        self.assertEqual(response.status_code, 400)
 
 
 if __name__ == '__main__':

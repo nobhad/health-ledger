@@ -26,13 +26,14 @@ import os
 import tempfile
 import threading
 import traceback
+import config
 from config import setup_logging, get_logger, DEFAULT_PORT, HOST, DEBUG, LOGS_DIR, DOCTOR_DOCS_DIR
 from validation import (
     validate_gene_symbol, validate_condition_name, validate_trait_name,
     validate_list_param, create_error_response
 )
 from profile_generator import generate_profile_html
-from doctor_templates import get_available_specialties
+from doctor_templates import get_available_specialties, DOCTOR_TEMPLATES
 
 # Set up logging
 logger = setup_logging(str(LOGS_DIR / 'app.log'))
@@ -59,6 +60,32 @@ app_logger.info("=" * 60)
 
 # Thread-local storage for database connections
 _local = threading.local()
+
+
+class PathOutsideDataDir(ValueError):
+    """A request named a file location outside HEALTH_LEDGER_DATA_DIR."""
+
+
+def resolve_data_path(user_path: str) -> Path:
+    """
+    Resolve a path supplied by a request to a location inside the data directory.
+
+    Relative paths are taken from the data directory, so "backups/export.db"
+    lands next to the other backups. Absolute paths are allowed only when they
+    already point inside it. Anything else (a home path, "..", another disk)
+    is refused: the server must never write records outside the folder the
+    person chose for them.
+    """
+    data_root = Path(config.DATA_ROOT).resolve()
+    candidate = Path(user_path).expanduser()
+    if not candidate.is_absolute():
+        candidate = data_root / candidate
+    candidate = candidate.resolve()
+    if candidate != data_root and data_root not in candidate.parents:
+        raise PathOutsideDataDir(
+            f"Path must be inside the data directory ({data_root}); got {user_path}"
+        )
+    return candidate
 
 def get_db():
     """
@@ -692,8 +719,8 @@ def metrics():
     """
     Health metrics page.
     
-    Displays health metrics (vitals, lab values) with statistics.
-    Automatically filters to routine visits only for averages.
+    Lists health metrics (vitals, lab values) with filters. Per-metric
+    statistics live in the doctor documents; the page itself is the list.
     
     Returns:
         str: Rendered HTML template with metrics content
@@ -728,22 +755,8 @@ def metrics():
             end_date=end_date
         )
         
-        # Get statistics (always routine-only)
-        stats = db.get_health_metrics_stats(metric_type=metric_type)
-        
-        # Get category-level averages (grouped by metric_type)
-        category_averages = db.get_health_metrics_category_averages()
-        
-        # Get visit type breakdown
+        # Metric type breakdown for the filter dropdown
         cursor = db.conn.cursor()
-        cursor.execute("""
-            SELECT visit_type, COUNT(*) as count
-            FROM health_metrics
-            GROUP BY visit_type
-        """)
-        visit_types = [dict(row) for row in cursor.fetchall()]
-        
-        # Get metric type breakdown
         cursor.execute("""
             SELECT metric_type, COUNT(*) as count,
                    COUNT(DISTINCT collection_date) as date_count
@@ -752,49 +765,14 @@ def metrics():
         """)
         metric_types = [dict(row) for row in cursor.fetchall()]
         
-        # Get fever data (temperatures > 100.4°F or > 38°C)
-        cursor.execute("""
-            SELECT 
-                collection_date,
-                collection_time,
-                metric_value,
-                unit,
-                visit_type,
-                notes
-            FROM health_metrics
-            WHERE metric_type = 'temperature'
-            AND metric_value IS NOT NULL
-            AND (
-                (unit = 'F' AND metric_value > 100.4)
-                OR (unit = 'C' AND metric_value > 38)
-            )
-            ORDER BY collection_date DESC, collection_time DESC
-            LIMIT 50
-        """)
-        all_fevers = [dict(row) for row in cursor.fetchall()]
-        
-        # Get fevers during sick visits
-        sick_visit_fevers = [f for f in all_fevers if f.get('visit_type') == 'sick_visit']
-        
-        # Calculate fever statistics
-        total_fever_count = len(all_fevers)
-        sick_fever_count = len(sick_visit_fevers)
-        
-        app_logger.info(f"Retrieved {len(metrics_data)} metrics, {total_fever_count} fevers ({sick_fever_count} during sick visits)")
+        app_logger.info(f"Retrieved {len(metrics_data)} metrics")
         return render_template('metrics.html',
                              metrics=metrics_data,
-                             stats=stats,
-                             category_averages=category_averages,
-                             visit_types=visit_types,
                              metric_types=metric_types,
                              current_metric_type=metric_type,
                              routine_only=routine_only,
                              start_date=start_date,
-                             end_date=end_date,
-                             all_fevers=all_fevers,
-                             sick_visit_fevers=sick_visit_fevers,
-                             total_fever_count=total_fever_count,
-                             sick_fever_count=sick_fever_count)
+                             end_date=end_date)
     except Exception as e:
         app_logger.error(f"Error rendering metrics: {e}", exc_info=True)
         return f"Error loading metrics: {str(e)}", 500
@@ -1062,8 +1040,11 @@ def api_pdf_doctor(specialty):
         
         # Determine where to save the file
         if save_path:
-            # User-specified path
-            save_dir = Path(save_path)
+            # User-specified folder, kept inside the data directory
+            try:
+                save_dir = resolve_data_path(save_path)
+            except PathOutsideDataDir as e:
+                return jsonify({'success': False, 'message': str(e)}), 400
             save_dir.mkdir(parents=True, exist_ok=True)
             final_path = save_dir / filename
         else:
@@ -1095,11 +1076,35 @@ def api_pdf_doctor(specialty):
         }), 500
 
 
+def describe_specialties() -> list:
+    """The doctor templates as the UI shows them, one entry per specialty."""
+    described = []
+    for specialty_id, template in DOCTOR_TEMPLATES.items():
+        genes = template['genes']
+        sections = template['sections']
+        described.append({
+            'id': specialty_id,
+            'label': specialty_id.replace('_', ' ').title(),
+            'title': template['title'],
+            'genes': 'All genes' if genes == 'all' else ', '.join(genes),
+            'sections': 'All sections' if sections == 'all'
+                        else ', '.join(s.replace('_', ' ').title() for s in sections),
+            'detail_level': template['detail_level'].title(),
+        })
+    return described
+
+
+@app.route('/api/doctor-specialties')
+def api_doctor_specialties():
+    """The available doctor document templates"""
+    return jsonify(describe_specialties())
+
+
 @app.route('/doctor-docs')
 def doctor_docs():
     """Doctor document generation interface"""
     try:
-        return render_template('doctor_docs.html')
+        return render_template('doctor_docs.html', specialties=describe_specialties())
     except Exception as e:
         app_logger.error(f"Error rendering doctor docs page: {e}", exc_info=True)
         return f"Error loading doctor docs page: {str(e)}", 500
@@ -1175,6 +1180,11 @@ def export_backup():
                 'success': False,
                 'message': 'Output path required'
             }), 400
+        
+        try:
+            output_path = str(resolve_data_path(output_path))
+        except PathOutsideDataDir as e:
+            return jsonify({'success': False, 'message': str(e)}), 400
         
         if format_type == 'json':
             success = export_to_json(output_path)

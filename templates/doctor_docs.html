@@ -15,12 +15,9 @@
             <label for="specialtySelect" class="field-label">Specialty:</label>
             <select id="specialtySelect" name="specialtySelect" autocomplete="off" class="form-select">
                 <option value="">-- Select Specialty --</option>
-                <option value="cardiologist">Cardiologist</option>
-                <option value="psychiatrist">Psychiatrist</option>
-                <option value="geneticist">Geneticist</option>
-                <option value="general_practitioner">General Practitioner</option>
-                <option value="neurologist">Neurologist</option>
-                <option value="endocrinologist">Endocrinologist</option>
+                {% for specialty in specialties %}
+                <option value="{{ specialty.id }}">{{ specialty.label }}</option>
+                {% endfor %}
             </select>
         </div>
         
@@ -74,56 +71,41 @@ document.addEventListener('DOMContentLoaded', function() {
     const previewContent = document.getElementById('previewContent');
     const generateStatus = document.getElementById('generateStatus');
     
-    const specialtyInfo = {
-        'cardiologist': {
-            title: 'Genetic Profile for Cardiologist',
-            genes: 'ADRA2A, COMT, CYP2D6, VKORC1',
-            sections: 'Cardiovascular, Medications, Pharmacogenomics',
-            level: 'Summary'
-        },
-        'psychiatrist': {
-            title: 'Genetic Profile for Psychiatrist',
-            genes: 'HTR2A, SLC6A4, COMT, CYP2D6, ADRA2A, CYP2C19',
-            sections: 'Mental Health, Medications, Pharmacogenomics',
-            level: 'Detailed'
-        },
-        'geneticist': {
-            title: 'Complete Genetic Profile',
-            genes: 'All genes',
-            sections: 'All sections',
-            level: 'Comprehensive'
-        },
-        'general_practitioner': {
-            title: 'Genetic Profile Summary',
-            genes: 'All genes',
-            sections: 'Summary, Health Metrics, Recent Visits, Medications',
-            level: 'Summary'
-        },
-        'neurologist': {
-            title: 'Genetic Profile for Neurologist',
-            genes: 'COMT, HTR2A, SLC6A4, CYP2D6',
-            sections: 'Neurological, Medications, Pharmacogenomics',
-            level: 'Detailed'
-        },
-        'endocrinologist': {
-            title: 'Genetic Profile for Endocrinologist',
-            genes: 'CYP2D6, CYP2C9, CYP2C19, UGT1A1, UGT2B15',
-            sections: 'Metabolic, Medications, Pharmacogenomics',
-            level: 'Detailed'
-        }
-    };
+    // One source of truth: doctor_templates.py, served by /api/doctor-specialties
+    // and rendered into the <option>s above.
+    const specialtyInfo = {};
+    fetch('/api/doctor-specialties')
+        .then(response => response.json())
+        .then(list => {
+            list.forEach(item => { specialtyInfo[item.id] = item; });
+            if (specialtySelect.value) {
+                specialtySelect.dispatchEvent(new Event('change'));
+            }
+        })
+        .catch(error => {
+            generateStatus.textContent = 'Error loading specialties: ' + error.message;
+        });
+    
+    function textRow(label, value) {
+        const p = document.createElement('p');
+        const strong = document.createElement('strong');
+        strong.textContent = label + ': ';
+        p.appendChild(strong);
+        p.appendChild(document.createTextNode(value));
+        return p;
+    }
     
     specialtySelect.addEventListener('change', function() {
         const specialty = this.value;
         
         if (specialty && specialtyInfo[specialty]) {
             const info = specialtyInfo[specialty];
-            previewContent.innerHTML = `
-                <p><strong>Title:</strong> ${info.title}</p>
-                <p><strong>Genes Included:</strong> ${info.genes}</p>
-                <p><strong>Sections:</strong> ${info.sections}</p>
-                <p><strong>Detail Level:</strong> ${info.level}</p>
-            `;
+            previewContent.replaceChildren(
+                textRow('Title', info.title),
+                textRow('Genes Included', info.genes),
+                textRow('Sections', info.sections),
+                textRow('Detail Level', info.detail_level)
+            );
             previewSection.hidden = false;
             generateBtn.disabled = false;
         } else {

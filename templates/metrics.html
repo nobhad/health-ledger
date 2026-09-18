@@ -77,7 +77,7 @@
                         <td>{{ metric.metric_type.replace('_', ' ').title() }}</td>
                         <td>{{ metric.metric_name or 'N/A' }}</td>
                         <td>
-                            {% if metric.metric_value %}
+                            {% if metric.metric_value is not none %}
                                 {% if metric.metric_type == 'temperature' %}
                                     {{ metric.metric_value|temp_display(metric.unit or 'F') }}
                                 {% else %}
