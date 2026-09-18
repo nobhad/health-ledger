@@ -3416,8 +3416,9 @@ input[type="date"] {
   background: var(--color-bg-hover);
 }
 
+/* A chosen option is a tag above the field; it is not listed again. */
 .multiselect-option.selected {
-  background: var(--color-bg-active);
+  display: none;
 }
 
 .multiselect-option--empty {
@@ -3777,8 +3778,10 @@ input[type="date"] {
   box-shadow: none;
 }
 
+/* The chosen option is on the trigger; it is not listed again (the
+   portal's FormDropdown filters it out the same way). */
 .dropdown-item[aria-selected="true"] {
-  background: var(--color-bg-active);
+  display: none;
 }
 
 /* ============================================
@@ -4793,20 +4796,22 @@ html[data-theme="dark"] .theme-toggle-icon--dark {
   line-height: var(--line-height-relaxed);
 }
 
-:is(.profile-content, .summary-content, .card-body, .source-details, .preview-panel) :is(ul, ol) {
+/* Only UNCLASSED lists are prose. A component's list (a dropdown menu, a
+   row list) carries a class and keeps its own layout. */
+:is(.profile-content, .summary-content, .card-body, .source-details, .preview-panel) :is(ul, ol):not([class]) {
   margin: 0 0 var(--space-2);
   padding-left: var(--space-3);
 }
 
-:is(.profile-content, .summary-content, .card-body, .source-details, .preview-panel) ul {
+:is(.profile-content, .summary-content, .card-body, .source-details, .preview-panel) ul:not([class]) {
   list-style: disc;
 }
 
-:is(.profile-content, .summary-content, .card-body, .source-details, .preview-panel) ol {
+:is(.profile-content, .summary-content, .card-body, .source-details, .preview-panel) ol:not([class]) {
   list-style: decimal;
 }
 
-:is(.profile-content, .summary-content, .card-body, .source-details, .preview-panel) li {
+:is(.profile-content, .summary-content, .card-body, .source-details, .preview-panel) :is(ul, ol):not([class]) > li {
   margin-bottom: var(--space-0-5);
   line-height: var(--line-height-relaxed);
 }

@@ -745,8 +745,9 @@ input[type="date"] {
   background: var(--color-bg-hover);
 }
 
+/* A chosen option is a tag above the field; it is not listed again. */
 .multiselect-option.selected {
-  background: var(--color-bg-active);
+  display: none;
 }
 
 .multiselect-option--empty {
@@ -1102,8 +1103,10 @@ input[type="date"] {
   box-shadow: none;
 }
 
+/* The chosen option is on the trigger; it is not listed again (the
+   portal's FormDropdown filters it out the same way). */
 .dropdown-item[aria-selected="true"] {
-  background: var(--color-bg-active);
+  display: none;
 }
 
 /* ============================================
