@@ -2512,10 +2512,17 @@ body[data-page="ledger"] {
 
   /* The native <select> caret follows the theme. */
   --app-select-caret: var(--select-caret-light);
+
+  /* The tick inside a checked box, drawn in the page ground so it reads on
+     the box's fill (the text colour). A data URI cannot read a token, so
+     the two grounds are spelled out here, once each, the way the design
+     system spells out its select carets. */
+  --app-check-mark: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23e0e0e0' stroke-width='3.5' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M20 6 9 17l-5-5'/%3E%3C/svg%3E");
 }
 
 html[data-theme="dark"] body[data-page="ledger"] {
   --app-select-caret: var(--select-caret);
+  --app-check-mark: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23171717' stroke-width='3.5' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M20 6 9 17l-5-5'/%3E%3C/svg%3E");
 }
 
 body[data-page="ledger"] {
@@ -2957,12 +2964,38 @@ select.form-input {
   cursor: pointer;
 }
 
+/* Checkbox: a flat square filled with the text colour, whether or not it is
+   ticked; the tick is drawn in the page ground. No native chrome. */
 input[type="checkbox"] {
+  -webkit-appearance: none;
+     -moz-appearance: none;
+          appearance: none;
+  display: inline-block;
+  flex-shrink: 0;
   width: var(--space-2);
   height: var(--space-2);
   margin: 0;
-  accent-color: var(--color-text-primary);
+  border: var(--border-width-thin) solid var(--color-text-primary);
+  border-radius: 0;
+  background-color: var(--color-text-primary);
+  background-repeat: no-repeat;
+  background-position: center;
+  background-size: 85%;
+  vertical-align: middle;
   cursor: pointer;
+}
+
+input[type="checkbox"]:checked {
+  background-image: var(--app-check-mark);
+}
+
+input[type="checkbox"]:focus-visible {
+  border-color: var(--color-accent);
+}
+
+input[type="checkbox"]:disabled {
+  opacity: var(--opacity-disabled);
+  cursor: not-allowed;
 }
 
 input[type="date"] {

@@ -297,12 +297,36 @@ select.form-input {
   cursor: pointer;
 }
 
+/* Checkbox: a flat square filled with the text colour, whether or not it is
+   ticked; the tick is drawn in the page ground. No native chrome. */
 input[type="checkbox"] {
+  appearance: none;
+  display: inline-block;
+  flex-shrink: 0;
   width: var(--space-2);
   height: var(--space-2);
   margin: 0;
-  accent-color: var(--color-text-primary);
+  border: var(--border-width-thin) solid var(--color-text-primary);
+  border-radius: 0;
+  background-color: var(--color-text-primary);
+  background-repeat: no-repeat;
+  background-position: center;
+  background-size: 85%;
+  vertical-align: middle;
   cursor: pointer;
+}
+
+input[type="checkbox"]:checked {
+  background-image: var(--app-check-mark);
+}
+
+input[type="checkbox"]:focus-visible {
+  border-color: var(--color-accent);
+}
+
+input[type="checkbox"]:disabled {
+  opacity: var(--opacity-disabled);
+  cursor: not-allowed;
 }
 
 input[type="date"] {
