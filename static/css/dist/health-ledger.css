@@ -3035,8 +3035,12 @@ input[type="checkbox"]:disabled {
   cursor: not-allowed;
 }
 
-input[type="date"] {
+/* Only the native calendar glyph is inverted for dark mode (the portal's
+   --filter-invert-controls); inverting the whole input flipped its ground
+   and text against every other field. */
+input[type="date"]::-webkit-calendar-picker-indicator {
   filter: var(--filter-invert-controls);
+  cursor: pointer;
 }
 
 /* ============================================
