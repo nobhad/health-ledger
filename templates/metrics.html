@@ -35,17 +35,17 @@
                 <input type="date" name="end_date" id="end_date" class="form-input" value="{{ end_date or '' }}">
             </div>
             
-            <div class="filter-group filter-group--check">
-                <label class="check-label">
-                    <input type="checkbox" name="routine_only" value="true" {% if routine_only %}checked{% endif %}>
-                    Routine visits only (exclude sick visits)
-                </label>
-            </div>
-            
-
-            <div class="filter-actions">
-                <button type="submit" class="btn btn-primary">Apply Filters</button>
-                <a href="/metrics" class="btn btn-secondary">Clear Filters</a>
+            <div class="filter-footer">
+                <div class="filter-group filter-group--check">
+                    <label class="check-label">
+                        <input type="checkbox" name="routine_only" value="true" {% if routine_only %}checked{% endif %}>
+                        Routine visits only (exclude sick visits)
+                    </label>
+                </div>
+                <div class="filter-actions">
+                    <button type="submit" class="btn btn-primary">Apply Filters</button>
+                    <a href="/metrics" class="btn btn-secondary">Clear Filters</a>
+                </div>
             </div>
         </form>
     </div>

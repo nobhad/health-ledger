@@ -494,19 +494,25 @@ html[data-theme="dark"] .theme-toggle-icon--dark {
   align-items: end;
 }
 
-/* The submit and clear buttons take a row of their own under the fields,
-   side by side, rather than standing in a column beside them. */
-.filter-actions {
+/* Under the fields, one row: the checkbox filter on the left and the
+   submit and clear buttons on the right. */
+.filter-footer {
   grid-column: 1 / -1;
   display: flex;
   flex-wrap: wrap;
-  gap: var(--space-1);
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--space-2);
 }
 
-/* A checkbox filter takes a row of its own under the fields, above the
-   buttons. */
-.filter-group--check {
-  grid-column: 1 / -1;
+.filter-footer .filter-group--check {
+  margin-bottom: 0;
+}
+
+.filter-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-1);
 }
 
 /* A label and its control on one line. */
