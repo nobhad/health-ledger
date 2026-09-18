@@ -4805,6 +4805,12 @@ html[data-theme="dark"] .theme-toggle-icon--dark {
   line-height: var(--line-height-relaxed);
 }
 
+/* The last block's bottom margin is empty space that a scrolling box still
+   counts, which is how a card body that fit its content grew a scrollbar. */
+:is(.profile-content, .summary-content, .card-body, .source-details, .preview-panel) > :last-child {
+  margin-bottom: 0;
+}
+
 :is(.profile-content, .summary-content, .card-body, .source-details, .preview-panel) a {
   color: var(--color-accent);
   text-decoration: none;
