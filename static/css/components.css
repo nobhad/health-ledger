@@ -664,6 +664,17 @@ input[type="date"] {
   height: var(--icon-size-md);
 }
 
+/* Open, the input and its list are one box, as the portal's dropdown is:
+   the input keeps its resting border (no focus accent while the list is
+   the thing you are looking at), drops its bottom edge, and the list
+   continues from it with no top edge of its own. */
+.multiselect-wrapper:focus-within .multiselect-input,
+.multiselect-wrapper:has(.multiselect-dropdown.show) .multiselect-input {
+  border-color: var(--dropdown-border-color);
+  border-bottom-color: transparent;
+  transition: none;
+}
+
 .multiselect-dropdown {
   position: absolute;
   top: 100%;
@@ -673,8 +684,9 @@ input[type="date"] {
   display: none;
   max-height: var(--app-dropdown-max-height);
   overflow-y: auto;
-  margin-top: calc(-1 * var(--border-width));
+  margin-top: calc(-1 * var(--dropdown-border-width));
   border: var(--dropdown-border-width) solid var(--dropdown-border-color);
+  border-top: none;
   background: var(--dropdown-bg);
   box-shadow: none;
 }
@@ -693,7 +705,9 @@ input[type="date"] {
   min-height: var(--dropdown-item-height);
   padding: var(--dropdown-padding-y) var(--dropdown-padding-x);
   font-size: var(--font-size-sm);
+  color: var(--color-text-primary);
   cursor: pointer;
+  user-select: none;
   transition: background var(--transition-faster);
 }
 
