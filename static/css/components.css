@@ -364,6 +364,7 @@ input[type="date"] {
   border-width: var(--border-width);
 }
 
+
 .card-header,
 .section-header {
   display: flex;
@@ -1160,8 +1161,9 @@ a.stat-card:hover {
   padding: 0;
 }
 
-/* Rows bleed to the card's edges so their rules span the whole card; the
-   card's horizontal padding comes back as the row's own. */
+/* Rows bleed into the card's padding so their rules span the whole card.
+   A scrolling card body clips that bleed on the x axis (layout.css) rather
+   than counting it as overflow. */
 .list-item {
   display: flex;
   flex-direction: column;

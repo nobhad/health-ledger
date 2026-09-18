@@ -3033,6 +3033,7 @@ input[type="date"] {
   border-width: var(--border-width);
 }
 
+
 .card-header,
 .section-header {
   display: flex;
@@ -3835,8 +3836,9 @@ a.stat-card:hover {
   padding: 0;
 }
 
-/* Rows bleed to the card's edges so their rules span the whole card; the
-   card's horizontal padding comes back as the row's own. */
+/* Rows bleed into the card's padding so their rules span the whole card.
+   A scrolling card body clips that bleed on the x axis (layout.css) rather
+   than counting it as overflow. */
 .list-item {
   display: flex;
   flex-direction: column;
@@ -4391,9 +4393,12 @@ html[data-theme="dark"] .theme-toggle-icon--dark {
   min-height: 0;
 }
 
+/* Vertical scroll only. Rows bleed sideways into the padding on purpose;
+   hidden on the x axis shows them to the card's edge without a scrollbar. */
 .grid--fill > .card > .card-body {
   min-height: 0;
-  overflow: auto;
+  overflow-x: hidden;
+  overflow-y: auto;
 }
 
 .quick-actions-row {
@@ -4788,6 +4793,12 @@ html[data-theme="dark"] .theme-toggle-icon--dark {
 
 :is(.profile-content, .summary-content) > :not(hr) {
   padding-inline: var(--portal-content-padding);
+}
+
+/* A list at the document's top level keeps its indent ON TOP of the text
+   gutter, so its markers sit in the text column, not out in the gutter. */
+:is(.profile-content, .summary-content) > :is(ul, ol):not([class]) {
+  padding-left: calc(var(--portal-content-padding) + var(--space-3));
 }
 
 :is(.profile-content, .summary-content) hr {

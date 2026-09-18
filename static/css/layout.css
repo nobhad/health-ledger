@@ -471,9 +471,12 @@ html[data-theme="dark"] .theme-toggle-icon--dark {
   min-height: 0;
 }
 
+/* Vertical scroll only. Rows bleed sideways into the padding on purpose;
+   hidden on the x axis shows them to the card's edge without a scrollbar. */
 .grid--fill > .card > .card-body {
   min-height: 0;
-  overflow: auto;
+  overflow-x: hidden;
+  overflow-y: auto;
 }
 
 .quick-actions-row {
