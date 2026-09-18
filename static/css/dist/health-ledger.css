@@ -4347,9 +4347,10 @@ html[data-theme="dark"] .theme-toggle-icon--dark {
   align-items: end;
 }
 
-/* The submit and clear buttons are one cell, so they never split across
-   rows when the grid wraps. */
+/* The submit and clear buttons take a row of their own under the fields,
+   side by side, rather than standing in a column beside them. */
 .filter-actions {
+  grid-column: 1 / -1;
   display: flex;
   flex-wrap: wrap;
   gap: var(--space-1);
