@@ -1,0 +1,97 @@
+/**
+ * ===============================================
+ * FONT FACE DEFINITIONS
+ * ===============================================
+ * @file src/styles/base/fonts.css
+ *
+ * Font face declarations must be defined BEFORE
+ * any CSS that references them.
+ *
+ * This file is imported FIRST in main.css to ensure
+ * fonts are available when design tokens reference them.
+ *
+ * @font-face descriptors are NOT subject to the cascade — a var() inside one
+ * never resolves and the whole descriptor falls back to its initial value.
+ * So these carry literal numbers, not weight tokens.
+ *
+ * Typography System:
+ * - MAIN SITE: Acme for headings
+ * - PORTAL: Inconsolata (monospace). Headings run on the body face until a
+ *   display face is chosen — see CURRENT_WORK.md.
+ */
+
+/* ============================================
+ * ACME FONT (Main Site Headings)
+ * ============================================ */
+
+@font-face {
+  font-family: "Acme";
+  src:
+    url("/static/fonts/Acme/Acme-Regular.woff2") format("woff2"),
+    url("/static/fonts/Acme/Acme-Regular.ttf") format("truetype");
+  font-weight: 400;
+  font-style: normal;
+  font-display: swap;
+}
+
+/* KC ACME HAND INKED is gone, and was never really here.
+ *
+ * It declared the family `KCAcmeHandInked` and served
+ * `KCSimpleSans-Inked.otf` — a different typeface entirely. Nothing in the
+ * portal or the site ever asked for that family, so the misdeclaration was
+ * invisible: the only thing that wanted KCAcmeHandInked was the 404 sign's
+ * SVG, and an <img>-loaded SVG cannot see a page's @font-face anyway. It was
+ * reading the copy installed in Noelle's own font library instead, which is
+ * why the sign rendered for her and as a fallback serif for everyone else.
+ *
+ * The sign's lettering is outlined now, so it needs no font at all. Acme —
+ * self-hosted above, woff2 with a ttf fallback — is the site's Acme-style
+ * face and is already what the 404 page sets its own copy in
+ * (pages/not-found.css). If anything wants that look again, it wants `Acme`
+ * (Noelle, 2026-09-15: "i think we can just use acme on site if needed").
+ *
+ * `public/fonts/KCAcmeHand/` is now referenced by nothing: KCAcmeHand.otf and
+ * KCSimpleSans-Inked.otf, ~490KB of unshipped licensed fonts. Left in place —
+ * deleting someone's font files is their call, not a tidy-up.
+ */
+
+/* ============================================
+ * PORTAL FONTS (Admin & Client Portal Only)
+ * These fonts are used exclusively in portal pages
+ * via [data-page="admin"] and [data-page="client"]
+ * ============================================ */
+
+/* Inconsolata - Monospace UI for portal.
+ *
+ * Two static faces, not one variable face. The file that used to sit here was
+ * named Inconsolata-Variable.woff2 and declared `font-weight: 400 700`, but it
+ * had no `fvar` table — it was a 290-glyph static Regular. Because the
+ * descriptor claimed the 400-700 range, the browser matched every bold request
+ * to it, set a weight axis that did not exist, and declined to synthesise bold
+ * (a face that says it covers 700 is taken at its word). So `font-weight: 700`
+ * rendered at 400 everywhere in the portal: field labels, table headers, every
+ * `--label-font-weight` consumer. Measured ink coverage was identical at 400
+ * and 700; with these two faces it is 504 vs 705.
+ *
+ * The .ttf originals stay in the same directory — server/utils/pdf-utils.ts
+ * embeds them in generated PDFs. These .woff2 are those exact files, converted.
+ */
+@font-face {
+  font-family: "Inconsolata";
+  src: url("/static/fonts/Inconsolata/Inconsolata-Regular.woff2") format("woff2");
+  font-weight: 400;
+  font-style: normal;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: "Inconsolata";
+  src: url("/static/fonts/Inconsolata/Inconsolata-Bold.woff2") format("woff2");
+  font-weight: 700;
+  font-style: normal;
+  font-display: swap;
+}
+
+/* Cormorant Garamond is OUT — see CURRENT_WORK.md, "Serif face to replace".
+   Portal headings run on the body face until a replacement is chosen. The
+   .woff2 is still in public/fonts/ so restoring it is one @font-face block. */

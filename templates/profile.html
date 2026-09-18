@@ -1,0 +1,47 @@
+{% extends "base.html" %}
+
+{% block title %}Genetic Profile - Full Document{% endblock %}
+{% block page_body_class %} page-body--flush{% endblock %}
+
+
+{% block page_title %}Full Genetic Profile{% endblock %}
+{% block page_description %}Complete genetic profile document with detailed information about all genes, traits, and health associations.{% endblock %}
+
+{% block content %}
+<div class="doc-layout">
+    <aside class="doc-nav" id="docNav" hidden aria-label="Sections">
+        <div class="doc-nav-title">Sections</div>
+        <ul class="doc-nav-list" id="docNavList"></ul>
+    </aside>
+    <div class="profile-content" id="docBody">
+        {{ profile_html|safe }}
+    </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script src="{{ url_for('static', filename='js/doc-nav.js') }}"></script>
+<script>
+// Citation expand/collapse functionality
+document.addEventListener('DOMContentLoaded', function() {
+    document.querySelectorAll('.citation.expandable .cite-compact').forEach(function(compact) {
+        compact.style.cursor = 'pointer';
+        compact.addEventListener('click', function(e) {
+            e.preventDefault();
+            var citation = this.closest('.citation');
+            var expanded = citation.querySelector('.cite-expanded');
+            var compactSpan = citation.querySelector('.cite-compact');
+            
+            if (expanded && expanded.style.display === 'none') {
+                expanded.style.display = 'inline';
+                if (compactSpan) compactSpan.style.display = 'none';
+            } else if (expanded) {
+                expanded.style.display = 'none';
+                if (compactSpan) compactSpan.style.display = 'inline';
+            }
+        });
+    });
+});
+</script>
+{% endblock %}
+

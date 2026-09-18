@@ -1,0 +1,220 @@
+{% extends "base.html" %}
+
+{% block title %}Doctor Documents - Health Ledger{% endblock %}
+
+{% block page_title %}Generate Doctor-Specific Documents{% endblock %}
+{% block page_description %}Create focused documents tailored to specific medical specialties{% endblock %}
+
+{% block content %}
+<div class="card">
+    <div class="card-header">
+        <h3>Select Doctor Specialty</h3>
+    </div>
+    <div class="card-body">
+        <div class="form-row">
+            <label for="specialtySelect" class="field-label">Specialty:</label>
+            <select id="specialtySelect" name="specialtySelect" autocomplete="off" class="form-select">
+                <option value="">-- Select Specialty --</option>
+                <option value="cardiologist">Cardiologist</option>
+                <option value="psychiatrist">Psychiatrist</option>
+                <option value="geneticist">Geneticist</option>
+                <option value="general_practitioner">General Practitioner</option>
+                <option value="neurologist">Neurologist</option>
+                <option value="endocrinologist">Endocrinologist</option>
+            </select>
+        </div>
+        
+        <div id="previewSection" class="preview-panel" hidden>
+            <h4>Document Preview</h4>
+            <div id="previewContent"></div>
+        </div>
+        
+        <div class="mt-3">
+            <h4>Include in PDF:</h4>
+            <div class="check-list">
+                <label class="check-label">
+                    <input type="checkbox" id="includeOriginal" checked>
+                    Include original genetic test report
+                </label>
+                <label class="check-label">
+                    <input type="checkbox" id="includeMedications" checked>
+                    Include current medications
+                </label>
+                <label class="check-label">
+                    <input type="checkbox" id="includeStats" checked>
+                    Include average health statistics (BP, temp, weight, height, etc.)
+                </label>
+            </div>
+            
+            <div class="check-list">
+                <label class="check-label">
+                    <input type="checkbox" id="useCustomPath">
+                    Use custom save location
+                </label>
+            </div>
+            <div id="customPathSection" class="form-row" hidden>
+                <label for="customPathInput" class="field-label">Save to folder:</label>
+                <input type="text" id="customPathInput" placeholder="Leave empty for default folder" 
+                       class="form-input">
+                <small class="helper-text">
+                    Default: output/doctor_docs/
+                </small>
+            </div>
+            <button type="button" class="btn btn-primary" id="generateBtn" disabled>Generate PDF</button>
+            <div id="generateStatus" class="status-message"></div>
+        </div>
+    </div>
+</div>
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    const specialtySelect = document.getElementById('specialtySelect');
+    const generateBtn = document.getElementById('generateBtn');
+    const previewSection = document.getElementById('previewSection');
+    const previewContent = document.getElementById('previewContent');
+    const generateStatus = document.getElementById('generateStatus');
+    
+    const specialtyInfo = {
+        'cardiologist': {
+            title: 'Genetic Profile for Cardiologist',
+            genes: 'ADRA2A, COMT, CYP2D6, VKORC1',
+            sections: 'Cardiovascular, Medications, Pharmacogenomics',
+            level: 'Summary'
+        },
+        'psychiatrist': {
+            title: 'Genetic Profile for Psychiatrist',
+            genes: 'HTR2A, SLC6A4, COMT, CYP2D6, ADRA2A, CYP2C19',
+            sections: 'Mental Health, Medications, Pharmacogenomics',
+            level: 'Detailed'
+        },
+        'geneticist': {
+            title: 'Complete Genetic Profile',
+            genes: 'All genes',
+            sections: 'All sections',
+            level: 'Comprehensive'
+        },
+        'general_practitioner': {
+            title: 'Genetic Profile Summary',
+            genes: 'All genes',
+            sections: 'Summary, Health Metrics, Recent Visits, Medications',
+            level: 'Summary'
+        },
+        'neurologist': {
+            title: 'Genetic Profile for Neurologist',
+            genes: 'COMT, HTR2A, SLC6A4, CYP2D6',
+            sections: 'Neurological, Medications, Pharmacogenomics',
+            level: 'Detailed'
+        },
+        'endocrinologist': {
+            title: 'Genetic Profile for Endocrinologist',
+            genes: 'CYP2D6, CYP2C9, CYP2C19, UGT1A1, UGT2B15',
+            sections: 'Metabolic, Medications, Pharmacogenomics',
+            level: 'Detailed'
+        }
+    };
+    
+    specialtySelect.addEventListener('change', function() {
+        const specialty = this.value;
+        
+        if (specialty && specialtyInfo[specialty]) {
+            const info = specialtyInfo[specialty];
+            previewContent.innerHTML = `
+                <p><strong>Title:</strong> ${info.title}</p>
+                <p><strong>Genes Included:</strong> ${info.genes}</p>
+                <p><strong>Sections:</strong> ${info.sections}</p>
+                <p><strong>Detail Level:</strong> ${info.level}</p>
+            `;
+            previewSection.hidden = false;
+            generateBtn.disabled = false;
+        } else {
+            previewSection.hidden = true;
+            generateBtn.disabled = true;
+        }
+    });
+    
+    const useCustomPathCheckbox = document.getElementById('useCustomPath');
+    const customPathSection = document.getElementById('customPathSection');
+    const customPathInput = document.getElementById('customPathInput');
+    
+    useCustomPathCheckbox.addEventListener('change', function() {
+        customPathSection.hidden = !this.checked;
+    });
+    
+    const includeOriginalCheckbox = document.getElementById('includeOriginal');
+    const includeMedicationsCheckbox = document.getElementById('includeMedications');
+    const includeStatsCheckbox = document.getElementById('includeStats');
+    
+    generateBtn.addEventListener('click', async function() {
+        const specialty = specialtySelect.value;
+        if (!specialty) return;
+        
+        generateBtn.disabled = true;
+        generateStatus.textContent = 'Generating PDF...';
+        
+        try {
+            // Get checkbox values
+            const includeOriginal = includeOriginalCheckbox.checked;
+            const includeMedications = includeMedicationsCheckbox.checked;
+            const includeStats = includeStatsCheckbox.checked;
+            
+            // Determine if we should use a custom path
+            const useCustomPath = useCustomPathCheckbox.checked;
+            const customPath = useCustomPath ? customPathInput.value.trim() : null;
+            
+            // Build request body
+            const requestBody = {
+                include_original: includeOriginal,
+                include_medications: includeMedications,
+                include_stats: includeStats
+            };
+            if (useCustomPath && customPath) {
+                requestBody.save_path = customPath;
+            }
+            
+            // Always use POST to send options
+            const response = await fetch(`/api/pdf/doctor/${specialty}`, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify(requestBody)
+            });
+            
+            if (response.ok) {
+                const blob = await response.blob();
+                const url = window.URL.createObjectURL(blob);
+                const a = document.createElement('a');
+                a.href = url;
+                
+                // Extract filename from Content-Disposition header or use default
+                const contentDisposition = response.headers.get('Content-Disposition');
+                let filename = `genetic_profile_${specialty}.pdf`;
+                if (contentDisposition) {
+                    const filenameMatch = contentDisposition.match(/filename="?([^"]+)"?/);
+                    if (filenameMatch) {
+                        filename = filenameMatch[1];
+                    }
+                }
+                
+                a.download = filename;
+                document.body.appendChild(a);
+                a.click();
+                window.URL.revokeObjectURL(url);
+                document.body.removeChild(a);
+                
+                const saveLocation = useCustomPath && customPath ? customPath : 'default folder (output/doctor_docs/)';
+                generateStatus.textContent = `PDF generated and saved to ${saveLocation}. Download started.`;
+            } else {
+                const data = await response.json();
+                generateStatus.textContent = 'Error: ' + (data.message || 'Failed to generate PDF');
+            }
+        } catch (error) {
+            generateStatus.textContent = 'Error: ' + error.message;
+        } finally {
+            generateBtn.disabled = false;
+        }
+    });
+});
+</script>
+{% endblock %}
+

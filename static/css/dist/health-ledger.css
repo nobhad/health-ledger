@@ -1,0 +1,5360 @@
+
+
+@layer reset, tokens, base, components, layouts, pages, states, responsive, utilities;
+
+/**
+ * ===============================================
+ * HEALTH LEDGER CSS BUNDLE
+ * ===============================================
+ * @file static/css/health-ledger.css
+ *
+ * Source entry point. Built by `npm run build:css` into
+ * static/css/dist/health-ledger.css, which is what base.html loads.
+ *
+ * The cascade mirrors no-bhad-codes' portal bundle (bundles/admin.css):
+ * layer order first, fonts unlayered, reset, tokens, then this app's own
+ * sheets in their layers, and portal-theme.css LAST and UNLAYERED so the
+ * surface palette beats every layered rule (see design-system/VENDORED.md).
+ *
+ * @import must precede every rule, so this file contains only imports.
+ */
+
+/* Cascade layer order — the single declaration for the whole app */
+
+/**
+ * ===============================================
+ * CSS CASCADE LAYER ORDER - SINGLE SOURCE OF TRUTH
+ * ===============================================
+ * @file src/styles/core/layer-order.css
+ *
+ * This file establishes the ONLY layer order declaration for the entire project.
+ * Import this file FIRST in any bundle to ensure consistent cascade behavior.
+ *
+ * LAYER HIERARCHY (lowest to highest priority):
+ * 1. reset      - Browser resets, normalize styles
+ * 2. tokens     - CSS custom properties, design tokens
+ * 3. base       - HTML element defaults, typography
+ * 4. components - Reusable UI components (buttons, forms, cards)
+ * 5. layouts    - Grid/flex layout systems
+ * 6. pages      - Page-specific styles
+ * 7. states     - Visibility and interactive states
+ * 8. responsive - Media query overrides
+ * 9. utilities  - Final overrides (highest priority)
+ *
+ * RULES:
+ * - Never declare @layer order in any other file
+ * - All other CSS files should use @layer(name) { } syntax
+ * - Utilities layer should only contain atomic helper classes
+ */
+
+/**
+ * SUB-LAYER DECLARATIONS (for bundle-specific organization)
+ *
+ * These allow bundles to organize within the main hierarchy:
+ * - admin: Admin dashboard specific styles (within pages)
+ * - portal: Client portal specific styles (within pages)
+ * - page-states: Page transition states (within states)
+ * - mobile: Mobile-specific overrides (within responsive)
+ */
+
+/**
+ * ===============================================
+ * HOW A SHEET GETS INTO ITS LAYER
+ * ===============================================
+ *
+ * There are two ways, and mixing them is a silent bug.
+ *
+ * 1. The bundle assigns it:   @import "../x.css" layer(components);
+ * 2. The sheet declares it itself, wrapping its own body in @layer x { }.
+ *
+ * Sheets that already do (2) MUST be imported WITHOUT a layer() clause:
+ *
+ *   - states/visibility.css      @layer states
+ *   - states/interactive.css     @layer states
+ *   - responsive/breakpoints.css @layer responsive
+ *
+ * Adding layer() to those imports nests the file's own @layer inside the
+ * import's, producing a SUB-layer (states.states, responsive.responsive).
+ * A sub-layer sorts BEFORE its parent's own direct content, so the sheet is
+ * demoted below every sibling imported with a plain layer() clause — the
+ * opposite of what the import looks like it is doing. Nothing errors; the
+ * rules just quietly stop winning.
+ *
+ * ===============================================
+ * DELIBERATELY UNLAYERED (the escape hatches)
+ * ===============================================
+ *
+ * Unlayered rules outrank EVERY layer, whatever the layer order says. Four
+ * sheets rely on that on purpose, and each says so in its own header:
+ *
+ *   - pages/projects-detail.css            (site.css)
+ *   - base/site-globals.css                (site.css, imported last)
+ *   - design-system/tokens/portal-theme.css (admin.css, client.css)
+ *   - portal/shared/portal-gutter.css       (admin.css, client.css)
+ *
+ * Nothing else should be imported without a layer() clause. If a sheet needs
+ * to win, give it the right layer rather than a fifth escape hatch — an
+ * unlayered sheet cannot be overridden by any layered rule at any specificity,
+ * which is how the two site.css hatches came to outrank the entire responsive
+ * layer.
+ */
+
+/* @font-face must be unlayered and first */
+
+/**
+ * ===============================================
+ * FONT FACE DEFINITIONS
+ * ===============================================
+ * @file src/styles/base/fonts.css
+ *
+ * Font face declarations must be defined BEFORE
+ * any CSS that references them.
+ *
+ * This file is imported FIRST in main.css to ensure
+ * fonts are available when design tokens reference them.
+ *
+ * @font-face descriptors are NOT subject to the cascade — a var() inside one
+ * never resolves and the whole descriptor falls back to its initial value.
+ * So these carry literal numbers, not weight tokens.
+ *
+ * Typography System:
+ * - MAIN SITE: Acme for headings
+ * - PORTAL: Inconsolata (monospace). Headings run on the body face until a
+ *   display face is chosen — see CURRENT_WORK.md.
+ */
+
+/* ============================================
+ * ACME FONT (Main Site Headings)
+ * ============================================ */
+
+@font-face {
+  font-family: "Acme";
+  src:
+    url("/static/fonts/Acme/Acme-Regular.woff2") format("woff2"),
+    url("/static/fonts/Acme/Acme-Regular.ttf") format("truetype");
+  font-weight: 400;
+  font-style: normal;
+  font-display: swap;
+}
+
+/* KC ACME HAND INKED is gone, and was never really here.
+ *
+ * It declared the family `KCAcmeHandInked` and served
+ * `KCSimpleSans-Inked.otf` — a different typeface entirely. Nothing in the
+ * portal or the site ever asked for that family, so the misdeclaration was
+ * invisible: the only thing that wanted KCAcmeHandInked was the 404 sign's
+ * SVG, and an <img>-loaded SVG cannot see a page's @font-face anyway. It was
+ * reading the copy installed in Noelle's own font library instead, which is
+ * why the sign rendered for her and as a fallback serif for everyone else.
+ *
+ * The sign's lettering is outlined now, so it needs no font at all. Acme —
+ * self-hosted above, woff2 with a ttf fallback — is the site's Acme-style
+ * face and is already what the 404 page sets its own copy in
+ * (pages/not-found.css). If anything wants that look again, it wants `Acme`
+ * (Noelle, 2026-09-15: "i think we can just use acme on site if needed").
+ *
+ * `public/fonts/KCAcmeHand/` is now referenced by nothing: KCAcmeHand.otf and
+ * KCSimpleSans-Inked.otf, ~490KB of unshipped licensed fonts. Left in place —
+ * deleting someone's font files is their call, not a tidy-up.
+ */
+
+/* ============================================
+ * PORTAL FONTS (Admin & Client Portal Only)
+ * These fonts are used exclusively in portal pages
+ * via [data-page="admin"] and [data-page="client"]
+ * ============================================ */
+
+/* Inconsolata - Monospace UI for portal.
+ *
+ * Two static faces, not one variable face. The file that used to sit here was
+ * named Inconsolata-Variable.woff2 and declared `font-weight: 400 700`, but it
+ * had no `fvar` table — it was a 290-glyph static Regular. Because the
+ * descriptor claimed the 400-700 range, the browser matched every bold request
+ * to it, set a weight axis that did not exist, and declined to synthesise bold
+ * (a face that says it covers 700 is taken at its word). So `font-weight: 700`
+ * rendered at 400 everywhere in the portal: field labels, table headers, every
+ * `--label-font-weight` consumer. Measured ink coverage was identical at 400
+ * and 700; with these two faces it is 504 vs 705.
+ *
+ * The .ttf originals stay in the same directory — server/utils/pdf-utils.ts
+ * embeds them in generated PDFs. These .woff2 are those exact files, converted.
+ */
+@font-face {
+  font-family: "Inconsolata";
+  src: url("/static/fonts/Inconsolata/Inconsolata-Regular.woff2") format("woff2");
+  font-weight: 400;
+  font-style: normal;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: "Inconsolata";
+  src: url("/static/fonts/Inconsolata/Inconsolata-Bold.woff2") format("woff2");
+  font-weight: 700;
+  font-style: normal;
+  font-display: swap;
+}
+
+/* Cormorant Garamond is OUT — see CURRENT_WORK.md, "Serif face to replace".
+   Portal headings run on the body face until a replacement is chosen. The
+   .woff2 is still in public/fonts/ so restoring it is one @font-face block. */
+
+/* 1. Reset */
+
+@layer reset{
+
+/**
+ * ===============================================
+ * CSS RESET & NORMALIZE
+ * ===============================================
+ * @file src/styles/base/reset.css
+ * 
+ * Modern CSS reset with accessibility considerations
+ * and performance optimizations for CLS prevention.
+ */
+
+/* ============================================
+ * UNIVERSAL BOX MODEL
+ * ============================================ */
+
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+/* ============================================
+ * THE HIDDEN ATTRIBUTE
+ * ============================================
+ * `hidden` is display:none in the UA stylesheet, which any class that sets
+ * its own display silently beats — so an element with `hidden` and, say,
+ * `.intro-left-group { display: flex }` stayed on screen. That is how the
+ * project detail page showed a LAUNCH label with nothing under it. There was
+ * no [hidden] rule anywhere in the tree, so nothing relies on overriding it.
+ *
+ * !important is what makes this hold: for important declarations the cascade
+ * reverses layer order, so the reset layer outranks components rather than
+ * losing to it.
+ */
+[hidden] {
+  display: none !important;
+}
+
+/* ============================================
+ * ROOT DOCUMENT SETUP
+ * ============================================ */
+
+html {
+  line-height: 1.5;
+  -webkit-text-size-adjust: 100%;
+  -moz-tab-size: 4;
+  -o-tab-size: 4;
+     tab-size: 4;
+  font-feature-settings: normal;
+  font-variation-settings: normal;
+  -webkit-tap-highlight-color: transparent;
+  scroll-behavior: smooth;
+  -moz-text-size-adjust: 100%;
+       text-size-adjust: 100%;
+  /* Theme-aware scrollbar */
+  scrollbar-color: rgba(var(--text-rgb, 25, 25, 25), 0.7) transparent;
+}
+
+/* ============================================
+ * SELECTION STYLING
+ * ============================================ */
+
+::-moz-selection {
+  background-color: var(--color-accent);
+  color: var(--color-neutral-100);
+}
+
+::selection {
+  background-color: var(--color-accent);
+  color: var(--color-neutral-100);
+}
+
+::-moz-selection {
+  background-color: var(--color-accent);
+  color: var(--color-neutral-100);
+}
+
+/* ============================================
+ * BODY FOUNDATION
+ * ============================================ */
+
+body {
+  font-family: var(
+    --font-family-body,
+    "Inconsolata",
+    ui-monospace,
+    "Cascadia Code",
+    "Source Code Pro",
+    Menlo,
+    monospace
+  );
+  font-weight: 500;
+  line-height: 1.4;
+  margin: 0;
+  padding: 0;
+  min-height: 100vh;
+  min-height: 100dvh; /* Dynamic viewport height for mobile Safari */
+  display: flex;
+  flex-direction: column;
+  overflow-x: hidden;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  text-rendering: optimizeLegibility;
+  /* Prevent layout shift during font loading */
+  font-display: swap;
+}
+
+/* ============================================
+ * TYPOGRAPHY RESET
+ * ============================================ */
+
+h1,
+h2,
+h3,
+h4,
+h5,
+h6 {
+  font-size: inherit;
+  font-weight: inherit;
+  line-height: 1.2;
+  margin: 0;
+}
+
+p {
+  margin: 0;
+  line-height: 1.6;
+}
+
+/* ============================================
+ * LIST RESET
+ * ============================================ */
+
+ul,
+ol {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+}
+
+/* ============================================
+ * FORM ELEMENT RESET
+ * ============================================ */
+
+button,
+input,
+optgroup,
+select,
+textarea {
+  font-family: inherit;
+  font-size: 100%;
+  font-weight: inherit;
+  line-height: inherit;
+  color: inherit;
+  margin: 0;
+  padding: 0;
+}
+
+button,
+select {
+  text-transform: none;
+}
+
+button,
+[type="button"],
+[type="reset"],
+[type="submit"] {
+  -webkit-appearance: button;
+  background-color: transparent;
+  background-image: none;
+}
+
+/* ============================================
+ * MEDIA RESET
+ * ============================================ */
+
+img,
+svg,
+video,
+canvas,
+audio,
+iframe,
+embed,
+object {
+  display: block;
+  vertical-align: middle;
+  max-width: 100%;
+  height: auto;
+}
+
+/* SVGs inside buttons inherit button's text color - ROOT LEVEL FIX
+   Ensures SVG icons match button text color instead of browser default.
+   Works with Lucide icons that use stroke="currentColor". */
+button svg,
+.btn svg,
+[type="button"] svg,
+[type="submit"] svg {
+  color: inherit;
+}
+
+img {
+  border-style: none;
+}
+
+/* ============================================
+ * TABLE RESET
+ * ============================================ */
+
+table {
+  border-collapse: collapse;
+  border-spacing: 0;
+}
+
+/* ============================================
+ * INTERACTIVE ELEMENT RESET
+ * ============================================ */
+
+a {
+  color: inherit;
+  text-decoration: inherit;
+}
+
+/* Content links: underline on hover, no color change.
+   Nav/interactive links opt out via their own text-decoration: none rules. */
+a:hover {
+  text-decoration: underline;
+}
+
+/* Navigation and interactive link contexts: no underline on hover */
+nav a:hover,
+.sidebar a:hover,
+.portal-global-header a:hover,
+.portal-tabs a:hover,
+.tab-list a:hover,
+.stat-card a:hover,
+.btn-primary:hover,
+.btn-secondary:hover,
+.btn-sm:hover {
+  text-decoration: none;
+}
+
+/* ============================================
+ * ACCESSIBILITY IMPROVEMENTS
+ * ============================================ */
+
+/* Screen reader only content */
+.sr-only {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  white-space: nowrap;
+  border: 0;
+}
+
+/* ============================================
+ * FOCUS MANAGEMENT - ACCESSIBILITY
+ * ============================================ */
+
+/* Remove outline on mouse clicks, keep on keyboard navigation */
+:focus {
+  outline: none;
+}
+
+/* Global focus indicator for ALL interactive elements - WCAG 2.4.7 */
+/* Applies to: a, button, input, select, textarea, [tabindex] */
+/* Use box-shadow instead of outline - follows element border-radius naturally */
+/* --focus-ring-* are declared in design-system/tokens/borders.css, which every
+   bundle imports. They used to come only from portal-theme.css, which the site
+   bundle does not ship, so on the marketing site this rule ran on the fallbacks
+   inside its own var() — no longer needed, and the token now means the same
+   thing everywhere it is read. */
+:focus-visible {
+  outline: none;
+  box-shadow: 0 0 0 var(--focus-ring-width) var(--focus-ring-color);
+}
+
+/* Remove focus ring for mouse users (non-keyboard focus) */
+:focus:not(:focus-visible) {
+  outline: none;
+}
+
+/* ============================================
+ * EXPANDABLE ELEMENTS FOCUS STANDARD
+ * ============================================
+ * When expanded/open: focus wraps entire element
+ * Inner triggers have NO focus ring when parent is expanded
+ * ============================================ */
+
+/* Details/Summary */
+details {
+  border-radius: var(--border-radius-lg, 12px);
+}
+
+summary {
+  display: flex;
+  align-items: center;
+  gap: var(--icon-gap-md);
+  cursor: pointer;
+  list-style: none;
+}
+
+summary::-webkit-details-marker {
+  display: none;
+}
+
+/* ============================================
+ * UNIVERSAL ICON-TEXT GAP - SINGLE SOURCE OF TRUTH
+ * Applies standard icon gap to ALL interactive elements
+ * with icons across admin and client portals
+ * ============================================ */
+
+/* ============================================
+ * ICON-TEXT SIZE MATCHING
+ * Root rule in portal-theme.css: .portal svg.lucide { width: 1em; height: 1em }
+ * handles all Lucide icons globally. Rules below cover non-Lucide SVGs
+ * (e.g. custom inline SVGs, .btn-icon wrappers).
+ * ============================================ */
+
+/* Non-Lucide SVGs in buttons/links — match text size */
+.portal
+  :is(button, a, .btn, .btn-primary, .btn-secondary, .btn-outline):not(.icon-btn):not(.nav-btn)
+  > .btn-icon {
+  width: 1em;
+  height: 1em;
+  flex-shrink: 0;
+}
+
+/* ============================================
+ * HOVER STATE COLOR RULES - ROOT LEVEL
+ * Dark bg hover = light text & icons
+ * Light bg hover = dark text & icons
+ * ============================================ */
+
+/* Universal hover rule: when background inverts, so does text/icon color */
+.portal :is(button, a, .btn):hover > svg,
+.portal :is(button, a, .btn):hover > .btn-icon {
+  color: inherit; /* Inherits from parent's hover color */
+}
+
+/* All portal SVGs default to primary text color.
+   Ensures standalone icons (empty states, headings, table icons, etc.)
+   always render in the correct text color rather than browser default or
+   an inherited muted/secondary color from an ancestor.
+   align-self: center ensures SVGs center in their flex parent's cross-axis
+   regardless of the parent's align-items setting (display: block from the
+   media reset kills vertical-align, so this is the correct root fix). */
+.portal svg {
+  color: var(--color-text-primary);
+  align-self: center;
+}
+
+/* Interactive elements: SVGs follow parent's color context instead of
+   the baseline above, so button variants, hover states, danger/success
+   colors, and nav active states all continue to work correctly. */
+.portal button svg,
+.portal a svg {
+  color: inherit;
+}
+
+details:focus-within {
+  outline: 2px solid var(--color-accent);
+  outline-offset: -2px;
+}
+
+details > summary:focus-visible {
+  outline: none;
+  box-shadow: none;
+}
+
+/* ============================================
+ * REDUCED MOTION SUPPORT
+ * ============================================ */
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
+}
+
+/* ============================================
+ * HIGH CONTRAST MODE SUPPORT
+ * ============================================ */
+
+@media (prefers-contrast: high) {
+  :root {
+    --color-shadow: rgba(0, 0, 0, 0.8);
+  }
+}
+
+/* ============================================
+ * PRINT STYLES
+ * ============================================ */
+
+@media print {
+  * {
+    background: transparent !important;
+    color: black !important;
+    box-shadow: none !important;
+    text-shadow: none !important;
+  }
+
+  body {
+    font-size: 12pt;
+    line-height: 1.5;
+  }
+}
+}
+
+/* 2. Tokens — the vendored design system, then the handful this app adds */
+
+@layer tokens{
+
+/**
+ * ===============================================
+ * DESIGN SYSTEM - MAIN INDEX
+ * ===============================================
+ * @file src/design-system/index.css
+ *
+ * Design system tokens and base styles.
+ * Utility classes are in src/styles/base/utilities.css
+ */
+
+/* ============================================
+ * DESIGN TOKENS
+ * ============================================ */
+
+/* Import all design tokens */
+}
+
+@layer tokens{
+
+/**
+ * ===============================================
+ * DESIGN SYSTEM TOKENS INDEX
+ * ===============================================
+ * @file src/design-system/tokens/index.css
+ * 
+ * Central import file for all design tokens.
+ */
+
+/* Import all token files in order */
+}
+
+@layer tokens{
+
+/**
+ * ===============================================
+ * COLOR DESIGN TOKENS
+ * ===============================================
+ * @file src/design-system/tokens/colors.css
+ *
+ * Core color palette and semantic color tokens.
+ * Uses CSS custom properties for runtime theming.
+ */
+
+/* Portal light mode overrides: see portal-theme.css */
+
+:root {
+  /* The nav drawer's page dimmer. Both halves are tokens because the rule that
+     drew it referenced --bg-rgb, which is defined nowhere in the codebase — so
+     it had silently fallen back to a fixed rgba(25, 25, 25, 0.7) in both
+     themes, and raising the alpha barely moved it because 25,25,25 is already
+     close to a dark page. */
+  --nav-overlay-rgb: 25, 25, 25;
+  --nav-overlay-alpha: 0.7;
+  /* One value for every backdrop that dims the page behind a drawer or panel.
+     The site nav and the portal dropdown had picked different fixed greys —
+     0.7 and 0.5 — so opening one looked nothing like opening the other. */
+  --overlay-backdrop: rgba(var(--nav-overlay-rgb), var(--nav-overlay-alpha));
+
+  /* ============================================
+   * PRIMITIVE COLOR PALETTE
+   * ============================================
+   * Global color primitives used by both main site and portals
+   */
+
+  /* Brand Colors - Main site uses crimson red */
+  --color-brand-primary: #dc2626;
+  --color-brand-primary-rgb: 220, 38, 38;
+  --color-brand-secondary: #10b981;
+  /* Darker than --color-brand-primary above, and deliberately so. The accent
+     is what 160 rules set as TEXT, and #dc2626 measures 3.66:1 on the page
+     ground, 4.14:1 on the menu button and 4.43:1 on gray-100 — three of the
+     five light surfaces it lands on, all short of the 4.5:1 that body-size
+     text needs. #b91c1c clears every one of them (4.90 / 5.54 / 5.93 / 6.38 /
+     6.47) at the same hue, nine points of lightness down.
+
+     It is not a new colour: it is already --color-interactive-primary-hover
+     below, so the accent's hover state stops being a hue change and becomes
+     the weight change it always read as.
+
+     --color-brand-primary keeps #dc2626 for the logo and brand fills. Non-text
+     accent use — borders, focus rings, the CRT chrome — only owes 3:1, which
+     the brighter red clears everywhere. */
+  --color-brand-accent: #b91c1c;
+
+  /* And its counterpart for dark grounds. The same reasoning runs the other
+     way there: on --color-gray-900 (#171717), #b91c1c is 2.77:1 and even the
+     original #dc2626 was only 3.71:1 — the accent has never passed as text in
+     dark mode. #f87171 measures 6.48:1 and is already the dark crimson the
+     design-system docs page uses, so the two now agree. */
+  --color-brand-accent-dark: #f87171;
+
+  /* Ink for a surface that is VIVID IN BOTH THEMES — a status pill, a filled
+     badge, the callout's bubble art. Deliberately not --color-text-primary:
+     that flips to near-white in dark mode, and these backgrounds do not flip
+     with it, so following the theme paints white on amber (1.26:1). Fixed dark
+     is the only value that works on all of them. */
+  --color-text-on-vivid: var(--color-gray-900);
+
+  /* Neutral Palette - Gray Scale */
+  --color-gray-50: #fafafa;
+  --color-gray-100: #f5f5f5;
+  --color-gray-200: #e0e0e0;
+  --color-gray-300: #d4d4d4;
+  --color-gray-400: #a3a3a3;
+  --color-gray-500: #737373;
+  --color-gray-600: #525252;
+  --color-gray-700: #404040;
+  --color-gray-800: #262626;
+  --color-gray-900: #171717;
+  
+  /* Portal Dark Neutrals - evenly spaced dark ramp for portal dark mode */
+  --portal-neutral-0: #000000;
+                    
+  /* Base primitives */
+  --color-off-white: #e0e0e0;
+
+  /* Functional Colors */
+  --color-success-500: #10b981;
+    --color-warning-500: #f59e0b;
+    --color-error-500: #ef4444;
+    --color-info-500: #3b82f6;
+  
+  /* ============================================
+   * SEMANTIC COLOR TOKENS - MAIN SITE (LIGHT)
+   * ============================================
+   * Light background, dark text for main site
+   */
+
+  /* Background Colors - Light base */
+  --color-bg-primary: var(--color-off-white);
+  --color-bg-secondary: var(--color-gray-100);
+  --color-bg-tertiary: var(--color-gray-200);
+  --color-bg-raised: var(--color-gray-300); /* Slightly raised surface (cards, panels) */
+  --color-bg-elevated: var(--color-gray-400); /* More elevated (nested panels) */
+  --color-bg-prominent: var(--color-gray-500); /* Most prominent background level */
+  --color-bg-hover: var(--color-gray-100); /* Solid hover background */
+  /* A readonly field is still a field on the page's background, not a pale
+     card sitting on it. As --color-gray-100 it was #f5f5f5 in both themes:
+     lighter than the light page (#e0e0e0) and glaring on the dark one
+     (#171717). Following the background is what the portal already does. */
+  --color-bg-readonly: var(--color-bg-primary);
+  --color-bg-inverse: var(--color-gray-900);
+  
+  --color-surface-secondary: var(--color-gray-100);
+  --color-surface-tertiary: var(--color-gray-200);
+  
+
+  /* Text Colors - Dark on light */
+  --color-text-primary: var(--color-gray-900);
+  /* Channel triplet for the same colour. base/reset.css composes it into
+     `scrollbar-color` with an alpha, which rgba() cannot do to a hex token —
+     so the value has to exist separately as R, G, B. Keep it in step with
+     --color-text-primary above (gray-900, #171717). */
+  --text-rgb: 23, 23, 23;
+  --color-text-secondary: var(--color-gray-700);
+  /* gray-600, not gray-500. #737373 on the off-white page background is
+     3.59:1, and everything wearing this token is body-size text — project
+     taglines, metadata labels, pending-link captions — so it needs 4.5:1
+     (WCAG 1.4.3). #525252 measures 5.92:1 and still reads as the quietest of
+     the three text weights. Changing the token rather than the six call sites
+     keeps the next muted thing accessible by default. */
+  --color-text-tertiary: var(--color-gray-600);
+    /* Default only. portal-theme.css deliberately flattens this to
+     --color-text-primary for the portal surfaces and still wins, being
+     unlayered; this exists so components/loading.css (.error-dismiss) has a
+     value on the public site instead of dropping the declaration. */
+  --color-text-muted: var(--color-text-tertiary);
+  --color-text-inverse: var(--color-off-white);
+  
+  /* Header/Navigation Specific Text Color */
+  --color-nav-text: #333333;
+
+  /* Border Colors - Standard borders */
+  --color-border-primary: var(--color-gray-300);
+  --color-border-secondary: var(--color-gray-200);
+    --color-border-focus: var(--color-brand-primary);
+  
+  --color-interactive-primary-hover: #b91c1c;
+        
+  /* State Colors */
+  --color-state-hover: rgba(0, 0, 0, 0.05);
+        --color-accent-10: rgba(var(--color-brand-primary-rgb), 0.1);
+
+/* Border color on hover */
+
+  /* Shadow Colors */
+  --color-shadow-sm: rgba(0, 0, 0, 0.05);
+  --color-shadow-md: rgba(0, 0, 0, 0.1);
+  --color-shadow-lg: rgba(0, 0, 0, 0.15);
+  --color-shadow-xl: rgba(0, 0, 0, 0.25);
+  --color-shadow-2xl: rgba(0, 0, 0, 0.3);
+  --color-shadow-3xl: rgba(0, 0, 0, 0.5);
+
+    --color-overlay-light: rgba(0, 0, 0, 0.5);
+    --color-overlay-heavy: rgba(0, 0, 0, 0.8);
+  
+      
+          }
+
+/* ============================================
+ * PORTAL THEME
+ * ============================================
+ * Portal-specific colors are defined in portal-theme.css
+ * This includes dark mode and light mode (default) overrides.
+ */
+
+/* ============================================
+ * DARK THEME OVERRIDES - MAIN SITE
+ * ============================================
+ * Dark theme for the main site (not portals)
+ */
+
+/* The two `:not()`s that used to be here tested <html> for `data-page`, and
+   `data-page` is set on <body> — by `server/views/layouts/portal.ejs` and
+   `auth.ejs` — never on <html>. Both negations were vacuously true, so this
+   block always applied, portal included: the guard expressed an intent it did
+   not carry out.
+
+   Deleted rather than repaired. Making them real means matching on <body>,
+   which moves where these custom properties are DECLARED — and
+   `--overlay-backdrop` is composed on `:root` from two of them. A property
+   substitutes its var()s where it is declared, not where it is read, so moving
+   the ingredients to <body> would leave the composed value on :root holding the
+   light one. `portal-theme.css` already carries that exact workaround with a
+   comment explaining why; a second copy of the problem helps nobody.
+
+   Nothing changes by deleting them — they matched everything already. The
+   portal still wins where it needs to, on
+   `html[data-theme="dark"] body[data-page=…]`: more specific, later in the
+   cascade, and on the closer element. */
+html[data-theme="dark"] {
+  /* Dark mode dims to near-black. Grey-on-dark left the drawer and the page
+     reading as nearly the same value, so the menu stopped looking like it was
+     on top of anything. */
+  --nav-overlay-rgb: 0, 0, 0;
+  --nav-overlay-alpha: 0.9;
+
+  /* Background Colors */
+  --color-bg-primary: var(--color-gray-900);
+  --color-bg-secondary: var(--color-gray-800);
+  --color-bg-tertiary: var(--color-gray-700);
+  --color-bg-inverse: var(--color-gray-50);
+
+  --color-surface-secondary: var(--color-gray-800);
+  --color-surface-tertiary: var(--color-gray-700);
+  
+  /* Text Colors */
+  --color-text-primary: var(--color-gray-50);
+  /* See the :root note — mirrors --color-text-primary (gray-50, #fafafa). */
+  --text-rgb: 250, 250, 250;
+  --color-text-secondary: var(--color-gray-200);
+  --color-text-tertiary: var(--color-gray-400);
+  --color-text-inverse: var(--color-gray-900);
+
+  /* Header/Navigation Specific Text Color */
+  --color-nav-text: var(--color-gray-50);
+
+  /* Border Colors */
+  --color-border-primary: var(--color-text-primary);
+  --color-border-secondary: var(--color-gray-700);
+  
+  /* State Colors */
+  --color-state-hover: rgba(255, 255, 255, 0.1);
+    
+  /* Shadow Colors */
+  --color-shadow-sm: rgba(0, 0, 0, 0.3);
+  --color-shadow-md: rgba(0, 0, 0, 0.5);
+  --color-shadow-lg: rgba(0, 0, 0, 0.7);
+  --color-shadow-xl: rgba(0, 0, 0, 0.9);
+}
+
+/* ============================================
+ * HIGH CONTRAST MODE
+ * ============================================ */
+
+@media (prefers-contrast: high) {
+  :root {
+    --color-text-primary: #000000;
+    --color-text-secondary: #000000;
+    --color-border-primary: #000000;
+    --color-shadow-md: rgba(0, 0, 0, 0.5);
+  }
+
+  html[data-theme="dark"] {
+    --color-text-primary: #ffffff;
+    --color-text-secondary: #ffffff;
+    --color-border-primary: #ffffff;
+  }
+}
+
+/* ============================================
+ * LEGACY VARIABLE ALIASES
+ * ============================================
+ * These aliases maintain backwards compatibility
+ * with the legacy variables.css naming convention.
+ * New code should use the semantic tokens above.
+ */
+
+:root,
+html[data-theme="light"] {
+  /* Legacy neutral colors - Main site light scale (matched to live deploy) */
+  --color-neutral-100: #fffdfc;
+  --color-neutral-200: var(--color-gray-200);
+  --color-neutral-300: #e0e0e0;
+  --color-neutral-400: var(--color-gray-400);
+  --color-neutral-500: var(--color-gray-500);
+  --color-neutral-600: var(--color-gray-600);
+  --color-neutral-700: var(--color-gray-700);
+  --color-neutral-800: var(--color-gray-800);
+  --color-neutral-900: var(--color-gray-900);
+
+  /* Legacy semantic colors - Main site light theme (matched to live deploy) */
+  --color-dark: #333333;
+  --color-light: #ffffff;
+  --color-primary: var(--color-text-primary);
+  --color-accent-rgb: var(--color-brand-primary-rgb);
+  --color-accent-hover: var(--color-brand-accent);
+  --color-secondary: var(--color-brand-secondary);
+  --color-accent: var(--color-brand-accent);
+  --color-border: #000000;
+
+  /* Ink for something drawn on a light surface *regardless of theme* — line
+     art that is white in both, where following the page's text colour would
+     put white on white. Arrow's speech bubble is the only user today
+     (`arrow-callout-theme.css`), which carried this exact value as a fallback
+     to a token declared nowhere. */
+  --color-text-on-light: #191a0b;
+    --color-shadow: rgba(0, 0, 0, 0.2);
+
+  /* App-level aliases (for components that need a single variable) */
+  --app-color-primary: var(--color-brand-primary);
+    --app-color-success: var(--color-success);
+  --app-color-warning: var(--color-warning);
+  --app-color-danger: var(--color-danger);
+  --app-color-info: var(--color-info);
+  --app-color-purple: var(--color-purple);
+  --app-color-warning-light: var(--color-warning-light);
+  --app-color-danger-dark: var(--color-danger-dark);
+
+  /* Portal label ink under the light theme. Labels sit a step darker than body
+     copy (--color-text-primary is #333333 there) so an uppercase run at
+     label size still reads. Was --color-light-text, which named #171717 —
+     near-black — after an appearance it does not have, and hardcoded
+     --color-gray-900's literal a second time. */
+  --color-label-ink: var(--color-gray-900);
+      
+  /* Legacy status colors */
+  --color-success: #10b981;
+      --color-warning: #fbbf24;
+    --color-warning-light: #fef3c7;
+
+  /* Warning as TEXT, which is a different problem from warning as a fill.
+     #fbbf24 is a light amber: it reads on near-black and is about 1.6:1 on the
+     light theme's surface, which is not reading at all (Noelle, 2026-09-13:
+     "yellow is impossible to read on light bg"). The swatch stays what it is
+     for dots, fills and icons; a sentence gets amber-700 here and the swatch
+     itself under the dark theme. */
+  --color-text-warning: #92400e;
+  --color-error: #dc2626;
+    --color-error-light: #fee2e2;
+  --color-info: #3b82f6;
+      --color-danger: var(--color-brand-accent); /* light mode: one red, see --status-cancelled */
+  --color-danger-rgb: 220, 38, 38;
+  --color-danger-dark: #ff4757;
+    --color-danger-hover: #b91c1c;
+
+  /* Legacy color aliases for components */
+  --color-purple: #c084fc;
+  --color-pink: #f472b6;
+  --color-cyan: #22d3ee;
+
+  /* ================================================
+     STATUS COLORS - SINGLE SOURCE OF TRUTH
+     See docs/design/STATUS_SYSTEM.md for full documentation
+     ================================================
+
+     STANDARD STATUS COLOR MAPPING:
+     - BLUE (#3b82f6)   = active, in-progress, contacted
+     - YELLOW (#fbbf24) = pending, new, on-hold
+     - GREEN (#10b981)  = completed, converted, replied
+     - RED (#ef4444)    = cancelled, lost, archived
+     - PURPLE (#8b5cf6) = qualified, in-review
+     - GRAY (#6b7280)   = read, inactive
+     ================================================ */
+
+  /* Primary status variables - USE THESE */
+  --status-active: #3b82f6; /* Blue - Active/In Progress */
+    
+  --status-pending: #fbbf24; /* Yellow - Pending/On Hold */
+    
+  --status-completed: #10b981; /* Green - Completed/Success */
+    --status-completed-bg: rgba(16, 185, 129, 0.15);
+
+  /* Light mode uses the brand's darker red for every "red" signal — the
+     bright #ef4444 read as a second, unrelated red beside the accent used
+     for nav, progress and links. Dark mode keeps the brighter value below,
+     where it is needed for contrast. */
+  --status-cancelled: var(--color-brand-accent); /* Red - Cancelled/Lost */
+    --status-cancelled-bg: rgba(185, 28, 28, 0.15);
+  --color-error-500: var(--color-brand-accent);
+
+  --status-qualified: #8b5cf6; /* Purple - Qualified/Review */
+    
+  --status-inactive: #6b7280; /* Gray - Inactive/Read */
+    
+  --status-new: #06b6d4; /* Cyan - New (distinct from pending) */
+    
+  --status-on-hold: #f97316; /* Orange - On Hold/Blocked/High Priority */
+    
+  /* Legacy status dot/indicator colors - mapped to primary */
+  --color-status-new: var(--status-new);
+  --color-status-pending: var(--status-pending);
+  --color-status-read: var(--status-qualified);
+  --color-status-responded: var(--status-completed);
+  --color-status-completed: var(--status-completed);
+  --color-status-archived: var(--status-inactive);
+  --color-status-overdue: var(--status-cancelled);
+
+    --color-status-pending-border: #f59e0b;
+
+  --color-status-progress-bg: #dbeafe;
+  --color-status-progress-text: #1e40af;
+  --color-status-progress-border: #3b82f6;
+
+      --color-status-review-border: #8b5cf6;
+
+  --color-status-completed-bg: #d1fae5;
+  --color-status-completed-text: #065f46;
+  --color-status-completed-border: #10b981;
+
+  /* The same two statuses as bare TEXT on a dark surface — same reason
+     --color-brand-accent-dark exists. The light pair's text half is far too
+     dark there (2.00:1 and 2.27:1), and the pill's own colour is not light
+     enough either: #3b82f6 measures 3.44:1 on the #333 the public site puts
+     behind it. One step lighter each clears AA at 4.97 and 6.57. */
+  --color-status-progress-text-dark: #60a5fa;
+  --color-status-completed-text-dark: #34d399;
+
+  /* Planned, the third of these. The raw --status-new cyan (#06b6d4) is fine
+     on dark and fails outright on light: 7.38:1 against the portal ground,
+     1.93:1 against the page's. Same treatment as the two above — a dark cyan
+     for the light theme, a light one for dark. Measured: 5.77:1 on #e5e5e5,
+     6.99:1 on the #333 the page puts behind the badge. */
+  --color-status-planned-text: #155e75;
+  --color-status-planned-text-dark: #22d3ee;
+
+      --color-status-hold-border: #6b7280;
+
+      
+    
+  /* Terminal colors - saloni-garg inspired (matrix green on black) */
+  --color-terminal-bg: #000000;
+  --color-terminal-bg-light: #0d0d0d;
+  --color-terminal-bg-panel: #0a0a0a;
+    --color-terminal-bg-hover: #1a1a1a;
+  --color-terminal-bg-dark: #222222;
+  --color-terminal-border: #2a2a2a;
+    --color-terminal-green: #7ff709;
+  --color-terminal-green-dark: #5cb800;
+  --color-terminal-blue: #268bd2;
+  --color-terminal-cyan: #88def2;
+  --color-terminal-red: #ff4444;
+  --color-terminal-pink: #ec4891;
+  --color-terminal-text: #e0e8f0;
+  --color-terminal-text-muted: #808080;
+  --color-terminal-text-dim: #606060;
+  --color-terminal-text-dimmer: #404040;
+  --color-terminal-scrollbar: #2a2a2a;
+  --color-terminal-scrollbar-hover: #3a3a3a;
+
+  /* Legacy macOS window button colors */
+  --color-mac-close: #ff5f56;
+  --color-mac-close-rgb: 255, 95, 86;
+  --color-mac-minimize: #ffbd2e;
+  --color-mac-maximize: #27ca40;
+
+  /* RGB variants for rgba() usage */
+  --color-error-rgb: 239, 68, 68;
+  --color-success-rgb: 16, 185, 129;
+  --color-warning-rgb: 245, 158, 11;
+
+  /* Legacy skeleton loading */
+  --color-skeleton-base: #2a2a2a;
+  --color-skeleton-highlight: #3a3a3a;
+
+  --color-svg-text-right: #222222;
+
+  /* Legacy business card colors */
+  --color-card-bg: var(--color-off-white);
+  --color-card-bg-gradient-end: #f8f9fa;
+  --color-card-text: #333333;
+
+    --color-admin-purple: #a855f7;
+  
+  /* Legacy form variables */
+  --form-input-border: #333333;
+  --form-input-placeholder: #666666;
+      }
+
+/* Dark theme legacy aliases - Main site only */
+/* Same vacuous guard as above; see the note there. */
+html[data-theme="dark"] {
+  /* On near-black the light amber IS the readable one — 10.4:1. See the note
+     beside --color-text-warning in the light block. */
+  --color-text-warning: var(--color-warning);
+  --color-neutral-300: #333333;
+  --color-neutral-100: #3a3a3a;
+  --color-neutral-200: #3a3a3a;
+  --color-neutral-700: #d0d0d0;
+  --color-neutral-800: #f0f0f0;
+  --color-neutral-900: #f5f5f5;
+  --color-dark: #e0e0e0;
+  --color-light: #1a1a1a;
+  --color-secondary: var(--color-brand-secondary);
+  /* The DARK accent — see --color-brand-accent-dark. Inheriting the light
+     one here put a 2.77:1 red on near-black. */
+  --color-accent: var(--color-brand-accent-dark);
+  --color-shadow: rgba(0, 0, 0, 1);
+  --form-input-border: #e0e0e0;
+  --form-input-placeholder: #999999;
+          --color-svg-text-right: #9a9a9a;
+
+  /* Business card - soft white */
+  --color-card-bg: var(--color-gray-200);
+  --color-card-bg-gradient-end: var(--color-gray-300);
+}
+
+/* Portal legacy aliases - see portal-theme.css for portal-specific color overrides */
+}
+
+@layer tokens{
+/* NOTE: portal-theme.css is intentionally NOT imported here.
+   It is imported UNLAYERED in src/styles/bundles/admin.css and client.css.
+   Keeping it out of @layer tokens ensures portal overrides beat all layered styles. */
+}
+
+@layer tokens{
+
+/**
+ * ===============================================
+ * TYPOGRAPHY DESIGN TOKENS
+ * ===============================================
+ * @file src/design-system/tokens/typography.css
+ * 
+ * Typography scale, font families, and text styles.
+ */
+
+:root {
+  /* ============================================
+   * FONT FAMILIES
+   * ============================================
+   * Dual-font system:
+   * - Headings: Cormorant Garamond (classic serif)
+   * - Body/UI: Inconsolata (monospace)
+   */
+
+  /* Acme display font (main site headings) */
+  --font--acme: "Acme", sans-serif;
+  --font-family-acme: var(--font--acme);
+
+  /* Body/UI: Inconsolata monospace */
+  --font-family-sans:
+    "Inconsolata", ui-monospace, "Cascadia Code", "Source Code Pro", Menlo, monospace;
+
+  /* No display face is loaded. Cormorant Garamond was dropped and a
+     replacement has not been chosen (CURRENT_WORK.md, "Serif face to
+     replace"), so this points at the body face rather than at a system serif
+     — a heading in Georgia beside Inconsolata body copy reads as a mistake,
+     where the body face reads as a deliberate single-typeface page. */
+  --font-family-serif: var(--font-family-mono);
+
+  /* Code: Inconsolata monospace */
+  --font-family-mono:
+    "Inconsolata", ui-monospace, "Cascadia Code", "Source Code Pro", Menlo, monospace;
+
+  /* Display headings: same story as --font-family-serif above. */
+  --font-family-display: var(--font-family-mono);
+
+  /* Body copy. Inconsolata, the same face as --font-family-sans and
+     --font-family-mono: the site is one typeface, and Arial sitting under the
+     body copy was the one place it was not. Four stylesheets read this token
+     and three spelled the old stack out inline; they all name Inconsolata now
+     so the fallback cannot disagree with the token. */
+  --font-family-body:
+    "Inconsolata", ui-monospace, "Cascadia Code", "Source Code Pro", Menlo, monospace;
+
+  /* ============================================
+   * FONT SIZES - FLUID TYPOGRAPHY
+   * ============================================ */
+
+  /* Fluid type scale using clamp() */
+  --font-size-2xs: clamp(0.625rem, 0.6rem + 0.125vw, 0.6875rem); /* 10px → 11px */
+  --font-size-xs: clamp(0.75rem, 0.7rem + 0.25vw, 0.875rem); /* 12px → 14px */
+  --font-size-sm: clamp(0.875rem, 0.825rem + 0.25vw, 1rem); /* 14px → 16px */
+  --font-size-md: clamp(1rem, 0.95rem + 0.25vw, 1.125rem); /* 16px → 18px */
+  --font-size-lg: clamp(1.125rem, 1.05rem + 0.375vw, 1.25rem); /* 18px → 20px */
+  --font-size-xl: clamp(1.25rem, 1.125rem + 0.625vw, 1.5rem); /* 20px → 24px */
+  --font-size-2xl: clamp(1.5rem, 1.25rem + 1.25vw, 2rem); /* 24px → 32px */
+  --font-size-3xl: clamp(1.875rem, 1.5rem + 1.875vw, 2.5rem); /* 30px → 40px */
+  --font-size-4xl: clamp(2.25rem, 1.75rem + 2.5vw, 3rem); /* 36px → 48px */
+  --font-size-5xl: clamp(3rem, 2rem + 5vw, 4rem); /* 48px → 64px */
+
+  /* Size of a page's <h2> section heading (.section-heading). Single source of
+     truth: About, Contact and friends all render the same class and must match
+     at every width, so the size lives here and the breakpoints override this
+     token rather than each page re-declaring font-size. */
+  --section-heading-size: var(--font-size-5xl);
+
+  /* Alias for backwards compatibility */
+  --font-size-base: var(--font-size-md);
+
+  /* ============================================
+   * FONT WEIGHTS
+   * ============================================ */
+
+  --font-weight-regular: 400;
+  --font-weight-normal: 400; /* Alias for regular — used by legacy variables.css consumers */
+  --font-weight-base: 400; /* Alias for regular — used by portal components */
+  --font-weight-medium: 500;
+  --font-weight-semibold: 600;
+  --font-weight-bold: 700;
+  --font-weight-extrabold: 800;
+
+  /* ============================================
+   * LINE HEIGHTS
+   * ============================================ */
+
+  --line-height-none: 1;
+  --line-height-tight: 1.25;
+  --line-height-snug: 1.375;
+  --line-height-normal: 1.5;
+  --line-height-relaxed: 1.625;
+
+  /* ============================================
+   * LETTER SPACING
+   * ============================================
+   * Portal uses very tight heading tracking
+   */
+
+  --letter-spacing-tightest: -0.09em; /* Portal heading style */
+  --letter-spacing-normal: 0;
+  --letter-spacing-wide: 0.025em;
+  --letter-spacing-wider: 0.05em;
+  --letter-spacing-widest: 0.1em;
+
+  /* Semantic aliases */
+  --letter-spacing-label: var(--letter-spacing-wider); /* 0.05em */
+  --letter-spacing-title: var(--letter-spacing-wide); /* 0.025em */
+
+  /* ============================================
+   * LABEL TYPE (Tier 4)
+   * ============================================
+   * The contract shared/portal-labels.css reads for .field-label,
+   * .label and .stat-label. These lived in portal-theme.css under
+   * body[data-page="admin"|"client"], so a field label rendered anywhere
+   * else — the project detail page, the login shells — resolved every one
+   * of them to nothing and fell back to plain body text. The values are
+   * type tokens, not portal ones; they belong here.
+   */
+  --label-font-size: var(--font-size-sm);
+  --label-font-weight: var(--font-weight-bold);
+  --label-text-transform: uppercase;
+  --label-letter-spacing: var(--letter-spacing-label);
+
+  /* Gap between a label and the value it names. */
+  --field-label-value-gap: calc(var(--space-px) * 2); /* 2px */
+  --portal-field-label-gap: var(--field-label-value-gap);
+
+  /* ============================================
+   * HEADING TIER SYSTEM
+   * ============================================
+   * Tier 1: Page title (.page-title) — largest, for page-level headings
+   * Tier 2: Card title (.portal-card-header) — entity card names
+   * Tier 3: Section title (.data-table-header h3, .section-title,
+   *          .panel-header-row .heading, .portal-section-title, and the
+   *          public site's h4) — table headers, panel headers, sections
+   * Tier 4: Labels — see LABEL TYPE above
+   *
+   * These were declared under body[data-page="admin"|"client"] in
+   * portal-theme.css, so the public site could not spend them even where it
+   * wanted the same heading.
+   */
+
+  /* Tier 1 — Page title */
+  --heading-page-font-size: var(--font-size-xl);
+  --heading-page-font-weight: var(--font-weight-semibold);
+  --heading-page-color: var(--color-text-primary);
+
+  /* Tier 2 — Card title */
+  --heading-card-font-size: var(--font-size-lg);
+  /* Bold. A card, table or dialog title is the thing you read first in its
+     container — it was at the regular weight, which after the label tier went
+     bold left the title lighter than the labels beneath it. */
+  --heading-card-font-weight: var(--font-weight-bold);
+  --heading-card-color: var(--color-text-primary);
+  --heading-card-letter-spacing: var(--letter-spacing-label);
+
+  /* Tier 3 — Section title (tables, panels, sections) */
+  --heading-section-font-size: var(--font-size-base);
+  --heading-section-font-weight: var(--font-weight-bold);
+  --heading-section-color: var(--color-text-primary);
+  --heading-section-letter-spacing: var(--letter-spacing-label);
+
+  /* Shared heading properties */
+  --heading-text-transform: uppercase;
+  /* The uppercase-heading face (panel, card and table headings). It is only
+     used through this token, so swapping the display face is a one-line
+     change here once one is chosen — see CURRENT_WORK.md.
+
+     ACME, for now (Noelle, 2026-09-13). It is the main site's heading face and
+     is already self-hosted, so the portal borrows it rather than pulling a
+     second webfont onto every page — one of the two reasons Cormorant was
+     dropped.
+
+     IT HAS NO SECOND WEIGHT, and that is fine here rather than a compromise
+     to revisit: Acme's single 400 already reads bold at heading sizes, which
+     is what it was picked for (Noelle, 2026-09-13, on seeing it rendered).
+     A heading asking for 700 gets a SYNTHESISED bold on top of that.
+
+     That is the opposite of the Inconsolata failure, and the distinction is
+     the thing to keep: there the descriptor claimed 400-700, so the browser
+     took it at its word, declined to synthesise, and bold rendered at regular
+     across the whole portal for months. An honest 400-only descriptor is
+     exactly what makes faux-bold available. Declaring a range Acme cannot
+     render would take it away again — and
+     tests/unit/design-system/font-face-contract.test.ts fails the build on
+     that. */
+  --heading-font-family: var(--font-family-acme);
+
+  /* ============================================
+   * SUBTAB / TAB BUTTON TYPE
+   * ============================================
+   * Read by portal-tabs.css and portal-layout.css, and by the design
+   * system page's section nav, which is the same control.
+   */
+  --portal-subtab-family: var(--font-family-mono);
+  --portal-subtab-size: var(--font-size-base);
+  --portal-subtab-weight: var(--font-weight-medium);
+  --portal-subtab-transform: uppercase;
+  --portal-subtab-spacing: var(--letter-spacing-label);
+
+  /* Widest tracking — nav/display contexts */
+}
+
+/* Text utilities (.uppercase/.lowercase/.capitalize, .text-left/center/right)
+   used to be duplicated here at @layer tokens — dead, since base/typography.css
+   (site, @layer base) and portal-layout.css / portal-utilities.css (portal)
+   define them identically at higher layers and always won. Removed 2026-09-16;
+   the real homes are base/typography.css and the portal utility sheets. */
+
+/* Shorthand alias, out of portal-theme.css's dashboard block so any surface
+   with a form can read it. `--font-family-mono` is not overridden there, so it
+   resolves to the same face wherever it is declared. */
+:root {
+  --font-mono: var(--font-family-mono);
+}
+}
+
+@layer tokens{
+
+/**
+ * ===============================================
+ * SPACING DESIGN TOKENS
+ * ===============================================
+ * @file src/design-system/tokens/spacing.css
+ * 
+ * Spacing scale for consistent margins, padding, and gaps.
+ */
+
+:root {
+  /* ============================================
+   * SPACING SCALE - BASE 8px GRID
+   * ============================================ */
+
+  /* Base unit */
+  --space-base: 0.5rem; /* 8px */
+
+  /* Fixed Spacing Scale */
+  --space-0: 0;
+  --space-px: 1px;
+  --space-0-25: calc(var(--space-base) * 0.25); /* 2px */
+  --space-0-5: calc(var(--space-base) * 0.5); /* 4px */
+  --space-1: var(--space-base); /* 8px */
+  --space-1-5: calc(var(--space-base) * 1.5); /* 12px */
+  --space-2: calc(var(--space-base) * 2); /* 16px */
+  --space-2-5: calc(var(--space-base) * 2.5); /* 20px */
+  --space-3: calc(var(--space-base) * 3); /* 24px */
+  --space-3-5: calc(var(--space-base) * 3.5); /* 28px */
+  --space-4: calc(var(--space-base) * 4); /* 32px */
+  --space-4-5: calc(var(--space-base) * 4.5); /* 36px */
+  --space-5: calc(var(--space-base) * 5); /* 40px */
+  --space-6: calc(var(--space-base) * 6); /* 48px */
+  --space-7: calc(var(--space-base) * 7); /* 56px */
+  --space-8: calc(var(--space-base) * 8); /* 64px */
+  --space-10: calc(var(--space-base) * 10); /* 80px */
+  --space-12: calc(var(--space-base) * 12); /* 96px */
+  --space-16: calc(var(--space-base) * 16); /* 128px */
+  --space-20: calc(var(--space-base) * 20); /* 160px */
+
+  /* ============================================
+   * RESPONSIVE (FLUID) SPACING (migrated from variables.css)
+   * ============================================
+   * Use for layout that scales with the viewport.
+   * Fixed scale (--space-0, --space-1, ...) is above.
+   */
+  --space-fluid-xs: clamp(0.25rem, 1vw, 0.5rem);
+  --space-fluid-sm: clamp(0.5rem, 2vw, 1rem);
+  --space-fluid-md: clamp(1rem, 3vw, 1.5rem);
+  --space-fluid-lg: clamp(1.5rem, 4vw, 2rem);
+  --space-fluid-xl: clamp(2rem, 5vw, 3rem);
+  
+  /* ============================================
+   * ICON-TEXT GAP - Single Source of Truth
+   * ============================================
+   * Proportionate gaps for icon + text/heading layouts.
+   * Use these instead of hardcoded gap values.
+   */
+
+  /* Icon-text gaps - proportionate to icon size
+   * Rule: icons next to text = 1em (same as text). Gap = one step larger.
+   * Each value bumped one step up from previous defaults. */
+  --icon-gap-xs: 8px; /* bumped from 6px */
+  --icon-gap-sm: 10px; /* bumped from 8px */
+  --icon-gap-md: 12px; /* bumped from 10px */
+  --icon-gap-lg: 16px; /* sidebar nav, loading states — unchanged */
+  --icon-gap-xl: 20px; /* decorative/large contexts — unchanged */
+
+  /* Default icon gap */
+  --icon-gap: clamp(8px, 0.75vw, 10px); /* bumped from clamp(6px, 0.5vw, 8px) */
+
+  /* ============================================
+   * PORTAL SECTION SPACING - Single Source of Truth
+   * ============================================
+   * Uniform spacing for all portal sections and headings.
+   */
+
+  /* Inside a card or panel: its own padding, and the gap between the items
+     stacked in it. The tightest of the three steps. */
+  --content-gutter: var(--space-2); /* 16px */
+  /* Section gap between cards/sections */
+  --portal-section-gap: var(--space-3); /* 24px — between cards in a row or grid */
+  /* Vertical distance between stacked bordered sections in a page's main
+     content. Larger than the grid gap on purpose: two panels one above the
+     other read as separate blocks, two cards side by side read as a row. */
+  --portal-stack-gap: var(--space-5); /* 40px */
+  /* Between full tables stacked on one page (Documents, Work, CRM, Workflows,
+     Knowledge Base). Tables are the densest blocks in the portal and need
+     more air between them than cards do. */
+  --portal-table-stack-gap: var(--space-8); /* 64px */
+
+}
+
+/* ============================================
+ * NOTE: Spacing utility classes are in src/styles/base/utilities.css
+ * This file contains only design tokens (CSS variables)
+ * ============================================ */
+}
+
+@layer tokens{
+
+/**
+ * ===============================================
+ * SHADOW DESIGN TOKENS
+ * ===============================================
+ * @file src/design-system/tokens/shadows.css
+ * 
+ * Box shadow and elevation system.
+ */
+
+:root {
+  /* ============================================
+   * ELEVATION SYSTEM
+   * ============================================ */
+
+  /* Base shadows using semantic color tokens */
+  --shadow-xs: 0 1px 2px 0 var(--color-shadow-sm);
+  --shadow-sm: 0 1px 3px 0 var(--color-shadow-sm), 0 1px 2px -1px var(--color-shadow-sm);
+  --shadow-md: 0 4px 6px -1px var(--color-shadow-md), 0 2px 4px -2px var(--color-shadow-sm);
+  --shadow-lg: 0 10px 15px -3px var(--color-shadow-md), 0 4px 6px -4px var(--color-shadow-sm);
+    --shadow-2xl: 0 25px 50px -12px var(--color-shadow-xl);
+  --shadow-inner: inset 0 2px 4px 0 var(--color-shadow-md);
+  
+  /* ============================================
+   * COLORED SHADOWS
+   * ============================================ */
+
+    
+    
+  /* ============================================
+   * COMPONENT-SPECIFIC SHADOWS
+   * ============================================ */
+
+  /* Card shadows */
+  --shadow-card-rest: var(--shadow-sm);
+    
+      
+  /* Modal shadows */
+  --shadow-modal: var(--shadow-2xl);
+
+  
+  
+    }
+
+/* ============================================
+ * MAIN SITE / PORTAL SPECIFIC SHADOWS (migrated from variables.css)
+ * ============================================
+ * These use explicit rgba() values rather than semantic color tokens
+ * because they are used on both light and dark surfaces.
+ */
+:root {
+  /* Card shadows — subtle elevation for cards and panels */
+  --shadow-card:
+    1px 0 2px rgba(0, 0, 0, 0.2), 2px 0 6px rgba(0, 0, 0, 0.15), 0 1px 2px rgba(0, 0, 0, 0.2),
+    0 2px 6px rgba(0, 0, 0, 0.15);
+
+  --shadow-inset-light:
+    inset 2px 2px 6px rgba(0, 0, 0, 0.3), inset -1px -1px 3px rgba(0, 0, 0, 0.15);
+
+  /* Elevated shadows — for floating elements */
+  --shadow-elevated-sm: 0 4px 12px rgba(0, 0, 0, 0.15);
+  --shadow-elevated-md: 0 8px 32px rgba(0, 0, 0, 0.1);
+  --shadow-elevated-lg: 0 8px 32px rgba(0, 0, 0, 0.3);
+  
+
+  /* Large dropdown shadow — main site only; portal overrides to none */
+
+  /* Terminal/modal shadows — layered depth effect */
+  --shadow-terminal: 4px 4px 10px rgba(0, 0, 0, 0.3), 0 8px 32px rgba(0, 0, 0, 0.4);
+
+    }
+
+/* ============================================
+ * NOTE: Shadow utility classes removed - use CSS variables directly
+ * Example: box-shadow: var(--shadow-md);
+ * ============================================ */
+
+/* ============================================
+ * ACCESSIBILITY CONSIDERATIONS
+ * ============================================ */
+
+/* Box-shadow transitions under reduced motion are covered by base/reset.css,
+   which sets transition-duration: 0.01ms !important on * (all properties,
+   box-shadow included). The rule here was redundant; removed 2026-09-16. */
+
+/* High contrast mode considerations */
+@media (prefers-contrast: high) {
+  :root {
+    --shadow-sm: 0 1px 3px 0 rgba(0, 0, 0, 0.3);
+    --shadow-md: 0 4px 6px -1px rgba(0, 0, 0, 0.3);
+    --shadow-lg: 0 10px 15px -3px rgba(0, 0, 0, 0.3);
+  }
+}
+}
+
+@layer tokens{
+
+/**
+ * ===============================================
+ * BORDER DESIGN TOKENS
+ * ===============================================
+ * @file src/design-system/tokens/borders.css
+ * 
+ * Border widths, radius, and styles.
+ */
+
+:root {
+  /* ============================================
+   * BORDER WIDTHS
+   * ============================================ */
+
+        --border-width-4: 4px;
+  
+  /* Semantic aliases (migrated from variables.css)
+   * DISCOTHÈQUE uses 2px borders consistently */
+  --border-width-thin: 1px; /* Subtle borders, kbd badges, dividers */
+  --border-width: 2px; /* Default border width */
+  --border-width-thick: 3px; /* Header branding row, emphasized borders */
+  --border-width-heavy: 4px; /* Dialog/modal borders, strong visual emphasis */
+
+  /* ============================================
+   * SVG STROKE WIDTH (migrated from variables.css)
+   * ============================================
+   * Matches border thickness for visual consistency.
+   */
+  --svg-stroke-width: 2.5;
+  /* A label's icon takes the label's weight — see portal-labels.css. Moved
+     off body[data-page] so it resolves outside the portal too. */
+  --svg-stroke-width-bold: 2.75;
+
+  /* ============================================
+   * BORDER RADIUS - BRUTALIST DESIGN
+   * All scale values set to 0 (sharp corners)
+   * Exception: --border-radius-full for circular elements
+   * ============================================ */
+
+    --border-radius-xs: 0;
+  --border-radius-sm: 0;
+  --border-radius-md: 0;
+  --border-radius-lg: 0;
+  --border-radius-xl: 0;
+      --border-radius-full: 9999px;
+
+  /* ============================================
+   * COMPONENT BORDER RADIUS
+   * BRUTALIST DESIGN: All components use 0 radius
+   * ============================================ */
+
+      --border-radius-card: 0;
+      /* Keep circular for avatars */
+
+  /* ============================================
+   * BORDER STYLES
+   * ============================================ */
+
+        }
+
+/* ============================================
+ * NOTE: Border utility classes removed - use CSS variables directly
+ * Example: border-radius: var(--border-radius-md);
+ * ============================================ */
+
+/* ============================================
+ * FOCUS RING
+ * ============================================
+ * The base declaration, shared by every bundle.
+ *
+ * These lived only in `portal-theme.css`, which the site bundle does not
+ * import, so `:focus-visible` in `base/reset.css` had been running on the
+ * fallbacks inside its own `var()` — a value that cannot answer to theme or
+ * surface, and a token name that was telling the truth nowhere but the portal.
+ *
+ * The values here are what the site has been rendering all along, so nothing
+ * moves. `portal-theme.css` still narrows the width to 1px for the dashboards
+ * — a deliberate choice recorded there ("inherits the element's own border
+ * visually, no thick glow") — and its `body[data-page]` selector still wins
+ * inside them.
+ */
+:root {
+  --focus-ring-color: var(--color-accent);
+  --focus-ring-width: 2px;
+}
+
+/* The two the form controls read, beside the ring they belong to.
+   They were inside portal-theme.css's `body[data-page]` block, so a page had
+   to claim `data-page="client"` — and inherit 556 lines of dashboard theming —
+   to reach them. Neither depends on anything that block overrides. */
+:root {
+  --focus-ring-width-thick: 2px;
+  --focus-ring-offset-sm: 2px;
+}
+}
+
+@layer tokens{
+
+/**
+ * ===============================================
+ * ANIMATION DESIGN TOKENS
+ * ===============================================
+ * @file src/design-system/tokens/animations.css
+ * 
+ * Animation timing, easing, and duration tokens.
+ */
+
+:root {
+  /* ============================================
+   * BASE DURATION & TRANSITION TOKENS
+   * ============================================
+   * Migrated from variables.css.
+   * These are consumed by animations.css component tokens (--animation-*) below.
+   */
+
+  /* Duration-only tokens — for complex multi-property transitions */
+  --duration-faster: 0.15s;
+  --duration-fast: 0.2s;
+  --duration-medium: 0.3s;
+  --duration-normal: 0.3s;
+  --duration-slow: 0.4s;
+  
+  /* Shorthand transition tokens — duration + ease combined */
+  --transition-faster: 0.15s ease;
+  --transition-fast: 0.2s ease;
+  --transition-medium: 0.3s ease;
+  --transition-slow: 0.4s ease;
+  
+  /* ============================================
+   * EASING ALIASES (from variables.css)
+   * ============================================ */
+
+  /* Default cubic-bezier — matches --easing-smooth */
+  --cubic-default: cubic-bezier(0.4, 0, 0.2, 1);
+
+  /* Menu open/close easing */
+  --cubic-menu: cubic-bezier(0.65, 0.05, 0, 1);
+
+  /* ============================================
+   * PAGE & SECTION TRANSITION TOKENS
+   * ============================================
+   * Consumed by page-transitions.css and GSAP modules.
+   */
+
+              --page-blur-amount: 12px;
+
+  /* ============================================
+   * DURATION & TRANSITION TOKENS
+   * ============================================
+   * Semantic timing tokens for specific use cases.
+   */
+
+  /* Theme color transitions (slower for smooth color changes) */
+  --transition-theme: 0.4s;
+
+  /* Mouse/hover interactions (fast for responsive feel) */
+  --transition-mouse: 0.2s;
+
+  /* Standard animation timing (for most UI transitions) */
+  --transition-normal: 0.3s;
+
+  /* Standard animation length (most common duration) */
+  --transition-length: 0.5s;
+
+  /* Dramatic entrance animations (longer for impact) */
+  --transition-long: 0.8s;
+
+  /* ============================================
+   * EASING TOKENS
+   * ============================================ */
+
+  /* Standard easing curves */
+  --easing-linear: linear;
+        --easing-ease-in-out: ease-in-out;
+
+  /* Custom cubic-bezier curves */
+  --easing-smooth: cubic-bezier(0.4, 0, 0.2, 1);
+  --easing-sharp: cubic-bezier(0.4, 0, 0.6, 1);
+  --easing-emphasized: cubic-bezier(0.2, 0, 0, 1);
+  --easing-decelerated: cubic-bezier(0, 0, 0.2, 1);
+  --easing-accelerated: cubic-bezier(0.4, 0, 1, 1);
+  
+  /* Spring-like animations */
+  --easing-bounce: cubic-bezier(0.68, -0.55, 0.265, 1.55);
+  
+
+  /* Smooth easing (standard animations) - THE DEFAULT */
+  --easing-smooth-sal: cubic-bezier(0.3, 0.9, 0.3, 0.9);
+
+  /* ============================================
+   * COMPONENT-SPECIFIC ANIMATIONS
+   * ============================================ */
+
+  
+  /* Card animations */
+  --animation-card-hover: var(--duration-normal) var(--easing-smooth);
+    
+    
+  
+  
+  /* Loading animations */
+  --animation-spinner: 1s var(--easing-linear) infinite;
+  --animation-spinner-fast: 0.8s var(--easing-linear) infinite;
+    --animation-pulse-loading: 1.5s var(--easing-ease-in-out) infinite;
+  --animation-pulse-skeleton: 2s var(--easing-ease-in-out) infinite;
+  --animation-skeleton-shimmer: 1.5s var(--easing-ease-in-out) infinite;
+      
+  }
+
+/* ============================================
+ * NOTE: Keyframes and animation utilities migrated to GSAP
+ * See: src/utils/gsap-utilities.ts for all animation functions
+ * This codebase follows a GSAP-first animation approach
+ * ============================================ */
+
+/* ============================================
+ * ACCESSIBILITY CONSIDERATIONS
+ * ============================================ */
+
+/* Reduced-motion reset lives in base/reset.css (@layer reset), which zeroes
+   animation-duration, animation-iteration-count, transition-duration and
+   scroll-behavior on * — a superset of what was duplicated here. Removed
+   2026-09-16; GSAP still checks prefers-reduced-motion in JS. */
+}
+
+@layer tokens{
+
+/**
+ * ===============================================
+ * BREAKPOINT DESIGN TOKENS
+ * ===============================================
+ * @file src/design-system/tokens/breakpoints.css
+ *
+ * Responsive breakpoints and container sizes.
+ */
+
+/* ============================================
+ * CUSTOM MEDIA QUERIES (migrated from variables.css)
+ * ============================================
+ * Use these instead of hardcoded breakpoints:
+ *   @media (--small-mobile)        { } - max-width: 479px
+ *   @media (--compact-mobile)      { } - max-width: 600px
+ *   @media (--mobile)              { } - max-width: 767px
+ *   @media (--tablet)              { } - min-width: 768px
+ *   @media (--tablet-only)         { } - 768px to 991px
+ *   @media (--tablet-down)         { } - max-width: 991px
+ *   @media (--desktop)             { } - min-width: 992px
+ *   @media (--desktop-down)        { } - max-width: 1023px
+ *   @media (--tablet-to-desktop)   { } - 600px to 1100px (medium viewport range)
+ *   @media (--wide)                { } - min-width: 1200px
+ *   @media (--ultra-wide)          { } - min-width: 1400px
+ *   @media (--ultra-wide-down)     { } - max-width: 1399px
+ */
+
+/* Mobile breakpoints */ /* Bootstrap sm equivalent */ /* Portal sidebar collapse */
+
+/* Tablet breakpoints */
+
+/* Desktop breakpoints */
+
+:root {
+  /* ============================================
+   * BREAKPOINT TOKENS
+   * ============================================ */
+
+  /* Mobile-first breakpoints */
+  --breakpoint-xs: 475px;
+  --breakpoint-sm: 640px;
+  --breakpoint-md: 768px;
+  --breakpoint-lg: 1024px;
+  --breakpoint-xl: 1280px;
+  --breakpoint-2xl: 1536px;
+
+          
+  /* Content width constraints */
+  --container-xs: 100%;
+  --container-sm: 640px;
+  --container-md: 768px;
+  --container-lg: 1024px;
+  --container-xl: 1280px;
+  --container-2xl: 1536px;
+
+  
+          }
+
+/* The .container utility (a Bootstrap-style responsive container) used to
+   live here at @layer tokens. It was dead: base/layout.css defines
+   .container at @layer base and always won on the site (the only place
+   the standalone class is used, the header partial); the portal uses
+   only compound *-container names, never this one. Removed 2026-09-16.
+   The @custom-media and --container-* tokens above stay — those ARE
+   tokens. */
+}
+
+@layer tokens{
+
+/**
+ * ===============================================
+ * Z-INDEX DESIGN TOKENS
+ * ===============================================
+ * @file src/design-system/tokens/z-index.css
+ * 
+ * Z-index layering system for consistent stacking order.
+ */
+
+:root {
+  /* ============================================
+   * Z-INDEX SCALE
+   * ============================================ */
+
+  --z-index-1: 1;
+  --z-index-10: 10;
+  --z-index-20: 20;
+      --z-index-50: 50;
+
+  /* Component layers */
+  --z-index-dropdown: 100;
+    --z-index-fixed: 300;
+  --z-index-modal-backdrop: 400;
+  --z-index-modal: 500;
+        --z-index-overlay: 900;
+  --z-index-max: 999;
+
+  /* Application-specific layers */
+  --z-index-behind: -1;
+  --z-index-base: 0;
+  --z-index-content: 1;
+  --z-index-elevated: 10;
+    --z-index-skip-link: 9999;
+
+  /* ============================================
+   * LEGACY SHORT-NAME ALIASES (migrated from variables.css)
+   * ============================================
+   * Many components reference these short names directly.
+   * Kept as aliases pointing at the proper z-index scale.
+   */
+  --z-header: var(--z-index-elevated); /* Alias → --z-index-elevated (10) */
+  --z-nav: var(--z-index-nav); /* Alias → --z-index-nav (100) */
+  --z-modal: var(--z-index-portal-modal); /* Alias → --z-index-portal-modal (9600) */
+
+  --z-index-nav: 100;
+  --z-index-nav-dropdown: 110;
+  --z-index-nav-overlay: 115; /* Blur overlay between header and nav menu */
+  --z-index-nav-menu: 120; /* Nav menu above overlay */
+  --z-index-nav-menu-content: 125; /* Menu content above overlay */
+  --z-index-nav-header: 130; /* Header above all nav layers */
+
+  /* Business card layers */
+  --z-index-business-card: 50;
+  --z-index-business-card-overlay: 400;
+  --z-index-business-card-modal: 500;
+
+  /* Loading and intro layers */
+  --z-index-loading: 999;
+  --z-index-intro: 998;
+
+      --z-index-portal-overlay: 9500;
+  --z-index-portal-modal: 9600;
+  --z-index-portal-dropdown: 9700;
+  --z-index-portal-toast: 9800;
+  
+  /* Performance dashboard */
+  --z-index-debug: 10000;
+}
+
+/* ============================================
+ * LAYERING GUIDELINES
+ * ============================================ */
+
+/*
+ * Z-Index Stacking Order (lowest to highest):
+ * 
+ * -1:      Behind content (::before/::after decorative elements)
+ * 0:       Normal document flow
+ * 1-49:    Content layers (cards, elevated content)
+ * 50-99:   Component interactions (business card, hover states)
+ * 100-199: Navigation elements (menus, dropdowns)
+ * 200-299: Sticky/Fixed elements (headers, sidebars)
+ * 300-399: Fixed overlays (loading screens)
+ * 400-499: Modal backdrops
+ * 500-599: Modal content
+ * 600-699: Popovers and context menus
+ * 700-799: Tooltips
+ * 800-899: Toast notifications
+ * 900-999: Critical overlays (loading, intro)
+ * 1000+:   Debug/Development tools
+ * 
+ * Application Specific Order:
+ * - Base content: 0-10
+ * - Business card: 50
+ * - Navigation: 100-110
+ * - Business card overlay: 400
+ * - Business card modal: 500
+ * - Intro sequence: 998
+ * - Loading screen: 999
+ * - Debug tools: 10000+
+ */
+
+/* ============================================
+ * COMPONENT-SPECIFIC STACKING CONTEXTS
+ * ============================================ */
+
+/* Business card stacking context */
+/* .business-card-container's z-index moved to components/business-card.css
+   on 2026-09-16 (a component rule, not a token). Its position: relative here
+   was dead — business-card.css sets static and page-transitions.css sets
+   absolute, both at higher layers. The --z-index-business-card TOKEN stays
+   defined above. */
+}
+
+@layer tokens{
+
+/**
+ * ===============================================
+ * BUTTON DESIGN TOKENS
+ * ===============================================
+ * @file src/design-system/tokens/buttons.css
+ *
+ * Shared button tokens for consistent styling across portals.
+ * Main site has its own creative button aesthetic and does NOT use these.
+ */
+
+/* ============================================
+ * PORTAL BUTTON TOKENS - BRUTALIST DESIGN
+ * ============================================
+ * Used by admin and client portal buttons.
+ * Design: Black background, white border, monospace font
+ * SCOPED to portal pages only to prevent main site bleed.
+ * data-page="auth" is the server-rendered set/reset/forgot-password pages —
+ * they draw the portal's card and submit button, so they need these tokens.
+ * Without them `border: var(--portal-btn-border-width) solid currentColor`
+ * has no width, the whole shorthand is invalid, and the button loses its box.
+ */
+[data-page="admin"],
+[data-page="ledger"],
+[data-page="auth"] {
+  /* Button sizing */
+  --portal-btn-padding-y: var(--space-2);
+  --portal-btn-padding-x: var(--space-4);
+  --portal-btn-padding: var(--portal-btn-padding-y) var(--portal-btn-padding-x);
+  --portal-btn-min-height: var(--space-5);
+
+  /* Button typography - Portal: Inconsolata monospace */
+  --portal-btn-font-family: "Inconsolata", ui-monospace, monospace;
+  --portal-btn-font-size: 0.875rem;
+  --portal-btn-font-weight: 500;
+  /* Positive, and only just. Every button on the site is uppercase
+     Inconsolata at 0.875rem, and uppercase has no ascenders or descenders to
+     separate one letter from the next — negative tracking closed the last of
+     the gap and ran DECLINE and ACCEPT ALL together. 0.03em is about half a
+     pixel at that size: enough to part the letters, too little to read as
+     spaced-out lettering. */
+  --portal-btn-letter-spacing: 0.03em;
+  --portal-btn-text-transform: uppercase;
+
+  /* Button borders - Portal: no radius, even 2px border on all four sides */
+  --portal-btn-border-width: 2px;
+  /* Was 6px — the heavy bottom edge. Kept as its own token rather than
+     deleted so the ten rules that read it still resolve; it now simply
+     matches the other three sides. */
+  --portal-btn-border-bottom-width: var(--portal-btn-border-width);
+  --portal-btn-border-radius: 0;
+  --portal-btn-border-color: var(--color-text-primary);
+
+  --portal-btn-color: var(--color-text-primary);
+  --portal-btn-border: var(--color-text-primary);
+
+  /* Button colors - hover (inverted: dark bg = light text, light bg = dark text) */
+  --portal-btn-hover-bg: var(--color-text-primary);
+  --portal-btn-hover-color: var(--color-bg-primary);
+  --portal-btn-hover-border: var(--color-text-primary);
+
+  /* Button colors - danger (transparent bg, red text/border). The background
+     is not a token: it is `transparent` in both themes, so the two
+     declarations only made you look in two places to learn nothing. */
+  --portal-btn-danger-color: var(--color-error-500);
+  --portal-btn-danger-border: var(--color-error-500);
+
+  /* Button colors - danger hover */
+  --portal-btn-danger-hover-bg: var(--color-error-500);
+  --portal-btn-danger-hover-color: var(--color-text-primary);
+  --portal-btn-danger-hover-border: var(--color-error-500);
+
+  /* Button effects - BRUTALIST: no shadows. There is no token for the
+     shadow: it was `none` in every declaration and every reference already
+     fell back to `none`, so the buttons say it themselves. */
+  --portal-btn-transition: all var(--transition-fast);
+  
+    --portal-btn-sm-font-size: 0.8rem;
+  --portal-btn-sm-min-height: var(--space-4);
+
+  /* Icon button sizes (square) */
+  --portal-btn-icon-size: calc(var(--space-4) + var(--space-0-5));
+  --portal-btn-icon-size-sm: var(--space-4);
+  --portal-btn-icon-size-xs: calc(var(--space-3) + var(--space-0-5));
+  /* 24px — the row-action rung, and the smallest a button may be: it is the
+     minimum target size a pointer can reliably hit. Row actions used to take
+     `--icon-size-sm` instead, which is a GLYPH token, so the button collapsed
+     onto its own icon: 14x14 with no padding, no target and nothing for a
+     hover state to fill. A button's size comes from this ladder; only what is
+     drawn inside it comes from the icon ladder. */
+  --portal-btn-icon-size-2xs: var(--space-3);
+  
+  /* Icon sizes within buttons */
+  --portal-btn-icon-inner-size: var(--icon-size-lg);
+  }
+
+/* ============================================
+ * PORTAL LIGHT MODE - Button colors inverted
+ * ============================================
+ * Transparent background, black text/border (matches dark mode pattern)
+ */
+html[data-theme="light"] body[data-page="ledger"],
+html[data-theme="light"] body[data-page="admin"],
+html[data-theme="light"] [data-page="ledger"],
+html[data-theme="light"] [data-page="admin"] {
+  /* Button borders - matches portal text color */
+  --portal-btn-border-color: var(--color-gray-900);
+
+  --portal-btn-color: var(--color-gray-900);
+  --portal-btn-border: var(--color-gray-900);
+
+  /* Button colors - hover (dark bg, light text) */
+  --portal-btn-hover-bg: var(--color-gray-900);
+  --portal-btn-hover-color: var(--color-off-white);
+  --portal-btn-hover-border: var(--color-gray-900);
+
+}
+
+/* ============================================
+ * PORTAL BUTTON STYLES
+ * ============================================
+ * Applied styles moved to: src/styles/portal/shared/portal-buttons.css
+ * This file contains only CSS variables (tokens).
+ */
+}
+
+@layer tokens{
+
+/**
+ * ===============================================
+ * DIMENSION DESIGN TOKENS
+ * ===============================================
+ * @file src/design-system/tokens/dimensions.css
+ *
+ * Semantic dimension variables for widths, heights,
+ * and size constraints. Prevents hardcoded px values.
+ */
+
+:root {
+  /* ============================================
+   * LAYOUT CONSTANTS (migrated from variables.css)
+   * ============================================ */
+  --header-height: 60px;
+  --footer-height: 40px;
+  --size-container: min(1200px, 100vw - 2rem);
+  --container-padding: clamp(1rem, 4vw, 2rem);
+  --gap: clamp(0.75rem, 3vw, 1.5rem);
+  
+  /* ============================================
+   * MODAL SIZES (migrated from variables.css)
+   * ============================================ */
+  --modal-width-sm: 400px;
+  --modal-width-md: 560px;
+  --modal-width-lg: 860px;
+
+  /* ============================================
+   * ICON GLYPH SIZES (migrated from variables.css)
+   * Container sizes are below (--icon-btn-size-*)
+   * ============================================ */
+  --icon-size-xs: 12px;
+  --icon-size-sm: 14px;
+  /* Height of one line of body text. An icon that leads a stacked text block
+     gets a box this tall so it centres on the block's first line rather than
+     on the middle of the whole block. */
+  --icon-first-line-box: calc(var(--font-size-base) * var(--line-height-normal));
+  --icon-size-md: 16px;
+  --icon-size-lg: 20px;
+  --icon-size-xl: 24px;
+  --icon-size-2xl: 32px;
+
+/* 14px — matches body text */
+
+  /* ============================================
+   * PORTAL NAVIGATION FONT SIZE (migrated from variables.css)
+   * ============================================ */
+
+  /* Shared by header logo text + sidebar buttons */
+  --portal-nav-font-size: 1.25rem;
+
+  /* ============================================
+   * SIDEBAR ICON SIZE (migrated from variables.css)
+   * ============================================
+   * Single value for both open and collapsed states.
+   */
+  --sidebar-icon-size: 20px;
+
+        /* Icon SVG size inside buttons — matches text */
+
+  /* ============================================
+   * DROPDOWN SIZING (migrated from variables.css)
+   * ============================================ */
+
+  /* Dropdown caret sizing */
+  --dropdown-caret-size: var(--icon-size-xs);
+  --dropdown-caret-gap: var(--space-2);
+
+  /* The caret artwork itself. Shared rather than portal-scoped because
+     components/form-fields.css styles `.form-container select` with
+     `appearance: none` for every surface — so without these the public site
+     removed the native arrow and drew nothing in its place. */
+  --select-caret: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 24 24' fill='none' stroke='%23888888' stroke-width='2.5' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='m6 9 6 6 6-6'/%3E%3C/svg%3E");
+  --select-caret-light: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 24 24' fill='none' stroke='%23404040' stroke-width='2.5' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='m6 9 6 6 6-6'/%3E%3C/svg%3E");
+
+        
+  /* ============================================
+   * STATUS DOT (migrated from variables.css)
+   * ============================================ */
+  --status-dot-size: 8px;
+  
+  /* ============================================
+   * NAVIGATION SIZING (migrated from variables.css)
+   * ============================================ */
+  --menu-padding: clamp(0.5rem, 2vw, 1rem);
+  --nav-base-gap: clamp(0.5rem, 1.5vw, 0.8rem);
+  --menu-multiplier: 0.15;
+  --list-multiplier: 0.12;
+  --menu-heading-size: clamp(2.5rem, 6vw, 4rem);
+      --menu-width-desktop: 35rem;
+  --menu-width-tablet: 32rem;
+  --menu-width-mobile: 100vw;
+  --menu-border-radius: 1.25rem;
+      
+    --business-card-aspect-ratio: 1.784582;
+  --business-card-base-width: 35vw;
+    --business-card-large-width: 525px;
+    --business-card-medium-width: 420px;
+    --business-card-small-width: 350px;
+    --business-card-tiny-width: 280px;
+  
+  /* ============================================
+   * CONTACT FORM DIMENSIONS (migrated from variables.css)
+   * ============================================ */
+  --contact-input-height: clamp(52px, 14vw, 60px);
+  --contact-input-width: min(520px, 100%);
+  --contact-textarea-height: 175px;
+  --contact-textarea-width: min(520px, 100%);
+        --contact-field-border-width: var(--border-width);
+  --contact-field-border-color: var(--color-text-primary);
+
+  /* ============================================
+   * TERMINAL DIMENSIONS (migrated from variables.css)
+   * ============================================ */
+  --terminal-font-family:
+    "Menlo", "Monaco", "Consolas", "Liberation Mono", "Courier New", monospace;
+  --terminal-line-height: 1.7;
+  --terminal-font-size: var(--font-size-base);
+
+  /* ============================================
+   * SIDEBAR DIMENSIONS
+   * ============================================ */
+  /* 24 + the longest nav label + 24, so the strip's padding is equal either
+     side of the icon-and-text block (Noelle, 2026-09-13). At 240 the leading
+     space was 24 and the trailing space 52, which read as the labels hugging
+     the left of an over-wide box.
+
+     Measured, not guessed: `DELIVERABLES` in the client portal is the longest
+     label in either portal — the admin's longest are DASHBOARD, DOCUMENTS and
+     ANALYTICS at nine characters — and its text ends at 188. A label longer
+     than that wants this number re-measured; the badges do not, being
+     absolutely positioned and display:none until they carry a count. */
+  --sidebar-width-open: 212px;
+  --header-search-width: 18rem; /* global header search trigger */
+  
+  /* Aside/column variations */
+  --aside-width-narrow: 240px;
+  --aside-width-medium: 280px;
+  --aside-width-wide: 320px;
+
+  --icon-btn-size-md: 36px;
+  --icon-btn-size-lg: 40px;
+  --icon-btn-size-xl: 48px;
+
+  /* Large icon / logo containers */
+  --icon-size-3xl: 64px;
+  --icon-size-4xl: 96px; /* Sign-in marks — two steps above the 3xl icon */
+
+  /* ============================================
+   * TOOLTIP / POPOVER CONSTRAINTS
+   * ============================================ */
+  --tooltip-max-width: 280px;
+  --tooltip-max-width-sm: 250px;
+
+    --chart-height-md: 200px;
+    /* In-portal form sections (settings and the like). A label/value row stops
+     being readable long before it stops fitting: past this the label and its
+     value sit at opposite ends of the screen. */
+  --form-section-max-width: 48rem;
+  
+  --divider-size: 2px;
+    --tooltip-arrow-size: 6px;
+
+  /* ============================================
+   * INDICATOR DOTS
+   * ============================================ */
+  --indicator-dot-md: 10px;
+  --indicator-dot-sm: 6px;
+
+  --search-input-max-width: 20rem;
+
+  /* ============================================
+   * PROGRESS COMPONENT
+   * ============================================ */
+  --progress-bar-height: 16px;
+
+  /* ============================================
+   * TOAST NOTIFICATIONS
+   * ============================================
+   * Here rather than in portal-theme.css because the toast component is not
+   * portal-only: bundles/foundation.css imports portal-toast-notifications.css
+   * for the public site too, and src/main-site.ts reaches showToast() through
+   * code-protection-service. Scoped to body[data-page="admin"|"client"] as
+   * these were, the site read them and got nothing, so .toast had no width
+   * bounds at all. A component's tokens belong wherever the component reaches.
+   */
+  --toast-min-width: 250px;
+  --toast-max-width: 400px;
+
+  /* ============================================
+   * TABLE PAGINATION
+   * ============================================
+   * Shared for the same reason as the carets: mobile/responsive-fixes.css is
+   * in both bundles and sizes .pagination-btn from this. 44px is the WCAG
+   * 2.5.5 touch target, which is not a portal-specific opinion. */
+  --table-pagination-btn-size-touch: calc(var(--space-base) * 5.5); /* 44px — WCAG touch target */
+}
+
+/* ============================================
+ * FORM AND SEARCH CONTROL TOKENS
+ * ============================================
+ * Lifted out of the `body[data-page="admin"], body[data-page="client"]` block
+ * in portal-theme.css, which is 556 lines of *dashboard* theming. A page that
+ * renders a form — `/intake` is the live case — wanted these and could only
+ * get them by claiming `data-page="client"` and inheriting the dashboard with
+ * them.
+ *
+ * All four are literals or read tokens the dashboard block does not override,
+ * so they resolve identically wherever they are declared.
+ *
+ * TWO OF THE NINE STAYED BEHIND, and the reason is the substitution rule: a
+ * custom property resolves its `var()`s **where it is declared**.
+ * `--portal-alpha-white-10` reads `--color-text-primary` and
+ * `--portal-placeholder-color` reads `--color-text-tertiary`; the dashboard
+ * block overrides both, so moving them here would silently re-point them at
+ * the site's text colours and the portal's placeholder would stop following
+ * the portal's own ramp.
+ */
+:root {
+  --min-height-textarea-lg: 80px; /* Tall textareas in prompt dialogs and resizable forms */
+  --search-font-size: var(--font-size-sm);
+  --search-icon-gap: var(--space-1-5); /* icon to the first character */
+  --search-icon-inset: var(--space-1); /* icon's distance from the left edge */
+}
+}
+
+@layer tokens{
+/* ============================================
+ * BASE STYLES
+ * ============================================ */
+
+/* Modern CSS reset and base styles */
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+html {
+  line-height: 1.5;
+  -webkit-text-size-adjust: 100%;
+  -moz-tab-size: 4;
+  -o-tab-size: 4;
+     tab-size: 4;
+  font-family: var(--font-family-sans);
+  font-feature-settings: normal;
+  font-variation-settings: normal;
+  -webkit-tap-highlight-color: transparent;
+}
+
+body {
+  font-family: var(--font-family-body);
+  font-size: var(--font-size-base);
+  line-height: var(--line-height-normal);
+  color: var(--color-text-primary);
+  background-color: var(--color-bg-primary);
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  text-rendering: optimizeLegibility;
+}
+
+/* ============================================
+ * ACCESSIBILITY
+ * ============================================ */
+
+/* ============================================
+ * INTERACTION STATE UTILITIES
+ * ============================================ */
+
+/* Focus states */
+.focus\:outline-none:focus {
+  outline: none;
+}
+.focus\:ring:focus {
+  outline: 2px solid transparent;
+  box-shadow: 0 0 0 2px var(--color-border-focus);
+}
+
+/* Disabled states */
+.disabled,
+[disabled] {
+  opacity: 0.5;
+  cursor: not-allowed;
+  pointer-events: none;
+}
+
+/* ============================================
+ * ACCESSIBILITY ENHANCEMENTS
+ * ============================================ */
+
+/* High contrast mode support */
+@media (prefers-contrast: high) {
+  .card {
+    border-width: 2px;
+  }
+
+  .btn {
+    border-width: 2px;
+  }
+
+  .input {
+    border-width: 2px;
+  }
+}
+
+/* Reduced motion support */
+@media (prefers-reduced-motion: reduce) {
+  .card,
+  .btn,
+  .input {
+    transition: none;
+    transform: none;
+    animation: none;
+  }
+}
+}
+
+@layer tokens{
+/**
+ * ===============================================
+ * HEALTH LEDGER APP TOKENS
+ * ===============================================
+ * @file static/css/app-tokens.css
+ *
+ * The few values this app needs that the vendored design system does not
+ * name. Each one aliases a design-system token; the only literals here are
+ * viewport fractions. If a value is needed in a component, it is added here
+ * first and referenced by name — never typed into components.css.
+ *
+ * Declared on the same element the portal theme declares its palette on, so
+ * anything derived from a themed token resolves against the themed value.
+ */
+body[data-page="ledger"] {
+  /* The sticky header: one control row plus its padding and rule. <main>
+     is sized against it, so the two cannot drift apart. */
+  --app-header-height: calc(
+    var(--portal-btn-min-height) + 2 * var(--space-1-5) + var(--border-width)
+  );
+
+  /* Every control on the page — inputs, selects, buttons, the multiselect
+     search — stands one height, so a filter row lines up without per-page
+     overrides. The portal's button minimum is that height. */
+  --app-control-height: var(--portal-btn-min-height); /* 40px */
+
+  /* Left inset on a control that carries a leading search icon: the icon's
+     inset, plus the icon, plus the icon-to-text gap (the portal's search-bar
+     arithmetic). */
+  --app-control-icon-pad: calc(
+    var(--search-icon-inset) + var(--icon-size-md) + var(--search-icon-gap)
+  );
+
+  /* A text control sitting inline beside its label (export path, custom
+     save folder). */
+  --app-inline-input-width: calc(var(--space-base) * 37.5); /* 300px */
+
+  /* Open multiselect list before it scrolls. */
+  --app-dropdown-max-height: calc(var(--space-base) * 30); /* 240px */
+
+  /* Column ceilings for the sources workspace. */
+  --app-sources-list-width: var(--aside-width-medium);
+  --app-sources-list-min-width: var(--aside-width-narrow);
+  --app-sources-findings-width: var(--aside-width-wide);
+  --app-sources-findings-min-width: var(--aside-width-narrow);
+  --app-sources-detail-min-width: var(--aside-width-wide);
+
+  /* Scroll ceilings for long text blocks. */
+  --app-results-max-height: 70vh;
+  --app-source-text-max-height: 60vh;
+
+  /* Measure for a rendered document (profile, summary). */
+
+  /* Accent edge that marks a row or block (abnormal metric, active source).
+     The portal's own highlight pattern: an inset edge, not a fill. */
+  --app-edge-mark: inset var(--border-width-thick) 0 0;
+
+  /* The native <select> caret follows the theme. */
+  --app-select-caret: var(--select-caret-light);
+}
+
+html[data-theme="dark"] body[data-page="ledger"] {
+  --app-select-caret: var(--select-caret);
+}
+
+body[data-page="ledger"] {
+  /* The section nav beside a rendered document. */
+  --app-doc-nav-width: var(--aside-width-narrow);
+}
+
+/* ============================================
+ * FOOTER BAND
+ * The portfolio site's curtain dimensions, copied from
+ * no-bhad-codes src/styles/components/footer.css. Same names, so the two
+ * can be diffed. The band is the mark plus its air, nothing chosen.
+ * ============================================ */
+:root {
+  /* Smaller than the site's clamp(88px, 16vh, 150px): there the band is
+     revealed at the end of a scroll; here it is always on screen beside
+     content that must fit the window, so it takes the least the lockup
+     can read at. */
+  --curtain-avatar-height: clamp(72px, 11vh, 96px);
+  --curtain-avatar-width: calc(var(--curtain-avatar-height) * 0.809);
+  --curtain-avatar-trim: calc(var(--curtain-avatar-height) * 0.107);
+  --curtain-mark-gap: var(--space-1);
+  /* The site sets these two as fixed steps tuned to a 150px avatar. Tied
+     to the avatar here so the year keeps clearing the wordmark at the
+     smaller size (0.08 and 0.137 of 150 are the site's 12px and 20.5px). */
+  --curtain-credit-pull: calc(var(--curtain-avatar-height) * 0.08);
+  --curtain-credit-leading: 1.6;
+  --curtain-wordmark-size: calc(var(--curtain-avatar-height) * 0.195);
+  --curtain-credit-size: calc(var(--curtain-wordmark-size) * 0.64);
+  --curtain-year-size: calc(var(--curtain-wordmark-size) * 0.9735);
+  --curtain-year-lift: var(--space-0-5);
+  --curtain-year-nudge: var(--space-0-25);
+  /* The site adds a step to the header gutter; this band keeps the page
+     gutter so the mark lines up with the content above it. */
+  --curtain-inset: var(--space-2);
+  --curtain-credit-height: calc(
+    var(--curtain-credit-size) * var(--curtain-credit-leading) * 2 - var(--curtain-credit-pull) +
+      var(--curtain-mark-gap) + var(--curtain-year-size) * 1.4 - var(--curtain-year-lift)
+  );
+  /* On phones the note stacks above the mark and the band grows by its
+     two lines; zero elsewhere, where the note sits beside the mark. */
+  --curtain-note-height: 0px;
+  --footer-curtain-height: calc(
+    var(--curtain-avatar-height) + var(--curtain-credit-height) + var(--curtain-inset) * 2 +
+      var(--curtain-note-height)
+  );
+  /* One fixed ink slab in both themes, by design. */
+  --footer-curtain-bg: var(--color-gray-900);
+  --footer-curtain-text: var(--color-off-white);
+  --footer-curtain-text-muted: var(--color-gray-400);
+}
+
+@media (max-width: 767px) {
+  :root {
+    --curtain-note-height: calc(var(--font-size-xs) * var(--line-height-normal) * 2 + var(--space-2));
+  }
+}
+}
+
+/* 3. Element defaults */
+
+@layer base{
+
+/**
+ * ===============================================
+ * BASE — element defaults
+ * ===============================================
+ * @file static/css/base.css  (@layer base)
+ *
+ * Element-level defaults on top of the vendored reset. No classes here;
+ * anything reusable by class belongs in components.css.
+ */
+
+body {
+  color: var(--color-text-primary);
+  font-size: var(--font-size-base);
+  line-height: var(--line-height-normal);
+}
+
+/* Lucide icons size to the text beside them and take the text's stroke
+   weight — the same root rule the portal carries in portal-primitives.css. */
+svg.lucide {
+  width: 1em;
+  height: 1em;
+  flex-shrink: 0;
+  stroke-width: var(--svg-stroke-width);
+}
+
+code,
+pre,
+kbd {
+  font-family: var(--font-family-mono);
+  font-size: var(--font-size-sm);
+}
+
+code {
+  padding: 0 var(--space-0-5);
+  background: var(--portal-alpha-white-05);
+}
+
+pre {
+  white-space: pre-wrap;
+  word-wrap: break-word;
+}
+
+hr {
+  border: none;
+  border-top: var(--portal-input-border);
+  margin: var(--space-3) 0;
+}
+
+strong {
+  font-weight: var(--font-weight-bold);
+}
+
+small {
+  font-size: var(--font-size-xs);
+}
+}
+
+/* 4. Reusable component classes — ALL of them live in components.css */
+
+@layer components{
+
+/**
+ * ===============================================
+ * COMPONENTS — every reusable class
+ * ===============================================
+ * @file static/css/components.css  (@layer components)
+ *
+ * The single home for reusable component classes: buttons, form controls,
+ * labels, cards and sections, tables, badges, alerts, the multiselect, the
+ * loading state, and the sources workspace panels. Before adding a class,
+ * grep this file for one that already does the job.
+ *
+ * Every value is a token from static/css/design-system/ or app-tokens.css.
+ * The recipes follow the no-bhad-codes portal (portal-buttons.css,
+ * portal-forms.css, portal-tables.css, portal-cards.css, portal-labels.css,
+ * portal-badges.css): flat ground, 2px rules, no radius, no shadows,
+ * uppercase letter-spaced labels, inverted hover on buttons.
+ */
+
+/* ============================================
+ * BUTTONS
+ * ============================================ */
+.btn,
+.btn-primary,
+.btn-secondary,
+.btn-danger {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: var(--icon-gap-md);
+  min-height: var(--app-control-height);
+  padding: 0 var(--portal-btn-padding-x);
+  border: var(--portal-btn-border-width) solid var(--portal-btn-border-color);
+  border-radius: var(--portal-btn-border-radius);
+  background: transparent;
+  color: var(--portal-btn-color);
+  font-family: var(--portal-btn-font-family);
+  font-size: var(--portal-btn-font-size);
+  font-weight: var(--portal-btn-font-weight);
+  letter-spacing: var(--portal-btn-letter-spacing);
+  text-transform: var(--portal-btn-text-transform);
+  text-decoration: none;
+  white-space: nowrap;
+  cursor: pointer;
+  box-shadow: none;
+  transition: var(--portal-btn-transition);
+}
+
+.btn-primary {
+  background: var(--portal-btn-hover-bg);
+  color: var(--portal-btn-hover-color);
+}
+
+.btn-primary:hover {
+  background: transparent;
+  color: var(--portal-btn-color);
+  text-decoration: none;
+}
+
+.btn-secondary:hover,
+.btn:not(.btn-primary):not(.btn-danger):not(.icon-btn):hover {
+  background: var(--portal-btn-hover-bg);
+  color: var(--portal-btn-hover-color);
+  border-color: var(--portal-btn-hover-border);
+  text-decoration: none;
+}
+
+.btn-danger {
+  color: var(--portal-btn-danger-color);
+  border-color: var(--portal-btn-danger-border);
+}
+
+.btn-danger:hover {
+  background: var(--portal-btn-danger-hover-bg);
+  color: var(--portal-btn-danger-hover-color);
+  border-color: var(--portal-btn-danger-hover-border);
+  text-decoration: none;
+}
+
+.btn-block {
+  display: flex;
+  width: 100%;
+}
+
+:is(.btn, .btn-primary, .btn-secondary, .btn-danger):disabled,
+:is(.btn, .btn-primary, .btn-secondary, .btn-danger)[aria-disabled="true"] {
+  opacity: var(--opacity-disabled);
+  cursor: not-allowed;
+  pointer-events: none;
+}
+
+/* Square icon-only button: no box until hovered, accent on hover. */
+.icon-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: var(--portal-btn-icon-size);
+  height: var(--portal-btn-icon-size);
+  padding: 0;
+  border: none;
+  background: transparent;
+  color: var(--color-text-primary);
+  cursor: pointer;
+  transition: color var(--transition-fast);
+}
+
+.icon-btn:hover,
+.icon-btn:focus-visible {
+  color: var(--color-accent);
+}
+
+.icon-btn svg.lucide {
+  width: var(--icon-size-lg);
+  height: var(--icon-size-lg);
+}
+
+/* Theme toggle shows the icon for the mode you would switch TO. */
+html[data-theme="light"] .theme-toggle-icon--light,
+html[data-theme="dark"] .theme-toggle-icon--dark {
+  display: none;
+}
+
+/* ============================================
+ * LABELS — Tier 4
+ * ============================================ */
+label,
+.field-label,
+.form-label,
+.filter-label,
+.label {
+  display: block;
+  margin-bottom: var(--portal-field-label-gap);
+  font-size: var(--label-font-size);
+  font-weight: var(--label-font-weight);
+  letter-spacing: var(--label-letter-spacing);
+  text-transform: var(--label-text-transform);
+  line-height: var(--line-height-tight);
+  color: var(--color-text-secondary);
+  --svg-stroke-width: var(--svg-stroke-width-bold);
+}
+
+html[data-theme="light"] :is(label, .field-label, .form-label, .filter-label, .label) {
+  color: var(--color-label-ink);
+}
+
+/* A checkbox and its text on one line — Tier 4b, sentence case. */
+.check-label,
+label:has(> input[type="checkbox"]) {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--icon-gap);
+  margin-bottom: 0;
+  font-size: var(--font-size-base);
+  font-weight: var(--font-weight-regular);
+  letter-spacing: var(--letter-spacing-normal);
+  text-transform: none;
+  line-height: var(--line-height-snug);
+  color: var(--color-text-primary);
+  cursor: pointer;
+}
+
+.check-list {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-1);
+  margin-bottom: var(--field-group-gap);
+}
+
+.helper-text {
+  display: block;
+  margin-top: var(--space-0-5);
+  font-size: var(--font-size-xs);
+  color: var(--color-text-tertiary);
+}
+
+/* ============================================
+ * FORM CONTROLS
+ * ============================================ */
+.form-group,
+.form-field,
+.filter-group {
+  display: flex;
+  flex-direction: column;
+  margin-bottom: var(--field-group-gap);
+}
+
+.form-group:last-child,
+.form-field:last-child,
+.filter-group:last-child {
+  margin-bottom: 0;
+}
+
+.filter-group > .form-input + .form-input {
+  margin-top: var(--space-0-5);
+}
+
+.form-input,
+.form-control,
+.form-select,
+.filter-input,
+.filter-select,
+.multiselect-input,
+.form-textarea {
+  width: 100%;
+  height: var(--app-control-height);
+  padding: 0 var(--space-1-5);
+  border: var(--portal-border);
+  background-color: var(--color-bg-primary);
+  color: var(--color-text-primary);
+  font-family: inherit;
+  font-size: var(--font-size-sm);
+  font-weight: var(--font-weight-medium);
+  line-height: var(--app-control-height);
+  caret-color: var(--color-text-primary);
+  box-sizing: border-box;
+  transition: border-color var(--transition-fast);
+}
+
+.form-textarea,
+textarea.form-input {
+  height: auto;
+  min-height: var(--min-height-textarea-lg);
+  padding: var(--space-1) var(--space-1-5);
+  line-height: var(--line-height-snug);
+  resize: vertical;
+}
+
+:is(.form-input, .form-control, .form-select, .filter-input, .filter-select, .multiselect-input, .form-textarea)::-moz-placeholder {
+  color: var(--portal-placeholder-color);
+  font-size: var(--search-font-size);
+  font-weight: var(--font-weight-regular);
+  letter-spacing: var(--letter-spacing-label);
+  text-transform: uppercase;
+  text-overflow: ellipsis;
+}
+
+:is(.form-input, .form-control, .form-select, .filter-input, .filter-select, .multiselect-input, .form-textarea)::placeholder {
+  color: var(--portal-placeholder-color);
+  font-size: var(--search-font-size);
+  font-weight: var(--font-weight-regular);
+  letter-spacing: var(--letter-spacing-label);
+  text-transform: uppercase;
+  text-overflow: ellipsis;
+}
+
+:is(.form-input, .form-control, .form-select, .filter-input, .filter-select, .multiselect-input, .form-textarea):is(:focus, :focus-visible) {
+  outline: none;
+  border-color: var(--color-accent);
+}
+
+/* Native select: no system chrome, the theme's caret. */
+.form-select,
+.filter-select,
+select.form-input {
+  -webkit-appearance: none;
+     -moz-appearance: none;
+          appearance: none;
+  padding-right: var(--space-4);
+  background-image: var(--app-select-caret);
+  background-repeat: no-repeat;
+  background-position: right var(--space-1-5) center;
+  background-size: var(--dropdown-caret-size);
+  cursor: pointer;
+}
+
+input[type="checkbox"] {
+  width: var(--space-2);
+  height: var(--space-2);
+  margin: 0;
+  accent-color: var(--color-text-primary);
+  cursor: pointer;
+}
+
+input[type="date"] {
+  filter: var(--filter-invert-controls);
+}
+
+/* ============================================
+ * CARDS + SECTIONS
+ * ============================================ */
+/* A card or section is a tile: it pads itself and draws a rule along its
+   bottom. Side rules come from the grid it sits in (layout.css), so a stack
+   of panels reads as one surface divided by rules, not boxes in a gutter. */
+.card,
+.section,
+.results,
+.preview-panel {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-2);
+  padding: var(--portal-card-padding) var(--portal-content-padding);
+  border: var(--portal-border);
+  border-width: 0 0 var(--border-width);
+  background-color: inherit;
+  box-shadow: none;
+}
+
+.results,
+.preview-panel {
+  border-width: var(--border-width);
+}
+
+.card-header,
+.section-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--space-2);
+  margin: 0;
+}
+
+/* Card title — Tier 2 */
+.card-header h3 {
+  margin: 0;
+  font-family: var(--font-family-mono);
+  font-size: var(--heading-card-font-size);
+  font-weight: var(--heading-card-font-weight);
+  letter-spacing: var(--heading-card-letter-spacing);
+  text-transform: var(--heading-text-transform);
+  color: var(--heading-card-color);
+}
+
+/* Section title — Tier 3 */
+.section-title,
+.panel-header,
+.results-header h2 {
+  margin: 0;
+  font-family: var(--font-family-mono);
+  font-size: var(--heading-section-font-size);
+  font-weight: var(--heading-section-font-weight);
+  letter-spacing: var(--heading-section-letter-spacing);
+  text-transform: var(--heading-text-transform);
+  color: var(--heading-section-color);
+}
+
+.section-description {
+  margin: 0;
+  color: var(--color-text-secondary);
+}
+
+.card-body {
+  margin: 0;
+  color: var(--color-text-primary);
+}
+
+.card-body > * + * {
+  margin-top: var(--space-2);
+}
+
+.preview-panel {
+  margin-top: var(--space-2);
+}
+
+/* ============================================
+ * TABLES — the portal's .data-table
+ * ============================================ */
+.table-container,
+.table-responsive,
+.results-table-wrapper {
+  width: 100%;
+  overflow-x: auto;
+}
+
+.results-table-wrapper {
+  max-height: var(--app-results-max-height);
+  overflow-y: auto;
+}
+
+.data-table,
+.table,
+.results-table {
+  width: 100%;
+  max-width: 100%;
+  border-collapse: collapse;
+  border-spacing: 0;
+  border: none;
+  background-color: inherit;
+  font-family: inherit;
+  font-size: var(--table-cell-font-size);
+  color: var(--table-cell-color);
+}
+
+:is(.data-table, .table, .results-table) thead tr {
+  height: var(--table-header-height);
+  border-bottom: var(--portal-border);
+}
+
+:is(.data-table, .table, .results-table) th {
+  padding: 0 var(--table-cell-padding-x);
+  text-align: left;
+  vertical-align: middle;
+  font-size: var(--table-header-font-size);
+  font-weight: var(--font-weight-medium);
+  letter-spacing: var(--table-header-letter-spacing);
+  text-transform: uppercase;
+  white-space: nowrap;
+  color: var(--table-header-color);
+  background: transparent;
+  border: none;
+}
+
+:is(.data-table, .table, .results-table) tbody tr {
+  height: var(--table-row-height);
+  transition: background var(--transition-faster);
+}
+
+:is(.data-table, .table, .results-table) td {
+  padding: var(--space-1) var(--table-cell-padding-x);
+  vertical-align: middle;
+  color: inherit;
+  background: transparent;
+  border: none;
+  border-bottom: var(--border-width-thin) solid var(--portal-alpha-white-10);
+}
+
+:is(.data-table, .table, .results-table) tbody tr:hover td {
+  background: var(--color-bg-hover);
+}
+
+:is(.data-table, .table, .results-table) tbody tr.abnormal td:first-child {
+  box-shadow: var(--app-edge-mark) var(--color-danger);
+}
+
+:is(.data-table, .table, .results-table) thead {
+  position: sticky;
+  top: 0;
+  z-index: var(--z-index-elevated);
+  background: var(--color-bg-primary);
+}
+
+.results-table tbody tr.result-row[style*="display: none"] {
+  display: none !important;
+}
+
+.table-note,
+.no-data {
+  margin: var(--space-2) 0 0;
+  text-align: center;
+  font-size: var(--font-size-sm);
+  color: var(--color-text-secondary);
+}
+
+.no-data {
+  padding: var(--space-5) var(--space-2);
+}
+
+/* ============================================
+ * BADGES — coloured text, no fill
+ * ============================================ */
+.badge,
+.status-badge,
+.abnormal-badge {
+  display: inline-flex;
+  align-items: center;
+  font-size: var(--font-size-xs);
+  font-weight: var(--font-weight-semibold);
+  letter-spacing: var(--letter-spacing-label);
+  text-transform: uppercase;
+  white-space: nowrap;
+  background: transparent;
+  border: none;
+}
+
+.badge-primary {
+  color: var(--color-text-primary);
+}
+
+.badge-secondary {
+  color: var(--color-text-secondary);
+}
+
+.abnormal-badge,
+.badge-danger {
+  color: var(--color-danger);
+}
+
+.badge-success {
+  color: var(--status-completed);
+}
+
+/* ============================================
+ * ALERTS + STATUS MESSAGES
+ * ============================================ */
+.alert,
+.error,
+.success,
+.status-message {
+  padding: var(--space-1) var(--space-2);
+  border-left: var(--border-width-thick) solid var(--color-text-secondary);
+  font-size: var(--font-size-sm);
+}
+
+.status-message {
+  margin-top: var(--space-1-5);
+}
+
+.status-message:empty {
+  display: none;
+}
+
+.error,
+.alert-error,
+.alert-danger,
+.status-message.is-error {
+  border-left-color: var(--color-danger);
+  color: var(--color-danger);
+}
+
+.success,
+.alert-success,
+.status-message.is-success {
+  border-left-color: var(--status-completed);
+  color: var(--status-completed);
+}
+
+.alert-info {
+  border-left-color: var(--color-info);
+}
+
+.alert-warning {
+  border-left-color: var(--color-text-warning);
+  color: var(--color-text-warning);
+}
+
+/* ============================================
+ * LOADING
+ * ============================================ */
+.loading {
+  display: none;
+  padding: var(--space-5) var(--space-2);
+  text-align: center;
+  color: var(--color-text-secondary);
+}
+
+.loading.show {
+  display: block;
+}
+
+.spinner {
+  width: var(--space-5);
+  height: var(--space-5);
+  margin: 0 auto var(--space-2);
+  border: var(--border-width-thick) solid var(--portal-alpha-white-20);
+  border-top-color: var(--color-accent);
+  border-radius: var(--border-radius-full);
+  animation: spin var(--animation-spinner);
+}
+
+@keyframes spin {
+  to { transform: rotate(360deg); }
+}
+
+/* ============================================
+ * MULTISELECT
+ * ============================================ */
+.multiselect-wrapper {
+  position: relative;
+  display: block;
+  width: 100%;
+}
+
+.multiselect-tags {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-0-5);
+}
+
+.multiselect-tags:not(:empty) {
+  margin-bottom: var(--space-0-5);
+}
+
+.multiselect-tag {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-1);
+  height: var(--space-3);
+  padding: 0 var(--space-1);
+  background: var(--color-text-primary);
+  color: var(--color-bg-primary);
+  font-size: var(--font-size-xs);
+  letter-spacing: var(--letter-spacing-label);
+  text-transform: uppercase;
+}
+
+.multiselect-tag-remove {
+  cursor: pointer;
+  font-weight: var(--font-weight-bold);
+  opacity: var(--opacity-subtle);
+}
+
+.multiselect-tag-remove:hover {
+  opacity: 1;
+}
+
+.multiselect-input-wrapper {
+  position: relative;
+}
+
+.multiselect-input {
+  padding-left: var(--app-control-icon-pad);
+  padding-right: calc(var(--icon-size-xl) + var(--space-1));
+  cursor: text;
+}
+
+.multiselect-search-icon,
+.dropdown-indicator {
+  position: absolute;
+  top: 50%;
+  transform: translateY(-50%);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: var(--icon-size-md);
+  height: var(--icon-size-md);
+  color: var(--color-text-tertiary);
+  pointer-events: none;
+  z-index: var(--z-index-content);
+}
+
+.multiselect-search-icon {
+  left: var(--search-icon-inset);
+}
+
+.dropdown-indicator {
+  right: var(--space-1-5);
+}
+
+:is(.multiselect-search-icon, .dropdown-indicator) svg {
+  width: var(--icon-size-md);
+  height: var(--icon-size-md);
+}
+
+.multiselect-dropdown {
+  position: absolute;
+  top: 100%;
+  left: 0;
+  right: 0;
+  z-index: var(--z-index-dropdown);
+  display: none;
+  max-height: var(--app-dropdown-max-height);
+  overflow-y: auto;
+  margin-top: calc(-1 * var(--border-width));
+  border: var(--dropdown-border-width) solid var(--dropdown-border-color);
+  background: var(--dropdown-bg);
+  box-shadow: none;
+}
+
+.multiselect-dropdown.show,
+.multiselect-wrapper:focus-within .multiselect-dropdown {
+  display: block !important;
+  visibility: visible !important;
+  opacity: 1 !important;
+}
+
+.multiselect-option {
+  display: flex;
+  align-items: center;
+  gap: var(--icon-gap);
+  min-height: var(--dropdown-item-height);
+  padding: var(--dropdown-padding-y) var(--dropdown-padding-x);
+  font-size: var(--font-size-sm);
+  cursor: pointer;
+  transition: background var(--transition-faster);
+}
+
+.multiselect-option:hover {
+  background: var(--color-bg-hover);
+}
+
+.multiselect-option.selected {
+  background: var(--color-bg-active);
+}
+
+.multiselect-option--empty {
+  justify-content: center;
+  padding: var(--space-2);
+  color: var(--color-text-secondary);
+  cursor: default;
+}
+
+.multiselect-option--empty:hover {
+  background: transparent;
+}
+
+.multiselect-option input[type="checkbox"] {
+  margin: 0;
+}
+
+.multiselect-option-icon {
+  display: inline-flex;
+  align-items: center;
+  width: var(--icon-size-md);
+  height: var(--icon-size-md);
+  flex-shrink: 0;
+  color: var(--color-text-tertiary);
+}
+
+.multiselect-option-icon svg {
+  width: var(--icon-size-md);
+  height: var(--icon-size-md);
+}
+
+/* ============================================
+ * RESULTS (query page)
+ * ============================================ */
+.results-container {
+  margin-top: var(--portal-stack-gap);
+}
+
+.results-container .results-container {
+  margin-top: 0;
+}
+
+.results-container:empty {
+  margin-top: 0;
+}
+
+.results-header {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--space-2);
+  margin-bottom: var(--space-2);
+  padding-bottom: var(--space-2);
+  border-bottom: var(--portal-border);
+}
+
+.results-controls {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--space-2);
+}
+
+.results-controls .filter-input {
+  width: auto;
+  min-width: var(--search-input-max-width);
+}
+
+.results-count {
+  font-size: var(--font-size-sm);
+  color: var(--color-text-secondary);
+}
+
+/* ============================================
+ * WORKSPACE PANELS (sources page)
+ * ============================================ */
+.panel-container {
+  display: flex;
+  flex: 1 1 auto;
+  min-height: 0;
+  overflow: hidden;
+}
+
+.panel {
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+  overflow: hidden;
+}
+
+.panel-header {
+  flex-shrink: 0;
+  padding: var(--space-1-5) var(--content-gutter);
+  border-bottom: var(--portal-border);
+}
+
+.panel-content {
+  flex: 1;
+  overflow-y: auto;
+  padding: var(--content-gutter);
+}
+
+.panel-splitter {
+  flex-shrink: 0;
+  width: var(--divider-size);
+  background: var(--color-border-primary);
+  cursor: col-resize;
+  transition: background var(--transition-fast);
+}
+
+.panel-splitter:hover,
+.panel-splitter.active {
+  background: var(--color-accent);
+}
+
+.panel-collapsed {
+  width: 0;
+  padding: 0;
+  margin: 0;
+  overflow: hidden;
+}
+
+.panel-resizing {
+  -webkit-user-select: none;
+     -moz-user-select: none;
+          user-select: none;
+}
+
+.sources-panel-left {
+  width: var(--app-sources-list-width);
+  min-width: var(--app-sources-list-min-width);
+}
+
+.sources-panel-middle {
+  flex: 1;
+  min-width: var(--app-sources-detail-min-width);
+}
+
+.sources-panel-right {
+  width: var(--app-sources-findings-width);
+  min-width: var(--app-sources-findings-min-width);
+}
+
+.source-filters {
+  display: flex;
+  flex-direction: column;
+  gap: var(--field-group-gap);
+  padding: var(--content-gutter);
+  border-bottom: var(--portal-border);
+}
+
+.source-filters .filter-group {
+  margin-bottom: 0;
+}
+
+.sources-list {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+}
+
+.sources-list-item {
+  padding: var(--space-1) var(--space-1-5);
+  overflow-wrap: anywhere;
+  border-bottom: var(--border-width-thin) solid var(--portal-alpha-white-10);
+  font-size: var(--font-size-sm);
+  cursor: pointer;
+  transition: background var(--transition-faster);
+}
+
+.sources-list-item:hover {
+  background: var(--color-bg-hover);
+}
+
+.sources-list-item.active {
+  background: var(--color-bg-active);
+  box-shadow: var(--app-edge-mark) var(--color-accent);
+}
+
+.source-details {
+  line-height: var(--line-height-relaxed);
+}
+
+.source-text {
+  max-height: var(--app-source-text-max-height);
+  overflow-y: auto;
+  padding: var(--content-gutter);
+  border: var(--portal-input-border);
+  font-family: var(--font-family-mono);
+  font-size: var(--font-size-sm);
+  line-height: var(--line-height-relaxed);
+  white-space: pre-wrap;
+  word-wrap: break-word;
+}
+
+.findings-list {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+}
+
+.finding-item {
+  margin-bottom: var(--space-1);
+  padding: var(--space-1) var(--space-1-5);
+  border: var(--portal-input-border);
+}
+
+.finding-type {
+  margin-bottom: var(--space-0-5);
+  font-size: var(--font-size-xs);
+  font-weight: var(--label-font-weight);
+  letter-spacing: var(--label-letter-spacing);
+  text-transform: uppercase;
+  color: var(--color-text-secondary);
+}
+
+.finding-text {
+  font-size: var(--font-size-sm);
+  line-height: var(--line-height-normal);
+}
+
+.finding-date {
+  margin-top: var(--space-0-5);
+  font-size: var(--font-size-xs);
+  color: var(--color-text-tertiary);
+}
+
+@media (max-width: 767px) {
+  .panel-container {
+    flex-direction: column;
+    height: auto;
+  }
+
+  .sources-panel-left,
+  .sources-panel-middle,
+  .sources-panel-right {
+    width: 100%;
+    min-width: 100%;
+    max-width: 100%;
+  }
+
+  .panel-splitter {
+    display: none;
+  }
+
+  .results-controls .filter-input {
+    min-width: 0;
+    width: 100%;
+  }
+}
+
+/* ============================================
+ * DROPDOWN — the portal's PortalDropdown, for a native <select>
+ * static/js/dropdown.ts wraps select.form-select / select.filter-select in
+ * this. The native select stays in the DOM (hidden) for forms and scripts;
+ * the trigger and menu are one box: the shared edge is drawn zero times.
+ * ============================================ */
+.dropdown {
+  position: relative;
+  width: 100%;
+}
+
+.dropdown-native {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  opacity: 0;
+  pointer-events: none;
+}
+
+.dropdown-trigger {
+  display: flex;
+  align-items: center;
+  gap: var(--dropdown-caret-gap);
+  width: 100%;
+  height: var(--app-control-height);
+  padding: 0 var(--dropdown-padding-x);
+  border: var(--dropdown-border-width) solid var(--dropdown-border-color);
+  background: var(--dropdown-bg);
+  color: var(--color-text-primary);
+  font-family: inherit;
+  font-size: var(--font-size-sm);
+  font-weight: var(--font-weight-medium);
+  text-align: left;
+  cursor: pointer;
+  transition: border-color var(--transition-fast);
+}
+
+.dropdown-trigger:focus-visible {
+  border-color: var(--color-accent);
+  box-shadow: none;
+}
+
+.dropdown-trigger[data-state="open"] {
+  border-bottom-color: transparent;
+  transition: none;
+}
+
+.dropdown-value {
+  flex: 1 1 auto;
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.dropdown-caret {
+  flex-shrink: 0;
+  margin-left: auto;
+  width: var(--dropdown-caret-size);
+  height: var(--dropdown-caret-size);
+  color: currentColor;
+  transition: transform var(--transition-fast);
+}
+
+.dropdown-trigger[data-state="open"] .dropdown-caret {
+  transform: rotate(180deg);
+}
+
+.dropdown-menu {
+  position: absolute;
+  top: 100%;
+  left: 0;
+  right: 0;
+  z-index: var(--z-index-dropdown);
+  margin: calc(-1 * var(--dropdown-border-width)) 0 0;
+  padding: 0;
+  list-style: none;
+  max-height: var(--app-dropdown-max-height);
+  overflow-y: auto;
+  border: var(--dropdown-border-width) solid var(--dropdown-border-color);
+  border-top: none;
+  background: var(--dropdown-bg);
+  box-shadow: none;
+}
+
+.dropdown-item {
+  display: flex;
+  align-items: center;
+  gap: var(--icon-gap);
+  min-height: var(--dropdown-item-height);
+  padding: var(--dropdown-padding-y) var(--dropdown-padding-x);
+  font-size: var(--font-size-sm);
+  color: var(--color-text-primary);
+  cursor: pointer;
+  -webkit-user-select: none;
+     -moz-user-select: none;
+          user-select: none;
+  outline: none;
+  transition: background-color var(--transition-faster);
+}
+
+.dropdown-item:hover,
+.dropdown-item:focus {
+  background: var(--color-bg-hover);
+  box-shadow: none;
+}
+
+.dropdown-item[aria-selected="true"] {
+  background: var(--color-bg-active);
+}
+
+/* ============================================
+ * STAT CARD (overview) — the portal's stat-card tier
+ * ============================================ */
+.stat-card {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-0-5);
+  padding: var(--portal-card-padding) var(--portal-content-padding);
+  border: var(--portal-border);
+  color: inherit;
+  text-decoration: none;
+  transition: background var(--transition-faster);
+}
+
+a.stat-card:hover {
+  background: var(--color-bg-hover);
+  text-decoration: none;
+}
+
+.stat-label {
+  font-size: var(--label-font-size);
+  font-weight: var(--label-font-weight);
+  letter-spacing: var(--label-letter-spacing);
+  text-transform: uppercase;
+  color: var(--color-text-secondary);
+}
+
+.stat-value {
+  font-size: var(--font-size-2xl);
+  font-weight: var(--font-weight-bold);
+  line-height: var(--line-height-tight);
+}
+
+.stat-hint {
+  font-size: var(--font-size-sm);
+  color: var(--color-text-secondary);
+}
+
+.stat-hint--alert {
+  color: var(--color-danger);
+}
+
+/* ============================================
+ * LIST ROWS (overview panels)
+ * ============================================ */
+.list {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+}
+
+.list-item {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-0-25);
+  padding: var(--space-1) 0;
+  border-bottom: var(--border-width-thin) solid var(--portal-alpha-white-10);
+  color: inherit;
+  text-decoration: none;
+}
+
+.list-item:last-child {
+  border-bottom: none;
+}
+
+a.list-item:hover {
+  color: var(--color-accent);
+  text-decoration: none;
+}
+
+.list-item-title {
+  font-size: var(--font-size-sm);
+  overflow-wrap: anywhere;
+}
+
+.list-item-meta {
+  font-size: var(--font-size-xs);
+  color: var(--color-text-tertiary);
+}
+
+/* A row that is a link to somewhere in the app: icon, title, one line. */
+.action-link {
+  display: flex;
+  align-items: center;
+  gap: var(--icon-gap-md);
+  padding: var(--space-1) 0;
+  border-bottom: var(--border-width-thin) solid var(--portal-alpha-white-10);
+  color: inherit;
+  text-decoration: none;
+  transition: color var(--transition-fast);
+}
+
+.action-link:last-child {
+  border-bottom: none;
+}
+
+.action-link:hover {
+  color: var(--color-accent);
+  text-decoration: none;
+}
+
+.action-link svg.lucide {
+  width: var(--icon-size-lg);
+  height: var(--icon-size-lg);
+}
+
+.action-link-text {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-0-25);
+}
+
+.action-link-title {
+  font-size: var(--font-size-sm);
+  font-weight: var(--font-weight-bold);
+  letter-spacing: var(--letter-spacing-label);
+  text-transform: uppercase;
+}
+
+.action-link-hint {
+  font-size: var(--font-size-xs);
+  color: var(--color-text-secondary);
+}
+}
+
+/* 5. Page structure: header, nav, footer, grids, page-level rows */
+
+@layer layouts{
+
+/**
+ * ===============================================
+ * LAYOUT — page structure
+ * ===============================================
+ * @file static/css/layout.css  (@layer layouts)
+ *
+ * Header, navigation, the page shell, the footer curtain, grids and the row
+ * patterns pages compose with. Nothing in here paints a component; that is
+ * components.css.
+ *
+ * THE SHELL
+ * The header is sticky. Below it, <main> is exactly the rest of the viewport
+ * and does not scroll as a whole: its page header is a fixed bar and its
+ * body holds the page, with any region that can outgrow it scrolling inside
+ * itself. The footer is the portfolio site's curtain: a band pinned behind
+ * the page at the bottom of the viewport. The document is taller than the
+ * viewport by exactly the band's height, so scrolling to the end slides the
+ * page up off the band (no-bhad-codes components/footer.css: "the curtain
+ * never moves — the page slides up off it").
+ */
+
+/* ============================================
+ * HEADER + NAVIGATION
+ * ============================================ */
+.main-header {
+  position: sticky;
+  top: 0;
+  z-index: var(--z-index-nav-header);
+  width: 100%;
+  min-height: var(--app-header-height);
+  background: var(--color-bg-primary);
+  border-bottom: var(--portal-border);
+}
+
+.header-container {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--space-3);
+  width: 100%;
+  padding: var(--space-1-5) var(--portal-page-gutter);
+}
+
+.header-brand {
+  flex: 0 0 auto;
+}
+
+.brand-link {
+  text-decoration: none;
+  color: inherit;
+}
+
+.site-title {
+  margin: 0;
+  font-family: var(--font-family-mono);
+  font-size: var(--heading-card-font-size);
+  font-weight: var(--heading-card-font-weight);
+  letter-spacing: var(--heading-card-letter-spacing);
+  text-transform: var(--heading-text-transform);
+  color: var(--heading-card-color);
+}
+
+.header-actions {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+}
+
+/* Hamburger: hidden until the nav becomes a drawer (see RESPONSIVE). */
+.nav-toggle {
+  display: none;
+}
+
+.nav-toggle[aria-expanded="false"] .nav-toggle-icon--close,
+.nav-toggle[aria-expanded="true"] .nav-toggle-icon--open {
+  display: none;
+}
+
+.main-nav {
+  flex: 0 1 auto;
+  min-width: 0;
+}
+
+.nav-list {
+  display: flex;
+  flex-wrap: nowrap;
+  align-items: center;
+  gap: var(--space-0-5);
+  list-style: none;
+  margin: 0;
+  padding: 0;
+}
+
+.nav-item {
+  margin: 0;
+}
+
+.nav-link {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--icon-gap);
+  min-height: var(--app-control-height);
+  padding: 0 var(--space-1-5);
+  font-size: var(--font-size-sm);
+  font-weight: var(--font-weight-medium);
+  letter-spacing: var(--letter-spacing-label);
+  text-transform: uppercase;
+  text-decoration: none;
+  color: var(--color-text-secondary);
+  transition: color var(--transition-fast);
+}
+
+.nav-link:hover {
+  color: var(--color-text-primary);
+  text-decoration: none;
+}
+
+.nav-link.active {
+  color: var(--color-accent);
+  box-shadow: inset 0 calc(-1 * var(--border-width)) 0 var(--color-accent);
+}
+
+/* ============================================
+ * PAGE SHELL
+ * ============================================ */
+body[data-page="ledger"] {
+  /* The scroll room that reveals the curtain — nothing else scrolls the
+     document. */
+  padding-bottom: var(--footer-curtain-height);
+}
+
+.main-content {
+  position: relative;
+  z-index: var(--z-index-content); /* above the fixed curtain */
+  display: flex;
+  flex-direction: column;
+  flex: 0 0 auto;
+  height: calc(100dvh - var(--app-header-height));
+  width: 100%;
+  overflow: hidden;
+  background: var(--color-bg-primary);
+}
+
+/* Tier 1 — the container's own top bar, not a floating heading. */
+.page-header {
+  flex-shrink: 0;
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  gap: var(--space-0-5) var(--space-3);
+  margin: 0;
+  padding: var(--space-2) var(--portal-content-padding);
+  border-bottom: var(--portal-border);
+}
+
+.page-header h2 {
+  margin: 0;
+  font-size: var(--heading-page-font-size);
+  font-weight: var(--heading-page-font-weight);
+  color: var(--heading-page-color);
+}
+
+.page-description {
+  margin: 0;
+  color: var(--color-text-secondary);
+}
+
+.page-description:empty {
+  display: none;
+}
+
+/* The page. No gutters at the root: panels tile the body edge to edge and
+   carry their own internal padding (components.css). */
+.page-body {
+  display: flex;
+  flex: 1 1 auto;
+  flex-direction: column;
+  min-height: 0;
+  overflow: auto;
+}
+
+/* Split-panel pages (documents, sources) hold their own scrolling. */
+.page-body--flush {
+  overflow: hidden;
+}
+
+.container {
+  display: flex;
+  flex: 1 1 auto;
+  flex-direction: column;
+  min-height: 0;
+  width: 100%;
+}
+
+/* Loose content that is not a panel gets the panel's padding. */
+.quick-actions-row,
+.results-container:not(:empty),
+.loading.show {
+  padding: var(--portal-content-padding);
+}
+
+/* The one block on a page that takes the remaining height and scrolls
+   inside itself. */
+.is-fill {
+  flex: 1 1 auto;
+  min-height: 0;
+  overflow: hidden;
+}
+
+.is-fill > :is(.table-container, .card-body, .panel-content) {
+  flex: 1 1 auto;
+  min-height: 0;
+  overflow: auto;
+}
+
+/* ============================================
+ * FOOTER CURTAIN
+ * Rules follow no-bhad-codes components/footer.css. The band is fixed to
+ * the viewport bottom beneath the page; body's bottom padding above gives
+ * the scroll that uncovers it.
+ * ============================================ */
+.footer {
+  position: fixed;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  z-index: var(--z-index-base);
+  height: var(--footer-curtain-height);
+}
+
+.footer-curtain {
+  height: 100%;
+  background: var(--footer-curtain-bg);
+  color: var(--footer-curtain-text);
+  overflow: hidden;
+  /* Clear the iOS home indicator without shortening the band. */
+  padding-bottom: env(safe-area-inset-bottom, 0px);
+}
+
+.footer-curtain__inner {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  align-items: end;
+  gap: var(--space-3);
+  height: 100%;
+  padding: var(--curtain-inset) var(--portal-page-gutter);
+}
+
+.footer-curtain__note {
+  margin: 0;
+  max-width: var(--form-section-max-width);
+  font-size: var(--font-size-xs);
+  letter-spacing: var(--letter-spacing-label);
+  text-transform: uppercase;
+  color: var(--footer-curtain-text-muted);
+}
+
+/* Two cells on a diagonal: the credit top-left, the lockup bottom-right. */
+.footer-curtain__mark {
+  display: grid;
+  grid-template-columns: auto auto;
+  gap: var(--curtain-mark-gap);
+  min-width: 0;
+  justify-self: end;
+}
+
+.footer-curtain__lockup {
+  grid-column: 2;
+  grid-row: 2;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+}
+
+.footer-curtain__brand {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+  min-width: 0;
+  color: inherit;
+  text-decoration: none;
+  transition: opacity var(--transition-mouse) ease;
+}
+
+.footer-curtain__brand:hover,
+.footer-curtain__brand:focus-visible {
+  opacity: var(--opacity-subtle);
+  text-decoration: none;
+}
+
+/* Solid black silhouette, partially inverted onto the band so it lands on
+   the off-white the type uses rather than true white. */
+.footer-curtain__avatar {
+  display: block;
+  height: var(--curtain-avatar-height);
+  width: auto;
+  margin-right: calc(var(--curtain-avatar-trim) * -1);
+  filter: invert(0.878);
+}
+
+/* Stacked NO / BHAD / CODES: min-content wraps one word per line. */
+.footer-curtain__wordmark {
+  width: -moz-min-content;
+  width: min-content;
+  margin: var(--space-1) 0 0;
+  font-family: var(--font-family-acme);
+  font-weight: var(--font-weight-semibold);
+  font-size: var(--curtain-wordmark-size);
+  line-height: 0.95;
+  letter-spacing: var(--letter-spacing-wide);
+  text-transform: uppercase;
+  color: var(--footer-curtain-text);
+}
+
+.footer-curtain__credit,
+.footer-curtain__year {
+  margin: 0;
+  line-height: var(--line-height-snug);
+  white-space: nowrap;
+  color: var(--footer-curtain-text-muted);
+}
+
+.footer-curtain__credit {
+  grid-column: 1;
+  grid-row: 1;
+  justify-self: start;
+  margin-bottom: calc(var(--curtain-credit-pull) * -1);
+  font-size: var(--curtain-credit-size);
+  line-height: var(--curtain-credit-leading);
+  letter-spacing: var(--letter-spacing-widest);
+  text-transform: uppercase;
+}
+
+.footer-curtain__year {
+  margin-top: calc(var(--curtain-year-lift) * -1);
+  margin-left: calc(
+    var(--curtain-avatar-width) - var(--curtain-avatar-trim) + var(--space-2) +
+      var(--curtain-year-nudge)
+  );
+  font-size: var(--curtain-year-size);
+  text-align: left;
+}
+
+/* ============================================
+ * GRIDS + ROWS
+ * ============================================ */
+.grid {
+  display: grid;
+  flex-shrink: 0;
+  gap: 0;
+}
+
+/* Cells draw only their right and bottom rules; the last column drops the
+   right one so the grid never doubles a rule or draws one at the edge. */
+.grid > :is(.card, .section, .stat-card) {
+  border-width: 0 var(--border-width) var(--border-width) 0;
+}
+
+.grid-2 > :is(.card, .section, .stat-card):nth-child(2n),
+.grid-3 > :is(.card, .section, .stat-card):nth-child(3n) {
+  border-right-width: 0;
+}
+
+.grid-2 {
+  grid-template-columns: repeat(2, 1fr);
+}
+
+.grid-3 {
+  grid-template-columns: repeat(3, 1fr);
+}
+
+.grid-auto {
+  grid-template-columns: repeat(auto-fit, minmax(var(--aside-width-narrow), 1fr));
+}
+
+/* Overview stat tiles: one row that tiles the width. */
+.stat-grid {
+  display: grid;
+  flex-shrink: 0;
+  grid-template-columns: repeat(auto-fit, minmax(var(--table-col-md), 1fr));
+}
+
+.stat-grid > .stat-card {
+  border-width: 0 var(--border-width) var(--border-width) 0;
+}
+
+.stat-grid > .stat-card:last-child {
+  border-right-width: 0;
+}
+
+/* A card grid that is the whole page: it takes the remaining height, its
+   rows share it, and a card that outgrows its row scrolls inside. */
+.grid--fill {
+  flex: 1 1 auto;
+  grid-auto-rows: minmax(0, 1fr);
+  min-height: 0;
+}
+
+.grid--fill > .card {
+  min-height: 0;
+}
+
+.grid--fill > .card > .card-body {
+  min-height: 0;
+  overflow: auto;
+}
+
+.quick-actions-row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-2);
+  padding: var(--portal-content-padding);
+}
+
+/* Filter controls in a row, buttons aligned to the controls' baseline. */
+.filters-form {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(var(--table-col-lg), 1fr));
+  gap: var(--space-2);
+  align-items: end;
+}
+
+/* The submit and clear buttons are one cell, so they never split across
+   rows when the grid wraps. */
+.filter-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-1);
+}
+
+/* A checkbox filter has no control box; its row stands the control height
+   so the checkbox sits on the same line as the inputs beside it. */
+.filter-group--check {
+  justify-content: center;
+  min-height: var(--app-control-height);
+}
+
+/* When the label wraps, the box stays on its first line — the portal's
+   status-dot arithmetic: top-aligned, then offset to the centre of one
+   line box. */
+.filter-group--check .check-label {
+  align-items: flex-start;
+}
+
+.filter-group--check input[type="checkbox"] {
+  margin-top: calc((1lh - var(--space-2)) / 2);
+}
+
+/* A label and its control on one line. */
+.form-row {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--space-1-5);
+  margin-bottom: var(--field-group-gap);
+}
+
+.form-row .field-label {
+  margin-bottom: 0;
+}
+
+.form-row :is(.form-input, .dropdown) {
+  width: auto;
+  flex: 0 1 var(--app-inline-input-width);
+}
+
+/* ============================================
+ * RESPONSIVE
+ * ============================================ */
+
+/* Below 1300px the eight links no longer fit on one row beside the brand
+   and the actions, so the nav becomes a drawer under the header, opened by
+   the hamburger (static/js/nav.ts). The breakpoint is --wide-down; nav.ts
+   carries the same figure. */
+@media (max-width: 1300px) {
+  .nav-toggle {
+    display: inline-flex;
+  }
+
+  .main-nav {
+    position: fixed;
+    top: var(--app-header-height);
+    right: 0;
+    bottom: 0;
+    left: 0;
+    z-index: var(--z-index-nav-menu);
+    display: none;
+    overflow-y: auto;
+    background: var(--color-bg-primary);
+  }
+
+  .main-nav.is-open {
+    display: block;
+  }
+
+  .nav-list {
+    flex-direction: column;
+    align-items: stretch;
+    gap: 0;
+  }
+
+  .nav-link {
+    min-height: var(--space-7);
+    padding: 0 var(--portal-page-gutter);
+    font-size: var(--font-size-base);
+    border-bottom: var(--portal-input-border);
+  }
+
+  .nav-link.active {
+    box-shadow: var(--app-edge-mark) var(--color-accent);
+  }
+}
+
+/* Tablet and down: three-up grids become two-up. */
+@media (max-width: 991px) {
+  .grid-3 {
+    grid-template-columns: repeat(2, 1fr);
+  }
+
+  .grid-3 > :is(.card, .section, .stat-card):nth-child(3n) {
+    border-right-width: var(--border-width);
+  }
+
+  .grid-3 > :is(.card, .section, .stat-card):nth-child(2n) {
+    border-right-width: 0;
+  }
+}
+
+/* Phones: single-column grids, split panels stack, the band stacks its
+   note over the mark. */
+@media (max-width: 767px) {
+  .grid-2,
+  .grid-3,
+  .stat-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .grid > :is(.card, .section, .stat-card) {
+    border-right-width: 0;
+  }
+
+  .grid--fill {
+    grid-auto-rows: auto;
+  }
+
+  .grid--fill > .card > .card-body {
+    overflow: visible;
+  }
+
+  .page-body--flush {
+    overflow: auto;
+  }
+
+  .doc-layout {
+    grid-template-columns: minmax(0, 1fr);
+    flex: 0 0 auto;
+  }
+
+  .doc-nav {
+    border-right: none;
+    border-bottom: var(--portal-border);
+  }
+
+  .form-row :is(.form-input, .dropdown) {
+    flex-basis: 100%;
+  }
+
+  .footer-curtain__inner {
+    grid-template-columns: minmax(0, 1fr);
+    align-items: start;
+    gap: var(--space-2);
+  }
+
+  .footer-curtain__note {
+    order: 2;
+  }
+
+  .footer-curtain__mark {
+    justify-self: center;
+  }
+}
+
+/* The narrowest phones: the credit and the lockup stack in one column. */
+@media (max-width: 500px) {
+  .footer-curtain__mark {
+    grid-template-columns: auto;
+  }
+
+  .footer-curtain__credit {
+    grid-column: 1;
+    grid-row: 1;
+    justify-self: end;
+    text-align: left;
+  }
+
+  .footer-curtain__lockup {
+    grid-column: 1;
+    grid-row: 2;
+  }
+}
+}
+
+/* 6. Page-specific: rendered documents, query results, sources workspace */
+
+@layer pages{
+
+/**
+ * ===============================================
+ * PAGES — page-specific styling
+ * ===============================================
+ * @file static/css/pages.css  (@layer pages)
+ *
+ * The rendered documents (profile, summary), and prose that lands inside a
+ * card body or a source detail. Nothing here is a reusable component.
+ */
+
+/* ============================================
+ * PROSE SURFACES
+ * Rendered markdown (profile, summary), instructional card bodies, and the
+ * source detail column all carry running text with real lists and links.
+ * ============================================ */
+/* ============================================
+ * DOCUMENT LAYOUT
+ * A rendered document beside a sticky nav of its sections. The nav is
+ * filled by static/js/doc-nav.ts and stays hidden when the document has
+ * fewer than two sections, in which case the body simply spans the row.
+ * ============================================ */
+.doc-layout {
+  display: grid;
+  flex: 1 1 auto;
+  grid-template-columns: var(--app-doc-nav-width) minmax(0, 1fr);
+  align-items: stretch;
+  min-height: 0;
+}
+
+.doc-layout:has(> .doc-nav[hidden]) {
+  grid-template-columns: minmax(0, 1fr);
+}
+
+/* One split panel: the nav and the body share the layout's border and
+   meet at a single rule, the way the sources workspace does. */
+.doc-nav {
+  display: flex;
+  flex-direction: column;
+  min-height: 0;
+  border-right: var(--portal-border);
+}
+
+.doc-nav-title {
+  padding: var(--space-1-5) var(--content-gutter);
+  border-bottom: var(--portal-border);
+  font-size: var(--heading-section-font-size);
+  font-weight: var(--heading-section-font-weight);
+  letter-spacing: var(--heading-section-letter-spacing);
+  text-transform: var(--heading-text-transform);
+}
+
+.doc-nav-list {
+  list-style: none;
+  margin: 0;
+  padding: var(--space-1) 0;
+  flex: 1 1 auto;
+  min-height: 0;
+  overflow-y: auto;
+}
+
+.doc-nav-link {
+  display: block;
+  padding: var(--space-0-5) var(--content-gutter);
+  font-family: var(--portal-subtab-family);
+  font-size: var(--font-size-sm);
+  font-weight: var(--portal-subtab-weight);
+  letter-spacing: var(--portal-subtab-spacing);
+  text-transform: var(--portal-subtab-transform);
+  color: var(--color-text-secondary);
+  text-decoration: none;
+  transition: color var(--transition-fast);
+}
+
+.doc-nav-link:hover {
+  color: var(--color-text-primary);
+  text-decoration: none;
+}
+
+.doc-nav-link.is-active {
+  color: var(--color-accent);
+  box-shadow: var(--app-edge-mark) var(--color-accent);
+}
+
+.profile-content,
+.summary-content {
+  min-width: 0;
+  min-height: 0;
+  overflow-y: auto;
+  padding: var(--portal-card-padding);
+}
+
+:is(.profile-content, .summary-content, .card-body, .source-details, .preview-panel) p {
+  margin: 0 0 var(--space-2);
+  line-height: var(--line-height-relaxed);
+}
+
+:is(.profile-content, .summary-content, .card-body, .source-details, .preview-panel) :is(ul, ol) {
+  margin: 0 0 var(--space-2);
+  padding-left: var(--space-3);
+}
+
+:is(.profile-content, .summary-content, .card-body, .source-details, .preview-panel) ul {
+  list-style: disc;
+}
+
+:is(.profile-content, .summary-content, .card-body, .source-details, .preview-panel) ol {
+  list-style: decimal;
+}
+
+:is(.profile-content, .summary-content, .card-body, .source-details, .preview-panel) li {
+  margin-bottom: var(--space-0-5);
+  line-height: var(--line-height-relaxed);
+}
+
+:is(.profile-content, .summary-content, .card-body, .source-details, .preview-panel) a {
+  color: var(--color-accent);
+  text-decoration: none;
+}
+
+:is(.profile-content, .summary-content, .card-body, .source-details, .preview-panel) a:hover {
+  text-decoration: underline;
+}
+
+/* Document headings: page title, then the card and section tiers. */
+:is(.profile-content, .summary-content) h1 {
+  margin: 0 0 var(--space-3);
+  font-size: var(--font-size-2xl);
+  font-weight: var(--font-weight-bold);
+  line-height: var(--line-height-tight);
+}
+
+:is(.profile-content, .summary-content, .preview-panel) h2 {
+  margin: var(--space-5) 0 var(--space-2);
+  font-size: var(--heading-card-font-size);
+  font-weight: var(--heading-card-font-weight);
+  letter-spacing: var(--heading-card-letter-spacing);
+  text-transform: var(--heading-text-transform);
+  scroll-margin-top: var(--space-10);
+}
+
+:is(.profile-content, .summary-content, .preview-panel, .card-body) :is(h3, h4) {
+  margin: var(--space-3) 0 var(--space-1);
+  font-size: var(--heading-section-font-size);
+  font-weight: var(--heading-section-font-weight);
+  letter-spacing: var(--heading-section-letter-spacing);
+  text-transform: var(--heading-text-transform);
+}
+
+:is(.profile-content, .summary-content) :is(h1, h2, h3):first-child {
+  margin-top: 0;
+}
+
+:is(.profile-content, .summary-content) table {
+  width: 100%;
+  margin: 0 0 var(--space-2);
+  border-collapse: collapse;
+  font-size: var(--font-size-sm);
+}
+
+:is(.profile-content, .summary-content) th {
+  padding: var(--space-0-5) var(--space-1);
+  text-align: left;
+  font-weight: var(--font-weight-medium);
+  letter-spacing: var(--table-header-letter-spacing);
+  text-transform: uppercase;
+  color: var(--table-header-color);
+  border-bottom: var(--portal-border);
+}
+
+:is(.profile-content, .summary-content) td {
+  padding: var(--space-0-5) var(--space-1);
+  vertical-align: top;
+  border-bottom: var(--border-width-thin) solid var(--portal-alpha-white-10);
+}
+
+/* Citations */
+:is(.profile-content, .summary-content) sup.citation {
+  font-size: var(--font-size-2xs);
+  vertical-align: super;
+}
+
+:is(.profile-content, .summary-content) :is(.cite-num, .cite-link) {
+  color: var(--color-accent);
+  font-weight: var(--font-weight-semibold);
+  text-decoration: none;
+}
+
+:is(.profile-content, .summary-content) .cite-link:hover {
+  text-decoration: underline;
+}
+
+:is(.profile-content, .summary-content) :is(.citation.expandable, .cite-compact) {
+  cursor: pointer;
+}
+
+:is(.profile-content, .summary-content) .cite-expanded {
+  display: inline;
+}
+
+:is(.profile-content, .summary-content) ol > li {
+  font-size: var(--font-size-sm);
+}
+
+:is(.profile-content, .summary-content) ol > li[id^="ref-"] {
+  scroll-margin-top: var(--space-10);
+}
+}
+
+/* 9. Utilities */
+
+@layer utilities{
+
+/**
+ * ===============================================
+ * UTILITIES
+ * ===============================================
+ * @file static/css/utilities.css  (@layer utilities)
+ *
+ * Atomic helpers only. Highest layer, so they win over everything layered.
+ */
+
+.text-center { text-align: center; }
+.text-muted { color: var(--color-text-secondary); }
+.text-small { font-size: var(--font-size-sm); }
+
+.mt-0 { margin-top: 0; }
+.mt-1 { margin-top: var(--space-1); }
+.mt-2 { margin-top: var(--space-2); }
+.mt-3 { margin-top: var(--space-3); }
+
+.mb-0 { margin-bottom: 0; }
+.mb-1 { margin-bottom: var(--space-1); }
+.mb-2 { margin-bottom: var(--space-2); }
+.mb-3 { margin-bottom: var(--space-3); }
+
+.no-print { }
+
+@media print {
+  .no-print { display: none !important; }
+}
+}
+
+/* Surface palette — unlayered, last. Keys off body[data-page="ledger"]. */
+
+/**
+ * ===============================================
+ * PORTAL THEME - SINGLE SOURCE OF TRUTH
+ * ===============================================
+ * @file src/design-system/tokens/portal-theme.css
+ *
+ * Portal-specific CSS variable overrides.
+ * All portal theme values are defined here — this is the ONLY place.
+ *
+ * LOAD ORDER: Imported UNLAYERED in admin.css and client.css only.
+ * NOT in @layer tokens. This ensures portal overrides beat all layered styles.
+ * Main site pages do NOT load this file — complete style isolation.
+ *
+ * Strategy: portal overrides the same semantic variables the main site uses
+ * (--color-text-*, --color-bg-*, --color-border-*) within portal scope.
+ * Components use one consistent variable name everywhere.
+ *
+ * DARK/LIGHT MODE PHILOSOPHY:
+ * The ONLY values that differ between dark and light mode are the two primary
+ * colors: --color-bg-primary and --color-text-primary. All other colors are
+ * derived from those two via color-mix() and CSS variable references.
+ * The light mode block (below) contains only those two overrides.
+ *
+ * Portal-specific extensions (no main-site equivalent):
+ * - --color-bg-raised/elevated/prominent/hover/readonly (extra bg ramp levels)
+ * - --color-hover-bg/text/icon/border (hover state colors)
+ * - --portal-alpha-* (alpha utility colors)
+ * - --portal-border (border shorthand)
+ * - --portal-radius-pill (brutalist pill = 0, differs from --border-radius-full)
+ *
+ * Includes:
+ * - Dark mode (default): black background, white text
+ * - Light mode overrides: off-white background, off-black text
+ */
+
+/* ============================================
+ * PORTAL LIGHT MODE (DEFAULT) - INVERTED DISCOTHÈQUE
+ * Portal light mode — inherits bg from design system (colors.css).
+ * Uses body[data-page] for higher specificity than :root in colors.css
+ * ============================================ */
+/* ----------------------------------------
+ * OPACITY TOKENS
+ * ----------------------------------------
+ * A plain numeric scale — nothing about it is portal-specific. It sat inside
+ * body[data-page="admin"|"client"], so a page that was not the dashboard could
+ * not read it, and the auth pages had to claim data-page="ledger" (and the
+ * dashboard's entire 456-line theme with it) to style a password field.
+ */
+:root {
+  /* The portal's 1px rule. It lived in body[data-page="admin"|"client"], so a
+     page outside the dashboard carried `border: var(--portal-border)` that
+     resolved to nothing — which is why the activation card had no border. */
+  --portal-border: var(--border-width) solid var(--color-border-primary);
+  --opacity-faint: 0.3;
+  --opacity-inactive: 0.4;
+  --opacity-disabled: 0.5;
+  --opacity-muted: 0.6;
+  --opacity-subtle: 0.7;
+  --opacity-secondary: 0.8;
+  --opacity-high: 0.9;
+  --opacity-completed: 0.5; /* Completed/done items — same as disabled */
+}
+
+
+body[data-page="admin"],
+body[data-page="ledger"] {
+  /* Portal uses mono font everywhere — set on body so Radix portals inherit */
+  font-family: var(--font-family-mono);
+  background-color: var(--color-bg-primary);
+
+  /* ----------------------------------------
+   * PRIMARY COLORS — solid hex, no mixing
+   * ---------------------------------------- */
+  --color-text-primary: #333333;
+  --color-bg-primary: var(--color-off-white);
+  --color-bg-hover: var(--color-gray-100);
+
+  /* ----------------------------------------
+   * TEXT COLORS — derived from primaries
+   * ---------------------------------------- */
+  /* A real ramp again, 2026-09-13. These three were all aliased to
+     --color-text-primary (88cb0b24, 2026-03-08), so .text-secondary — 165 call
+     sites — rendered identically to .text-primary and nothing in the portal
+     could be de-emphasised. The complaint that started it was field labels
+     reading the same weight as their values; the bold half of that is already
+     fixed, this is the colour half.
+
+     Measured against this block's own ground, --color-off-white #e0e0e0:
+
+         --color-text-primary    #333333   9.57:1
+         --color-text-secondary  #525252   5.92:1   <- the step
+         gray-500                #737373   3.59:1   fails AA
+
+     **Which is why tertiary and muted follow secondary rather than stepping
+     down again.** The portal's background ramp is deliberately flat — every
+     surface is #e0e0e0 — and on that ground gray-500 is the first step below
+     secondary and it does not clear 4.5:1 for normal text. Three names and two
+     colours is still one name too many, but it is the honest maximum here: a
+     third level needs a lighter surface to sit on, not a lighter grey. */
+  --color-text-secondary: var(--color-gray-600);
+  --color-text-tertiary: var(--color-text-secondary);
+  --color-text-muted: var(--color-text-secondary);
+  --color-text-inverse: var(--color-bg-primary);
+
+  /* ----------------------------------------
+   * BACKGROUND RAMP — flat design: all steps equal bg-primary
+   * ---------------------------------------- */
+  --color-bg-secondary: var(--color-bg-primary);
+  --color-bg-tertiary: var(--color-bg-primary);
+  --color-bg-raised: var(--color-bg-primary);
+  --color-bg-elevated: var(--color-bg-primary);
+  --color-bg-prominent: var(--color-bg-primary);
+  --color-bg-readonly: var(--color-bg-primary);
+  /* Active/pressed state — slightly stronger than hover */
+  --color-bg-active: color-mix(in srgb, var(--color-bg-primary), var(--color-text-primary) 15%);
+
+  /* ----------------------------------------
+   * BORDER SYSTEM — derived from primaries
+   * ---------------------------------------- */
+  --color-border-primary: var(--color-text-primary);
+  --color-border-secondary: var(--color-text-primary);
+
+  /* Portal border shorthand — convenience alias.
+     A custom property substitutes its var()s where it is *declared*, not where
+     it is read, so the :root copy resolves against the site's grey border and
+     stays grey however the portal redefines --color-border-primary below it.
+     The portal's 97 users of this token need it declared here, in the scope
+     that decides the colour. */
+  --portal-border: var(--border-width) solid var(--color-border-primary);
+  /* Input border — 1px via root alias, since inputs are nested inside bordered panels */
+  --portal-input-border: var(--border-width-thin) solid var(--color-border-primary);
+
+  /* ----------------------------------------
+   * ALPHA COLORS
+   * portal-alpha-white-* = text-primary at various opacities.
+   * Name is historical — these are always "foreground text at X opacity".
+   * portal-alpha-black-* = true black overlays (shadows, scrims); never inverted.
+   * ---------------------------------------- */
+  --portal-alpha-white-02: color-mix(in srgb, var(--color-text-primary), transparent 98%);
+  --portal-alpha-white-05: color-mix(in srgb, var(--color-text-primary), transparent 95%);
+  --portal-alpha-white-08: color-mix(in srgb, var(--color-text-primary), transparent 92%);
+  --portal-alpha-white-10: color-mix(in srgb, var(--color-text-primary), transparent 90%);
+  --portal-alpha-white-15: color-mix(in srgb, var(--color-text-primary), transparent 85%);
+  --portal-alpha-white-20: color-mix(in srgb, var(--color-text-primary), transparent 80%);
+  --portal-alpha-white-30: color-mix(in srgb, var(--color-text-primary), transparent 70%);
+  /* Portal-only, and the prefix means it. Three site sheets used to reach for
+     these behind an `rgba()` fallback — which is what actually rendered, since
+     this file is not in the site bundle. They were the last entries in the
+     bundle contract's "living on a fallback" list, and five permanent benign
+     entries are how a sixth real one hides. The site sheets carry the `rgba()`
+     directly now; if the site ever wants a shared alpha ramp it should get one
+     in tokens/colors.css rather than borrow the portal's. */
+  --portal-alpha-black-05: color-mix(in srgb, black, transparent 95%);
+  --portal-alpha-black-10: color-mix(in srgb, black, transparent 90%);
+  --portal-alpha-black-30: color-mix(in srgb, black, transparent 70%);
+  --portal-alpha-black-50: color-mix(in srgb, black, transparent 50%);
+  --portal-alpha-black-60: color-mix(in srgb, black, transparent 40%);
+  --portal-alpha-black-80: color-mix(in srgb, black, transparent 20%);
+
+  /* Semantic color alphas - for colored highlights/backgrounds */
+  --portal-alpha-primary-08: rgba(var(--color-accent-rgb), 0.08);
+  --portal-alpha-primary-10: rgba(var(--color-accent-rgb), 0.1);
+
+  /* ----------------------------------------
+   * FOCUS STATE COLORS
+   * ---------------------------------------- */
+  --focus-ring-color: var(--color-accent);
+  --focus-ring-width: 1px;
+  --focus-ring-offset: var(--space-0);
+  /* Thin 1px ring — inherits element's own border visually, no thick glow */
+  --focus-ring: 0 0 0 var(--focus-ring-width) var(--focus-ring-color);
+  /* Thick 2px outline-based focus ring — for interactive controls (buttons, inputs) */
+  /* Standard outline-offset for focus indicators */
+  /* Inset outline-offset — draws focus ring inside element bounds (e.g. details cards) */
+  --focus-ring-offset-inset: -2px;
+
+  /* 12px 24px — on 8px grid */
+  --portal-panel-padding-x: var(--space-3); /* 24px — on 8px grid */
+
+  /* ----------------------------------------
+   * LAYOUT TOKENS
+   * ---------------------------------------- */
+  /* The page's horizontal rhythm: the gutter either side of the content, the
+     gap between cards, and the space the content keeps from the sidebar are
+     all this one value, so they cannot drift apart.
+
+     32 at desktop, stepping down as the viewport does (Noelle, 2026-09-13:
+     greater spacing at default, tighter on compact views). A 32px gutter on a
+     phone spends a tenth of the screen on empty margin, so it narrows rather
+     than holding a number that only makes sense wide. The steps are on the
+     ramp: 32 → 24 → 16. */
+  --portal-page-gutter: var(--space-4); /* 32px */
+
+  /* The padding INSIDE a panel — the space between its edge and the cards,
+     rows and states it holds. 16 is the base; it opens up as the page does,
+     because at 1600px a card sitting 16px off its panel's border reads as
+     cramped while the same 16 is right on a laptop (Noelle, 2026-09-13).
+     Steps 16 / 32 / 40 — the first pass at 16 / 24 / 32 was still tight.
+
+     Deliberately NOT --content-gutter, which this used to spend. That token
+     also sets the sidebar's own inset and the header row's, and growing it
+     would pull the header avatar out of line with the nav icons below it. */
+  --portal-content-padding: var(--space-2); /* 16px */
+
+  /* The portal has no display face. --heading-font-family is Acme on :root —
+     the site's heading type — and `.portal h3` reads it, so every card heading
+     in both portals was set in the marketing site's display face (Noelle,
+     2026-09-14: "should not use acme, i wont to remove acme from portal").
+     base/typography.css already excludes the portal from the site's own
+     h1-h3 rule; this closes the same leak coming through the token instead.
+     The portal is one typeface, the body face, at different weights. */
+  --heading-font-family: var(--font-family-mono);
+
+  /* A card's OWN padding — the space between its border and its contents.
+     Separate from --portal-content-padding, which is the space between a panel
+     and the cards inside it: the two want different amounts, and a card that
+     pads itself as much as the panel pads it reads as hollow. */
+  --portal-card-padding: var(--space-2); /* 16px */
+
+  --portal-section-gap: var(--space-3); /* 24px */
+  --portal-stack-gap: var(--space-5); /* 40px — see spacing.css */
+  --portal-table-stack-gap: var(--space-8); /* 64px — see spacing.css */
+  --space-neg-px: -1px; /* Negative 1px — tab bottom-border overlap alignment */
+  --transform-scale-press: 0.95; /* Scale-down on button press (touch interaction) */
+
+  /* ----------------------------------------
+   * FIELD/LABEL SPACING
+   * ---------------------------------------- */
+  /* --field-label-value-gap lives in design-system/tokens/typography.css
+     with the rest of the label contract. */
+  --field-group-gap: var(--space-1-5); /* 12px */
+  --portal-field-group-gap: var(
+    --field-group-gap
+  ); /* alias — used in project-detail and modal layouts */
+  /* icon + gap = ~36px */
+
+  /* The heading tier tokens live in design-system/tokens/typography.css —
+     the public site spends them too (its h4 is a table title). */
+
+  /* ----------------------------------------
+   * WEIGHT SCALE — TWO STEPS, NOT FOUR
+   *
+   * fonts.css loads two Inconsolata faces: Regular (400) and Bold (700).
+   * CSS font matching therefore resolves 500 to the 400 face and 600 to the
+   * 700 face, so "medium" and "semibold" are not weights the portal can
+   * render — they are 52 and 49 stylesheet declarations asking for something
+   * that silently becomes regular or bold. The tokens are re-pointed at what
+   * actually renders so the stylesheets tell the truth.
+   *
+   * To get the middle steps back, add Inconsolata Medium and SemiBold faces
+   * to base/fonts.css and delete these two lines.
+   * ---------------------------------------- */
+  --font-weight-medium: var(--font-weight-regular);
+  --font-weight-semibold: var(--font-weight-bold);
+
+  /* ----------------------------------------
+   * ICON STROKE — A WEIGHT OF THE TEXT, NOT A CONSTANT
+   *
+   * Portal icons are sized 1em (see the root `.portal svg.lucide` rule), so a
+   * Lucide icon's stroke and the adjacent text's stem are directly
+   * comparable: at stroke-width W in a 24 viewBox the stroke renders at
+   * W/24 em. Measured off the shipped faces, an Inconsolata stem is 0.083em
+   * regular and 0.115em bold — which is 2.0 and 2.75 in stroke-width terms.
+   * So an icon inherits its stroke from the weight of the text it sits in,
+   * rather than the flat 2.5 that read heavier than every regular label.
+   * ---------------------------------------- */
+  --svg-stroke-width: 2;
+
+  /* ----------------------------------------
+   * SEARCH SURFACES
+   * The global header trigger and the inline .search-bar are different
+   * elements — a button and an input — and had drifted to different icon
+   * insets, different icon-to-text gaps and different text sizes. These three
+   * tokens are the contract both read, so the two read as one control.
+   * ---------------------------------------- */
+
+  /* ----------------------------------------
+   * DETAIL HEADER
+   * The page title on a detail view. It is a token because the gap between
+   * the title and its status pill is expressed against it — see
+   * portal-detail-header.css.
+   * ---------------------------------------- */
+  --detail-title-size: clamp(1.5rem, 4vw, 2rem);
+
+  /* The subtab type tokens live in design-system/tokens/typography.css —
+     the design system page's jump nav is the site's version of them. */
+
+  /* ----------------------------------------
+   * PORTAL HEADER / SIDEBAR LAYOUT TOKENS
+   * ---------------------------------------- */
+  --portal-header-height: calc(
+    2 * var(--space-5) + var(--space-1) + 2 * var(--space-2)
+  ); /* 2 rows (40px) + gap (8px) + branding row padding (32px) = 120px */
+  --portal-header-top: var(--space-2-5); /* 20px */
+  --portal-header-height-line: var(--space-4); /* 32px */
+  /* 18px */
+  --portal-page-top: var(--space-3);
+  --portal-page-bottom: var(--space-6);
+  /* 24 + icon + 24 = 68px, stated as the sum so the space around a collapsed
+     icon stays tied to `--sidebar-icon-size` rather than to a number that
+     drifts from it.
+
+     It was 56px, which centred a 20px glyph at 18px a side — the one uneven
+     gap in a row that is otherwise the page step. Matching the page exactly at
+     32 was tried and read as too much: a strip that is mostly empty space
+     looks like a mistake rather than a margin, because there is no content in
+     it to justify the room. One step down keeps the increase and loses the
+     hole (Noelle, 2026-09-13). */
+  --sidebar-collapsed-width: calc(2 * var(--space-3) + var(--sidebar-icon-size)); /* 68px */
+
+  /* ----------------------------------------
+   * FORM / FIELD TOKENS
+   * ---------------------------------------- */
+  --portal-placeholder-color: var(--color-text-tertiary);
+  --action-bar-item-height: var(--portal-btn-icon-size); /* 36px */
+  /* Gap between adjacent icon/action buttons (edit, delete, save, close clusters) */
+  --action-btn-gap: var(--space-1); /* 8px */
+
+  /* ----------------------------------------
+   * TABLE TOKENS
+   * ---------------------------------------- */
+  --table-header-height: var(--space-4);
+  --table-row-height: var(--space-5);
+  --table-cell-padding-x: clamp(var(--space-1), 2vw, var(--space-2));
+  /* Row action icons: the air BETWEEN THE BOXES. The buttons are 24px squares
+     around a 14px glyph, so the boxes' own inset already puts 10px of clear
+     space between two glyphs with no gap at all — that is the separation, and
+     it is set once here for every table in both portals. Adding to it was what
+     read as loose: 4px here made 14px between glyphs and "the spacing needs
+     to be tighter" (Noelle, 2026-09-15). The crowding step lives in
+     portal-tables.css, beside the other things a narrowing table gives up. */
+  --table-actions-gap: 0px;
+  /* The gap a badge keeps from the text it follows — one number, portal
+     wide. The Badge component's own doc promised this was "decided once, in
+     CSS" and it never was: a badge sat 4px from a card heading, 16 from a
+     project title and 24 from a contact's name, and the invoices header
+     carried --space-3 as a stand-in (Noelle, 2026-09-15: "Badges need a set
+     gap from the text they follow, portal wide"). --space-3 is the value
+     that stand-in chose and Noelle read as right ("spacied like badge gap"). */
+  --badge-gap: var(--space-3);
+  --table-header-font-size: var(--font-size-sm);
+  --table-cell-font-size: var(--font-size-sm);
+  --table-header-letter-spacing: var(--letter-spacing-label);
+  --table-header-color: var(--color-text-secondary);
+  --table-cell-color: var(--color-text-primary);
+  --table-identity-max-width: calc(var(--space-base) * 27.5);
+  --table-truncate-max-width: calc(var(--space-base) * 37.5);
+  --table-checkbox-width: var(--space-5);
+  --table-cell-max-width: calc(var(--space-base) * 25);
+  /* The primary column hugs its content and stops here. 44 * 8px = 352px fits
+     the longest thing these columns carry on ONE line — a full email
+     ("clementine.carter-rutledge@demo.nobhad.codes" ~334px) or a project
+     title — so nothing wraps or truncates at a normal desktop width (Noelle:
+     "i dont want the emails to wrap", 2026-09-17). A rarer, longer string (a
+     six-name contact) ellipsizes; its hover card carries the whole thing. */
+  --table-name-max-width: calc(var(--space-base) * 44);
+  /* The ceiling on a SHORT-VALUE column — type, status, date, amount, count.
+     It is there to stop one of them growing into the primary column's space,
+     not to cut the values themselves, and at 120px it was cutting them: the
+     traffic sessions table renders "desktop · Chrome" in a .type-col, which
+     needs about 135px at this size, and it truncated to "desktop · C…" while
+     the visitor column beside it held several hundred pixels of slack (Noelle,
+     2026-09-15: "vistor column width is HUGE while device is turncated!!!").
+
+     192px is roughly 22 characters of the portal's mono at --font-size-sm —
+     past every value these columns actually carry, and still a ceiling. */
+  --table-compact-max-width: calc(var(--space-base) * 24);
+  --table-icon-size: var(--icon-size-md);
+  --table-sort-indicator-size: calc(var(--icon-size-xs) - var(--border-width));
+  --table-pagination-btn-size: var(--space-3-5); /* 28px */
+  --table-col-xs: calc(var(--space-base) * 7.5);
+  --table-col-sm: calc(var(--space-base) * 12.5);
+  --table-col-md: calc(var(--space-base) * 18.75);
+  --table-col-lg: calc(var(--space-base) * 25);
+  --table-col-xl: calc(var(--space-base) * 35);
+
+  /* ----------------------------------------
+   * DROPDOWN TOKENS
+   * ---------------------------------------- */
+  --dropdown-padding-x: var(--space-1-5);
+  --dropdown-padding-y: var(--space-1);
+  --dropdown-item-height: var(--space-4); /* 32px — fixed-height dropdown rows */
+  /* Left padding on a checkbox or radio item, clearing the indicator that sits
+     absolutely at the row's left edge. It was written as a fallback at both
+     use sites — `var(--dropdown-indicator-inset, 28px)` against a property
+     nothing declared — so the literal was the value, twice, and could not
+     answer to anything. 28px is --space-3-5 on the scale. */
+  --dropdown-indicator-inset: var(--space-3-5);
+  --status-dropdown-width: var(--space-20); /* 160px */
+  --portal-dropdown-min-width: var(--status-dropdown-width); /* default trigger min-width */
+  /* The status trigger's resting border: the ground it sits on, so the border
+     reserves its width invisibly until hover or open. A details panel sets it
+     to the panel's own ground (admin/modal-system.css). */
+  --dropdown-trigger-resting-color: var(--color-bg-primary);
+
+
+  /* ----------------------------------------
+   * BLUR TOKENS
+   * ---------------------------------------- */
+  --blur-backdrop: 4px; /* Overlay backdrops: keyboard shortcuts, command palette, confirm dialog */
+  --blur-modal: 8px; /* Full modal overlays */
+
+  /* ----------------------------------------
+   * LAYOUT / ASIDE WIDTH TOKENS
+   * ---------------------------------------- */
+  --aside-width-narrow: 240px;
+  --aside-width-medium: 280px;
+  --aside-width-wide: 320px;
+
+  /* ----------------------------------------
+   * CONTROL HEIGHT TOKENS
+   * ---------------------------------------- */
+  --min-height-textarea: 60px; /* Min height for multiline inputs and reply boxes */
+
+  --chart-height: 320px;
+  --chart-placeholder-min-height: 200px;
+
+  /* Group: Progress Bar (portal overrides base 16px) */
+  --progress-bar-height: 12px;
+  --progress-bar-height-sm: 8px;
+  --progress-bar-height-lg: 16px;
+
+  /* Group: Kanban (shared portal-kanban.css) */
+  --kanban-board-min-height: 500px;
+  --kanban-column-min-width: 200px;
+  --kanban-column-offset: 320px;
+  --kanban-content-min-height: 120px;
+  --hover-lift-sm: -2px;
+
+  --kanban-skeleton-height: 256px;
+  --tasks-textarea-min-height: 60px;
+  --tasks-progress-track-max-width: 200px;
+
+  /* Group: Configuration */
+  --config-overview-grid-min-width: 180px;
+  --config-textarea-min-height: 72px;
+  --config-field-label-min-width: 64px;
+
+  /* Group: Project Detail */
+  --pd-truncate-filename-max-width: 300px;
+
+  /* Group: Modal / Details Panel */
+  --detail-row-label-width: 140px;
+  --detail-message-max-height: 200px;
+  --details-panel-width: 500px;
+
+  /* Group: Modal widths (portal additions) */
+  --modal-width-xl: 1000px;
+  /* Modal viewport constraints */
+  --modal-max-height: 90vh; /* Default max-height for portal modals */
+  --modal-edge-padding: 2rem; /* Horizontal edge clearance for modal calc() values */
+
+  /* Group: Files */
+  --files-folder-panel-width: 220px;
+  --files-browser-min-height: 300px;
+  --files-filter-group-min-width: 140px;
+  --files-filter-date-min-width: 120px;
+  --files-action-btn-min-width: 90px;
+  --files-filter-select-max-width: 300px;
+  /* The folder rail on the Files screen. 200 is the floor, for the narrowest
+     width at which it is shown at all (--tablet, 768px); it steps up with the
+     viewport rather than staying at a phone-adjacent number on a wide screen,
+     where a 200px rail beside a full-width table reads as an offcut
+     (Noelle, 2026-09-13). Folder names are the thing it has to fit, and they
+     are the part that was truncating first. */
+  --portal-files-sidebar-width: 200px;
+  --files-grid-item-min-width: 150px;
+  --files-folder-tree-max-height: 150px;
+
+  /* Group: Inline Edit */
+  --inline-edit-date-min-width: 130px;
+  --inline-edit-label-min-width: 140px;
+  --inline-edit-date-icon-size: 13px; /* Calendar icon inside compact date input */
+  --inline-edit-compact-padding-x: 6px; /* Horizontal padding for compact row inputs */
+  --inline-edit-required-margin: 2px; /* Left gap before required asterisk */
+  --inline-edit-compact-height: 22px; /* Compact override height (page-layer) */
+
+  /* Small action/pagination buttons */
+  --icon-container-lg: var(--space-6); /* 48px — large icon/status containers */
+  --modal-input-height: var(--space-6); /* 48px — modal dropdown trigger height */
+  --inline-pill-height: 18px; /* Inline badge/pill height */
+
+  /* Group: Help Center */
+  --help-right-column-min-height: 400px; /* Article column floor height */
+  /* One height for the help panel in every view. Without it the panel is as
+     tall as whichever article is open, so switching articles resizes the whole
+     table under the cursor. Clamped: never shorter than the column floor,
+     never taller than a screenful. */
+  --help-grid-height: clamp(var(--help-right-column-min-height), 55vh, 760px);
+  --help-contact-min-width: 200px; /* Contact card text block min-width */
+
+  /* Group: Progress / Indicators */
+  --progress-track-height: var(--space-0-5); /* 4px — horizontal progress bars */
+  --status-dot-size: 6px; /* Inline status indicator dot */
+
+  /* ----------------------------------------
+   * NOTIFICATION BELL TOKENS
+   * ---------------------------------------- */
+  --notification-badge-size: var(--icon-size-md); /* 16px — corner count badge */
+  --notification-badge-offset: 2px; /* tight corner offset */
+  --notification-unread-dot-size: var(--space-1); /* 8px — inline unread dot */
+  --notification-dropdown-gap: var(--space-1); /* 8px gap above dropdown */
+  --notification-dropdown-width: 320px;
+  --notification-dropdown-max-height: 420px;
+  --notification-list-max-height: 360px; /* inner scroll area */
+  --notification-dropdown-mobile-bleed: 10px; /* overhang on xs screens */
+
+  /* ----------------------------------------
+   * COMMAND PALETTE TOKENS
+   * ---------------------------------------- */
+  --cmd-palette-max-width: calc(var(--space-base) * 70); /* 560px */
+  /* 20px */
+  --cmd-palette-item-icon-size: var(--icon-size-md); /* 16px */
+
+  /* ----------------------------------------
+   * SEMANTIC COLOR TOKENS — derived from primaries
+   * Portal inverts the neutral scale: 100 = near-bg, 900 = near-text.
+   * ---------------------------------------- */
+  --color-neutral-100: color-mix(in srgb, var(--color-bg-primary), var(--color-text-primary) 10%);
+  --color-neutral-200: color-mix(in srgb, var(--color-bg-primary), var(--color-text-primary) 4%);
+  --color-neutral-300: var(--color-bg-primary);
+  --color-neutral-400: color-mix(in srgb, var(--color-bg-primary), var(--color-text-primary) 47%);
+  --color-neutral-500: color-mix(in srgb, var(--color-bg-primary), var(--color-text-primary) 63%);
+  --color-neutral-600: color-mix(in srgb, var(--color-bg-primary), var(--color-text-primary) 75%);
+  --color-neutral-700: color-mix(in srgb, var(--color-bg-primary), var(--color-text-primary) 88%);
+  --color-neutral-800: color-mix(in srgb, var(--color-bg-primary), var(--color-text-primary) 96%);
+  --color-neutral-900: var(--color-text-primary);
+  --color-dark: var(--color-text-primary);
+  --color-light: var(--color-bg-primary);
+  --color-nav-text: var(--color-text-primary);
+  /* App-level aliases — derived from primaries */
+  --app-color-primary: var(--color-text-primary);
+
+  /* Form variables — derived from primaries */
+  --form-input-border: var(--color-text-primary);
+  --form-input-placeholder: var(--color-neutral-400); /* ~47% between bg and text */
+
+  /* ----------------------------------------
+   * DROPDOWN COMPONENT DEFAULTS
+   * Context variables — override per-component via selector scope.
+   * Defaults provide safe fallback when no context is set.
+   * ---------------------------------------- */
+  --dropdown-bg: var(--color-bg-secondary);
+  --dropdown-border-color: var(--color-border-primary);
+  --dropdown-border-width: var(--border-width);
+  --dropdown-radius: var(--border-radius-sm);
+
+  /* ----------------------------------------
+   * FILTER TOKENS — theme-aware native control filters
+   * Light mode: native controls are already visible, no filter needed.
+   * Dark mode override below sets invert(1) so dark native controls
+   * (e.g. date picker calendar icon) become visible on dark backgrounds.
+   * ---------------------------------------- */
+  --filter-invert-controls: none;
+
+  /* ----------------------------------------
+   * UTILITY ALIASES
+   * Map non-standard token names used in component CSS.
+   * ---------------------------------------- */
+  --portal-bg: var(--color-bg-primary); /* background context alias */
+  /* Tailwind ring utility alias */
+  --card-grid-gap: var(--space-4); /* configurable grid gap default */
+  /* compact mobile table text */
+}
+
+/* ============================================
+ * PORTAL DARK MODE - DISCOTHÈQUE THEME
+ * Near-black background, white text.
+ * ============================================ */
+html[data-theme="dark"] body[data-page="admin"],
+html[data-theme="dark"] body[data-page="ledger"] {
+  /* Same near-black dim the site uses in dark mode. The site's dark block is
+     scoped away from the portal, so without this the portal's backdrops would
+     resolve to the light value and a modal would open over a page barely
+     darker than itself. */
+  --nav-overlay-rgb: 0, 0, 0;
+  /* LIGHTER than light mode's 0.7, not darker. A scrim's job is to push the
+     page back from what is on top of it, and how much dimming that needs
+     depends on what it is dimming: on a near-white page 0.7 black is a strong
+     veil, and on a near-black one it is almost the page's own colour, so the
+     same number reads as heavier the darker the ground gets. 0.9 blacked the
+     page out and 0.8 still did (Noelle, 2026-09-14: "overlay is too dark on
+     dark mode"). At 0.6 the page stays legible behind the blur, which is what
+     tells you the panel is over something rather than instead of it. */
+  --nav-overlay-alpha: 0.6;
+  /* Redeclared here because a custom property substitutes its var()s where
+     it is declared: --overlay-backdrop is composed on :root, and the site's
+     dark block redefines the two ingredients on <html> — so the :root value
+     was already rgba(0,0,0,0.9) before this block's alpha could be read. */
+  --overlay-backdrop: rgba(var(--nav-overlay-rgb), var(--nav-overlay-alpha));
+  --color-text-primary: #ffffff;
+  /* The same step, inverted. --color-text-secondary is declared in the light
+     block as var(--color-gray-600) — a fixed grey, not a derivation — so unlike
+     the old alias it does NOT follow --color-text-primary into white here, and
+     #525252 on #171717 is 1.9:1. It has to be restated.
+
+         --color-text-primary    #ffffff  17.93:1
+         --color-text-secondary  #d4d4d4  12.09:1   <- the step
+         gray-500                #737373   3.78:1   fails AA
+
+     gray-300 rather than gray-400 (7.11:1) because it matches the light theme's
+     perceptual drop; gray-400 reads as a much bigger jump on a dark ground. */
+  --color-text-secondary: var(--color-gray-300);
+  --color-bg-primary: #171717;
+  --color-bg-hover: color-mix(in srgb, var(--color-bg-primary), var(--color-text-primary) 6%);
+  --filter-invert-controls: invert(1);
+}
+
+/* ============================================
+ * ADMIN-ONLY TOKENS
+ * Activity type colors for admin client detail
+ * ============================================ */
+[data-page="admin"] {
+  --activity-email-color: var(--app-color-info);
+  --activity-invoice-color: var(--app-color-success);
+  --activity-project-color: var(--color-admin-purple);
+  --activity-file-color: var(--app-color-warning);
+  --activity-message-color: var(--color-cyan);
+  --activity-contact-color: var(--color-pink);
+  --activity-status-color: var(--app-color-warning);
+}
+
+/* ============================================
+ * HTML ELEMENT - PORTAL DARK MODE
+ * Must define --color-bg-primary on html itself since html does not have
+ * data-page="admin" — without this, html inherits the main-site :root value.
+ * ============================================ */
+html:has(body[data-page="admin"]),
+html:has(body[data-page="ledger"]) {
+  --color-bg-primary: var(--portal-neutral-0); /* Portal dark = black */
+  background-color: var(--color-bg-primary);
+  height: 100%;
+}
+
+/* ============================================
+ * HTML ELEMENT - PORTAL LIGHT MODE
+ * ============================================ */
+html[data-theme="light"]:has(body[data-page="admin"]),
+html[data-theme="light"]:has(body[data-page="ledger"]) {
+  --color-bg-primary: var(--color-off-white); /* Portal light = #e0e0e0 */
+  background-color: var(--color-bg-primary);
+}
+
+/* Portal component primitives (checkbox, panel header, active-icon
+   colours, root icon sizing, icon-text defaults, menu trigger) moved
+   to portal/shared/portal-primitives.css on 2026-09-16 — imported
+   unlayered right after this file. This file is the palette only. */
+
+/* ============================================
+ * RESPONSIVE CARD PADDING
+ * Reduce card/panel padding on small screens.
+ * Overrides --portal-card-padding token defined in :root above.
+ * ============================================ */
+@media (max-width: 600px) {
+  body[data-page="admin"],
+  body[data-page="ledger"] {
+    /* 8px 16px */
+    --portal-panel-padding-x: var(--space-2); /* 16px */
+  }
+}
+
+/* Responsive steps.
+
+   THESE MUST REPEAT `body[data-page=...]`, not narrow to `:root`. The tokens
+   above are defined on that selector at (0,1,1), so a `:root` redefinition at
+   (0,1,0) loses no matter which media query it sits in — the rule applies and
+   the value simply never wins. Written as `:root` first, and both steps were
+   silently dead until the folder rail refused to widen and showed it.
+
+   The gutter narrows as the viewport does: a 32px margin on a phone spends a
+   tenth of the screen on nothing. The folder rail goes the other way: 200 is
+   the floor for the narrowest width it is shown at, and a wide screen should
+   not get a number chosen for a tablet. */
+@media (max-width: 960px) {
+  body[data-page="admin"],
+  body[data-page="ledger"] {
+    --portal-page-gutter: var(--space-3); /* 24px */
+  }
+}
+
+@media (max-width: 767px) {
+  body[data-page="admin"],
+  body[data-page="ledger"] {
+    --portal-page-gutter: var(--space-2); /* 16px */
+  }
+}
+
+/* The first step up, at 960.
+
+   The ramp used to sit flat at 16px until 1200, which put an ordinary desktop
+   window — a 1115px browser on a 14" display — on the same card padding as a
+   phone. A nested card can be tight when the screen is; 1115px is not that
+   screen (Noelle, 2026-09-13). Card padding opens to 24 here and content
+   padding follows halfway, so the 16 -> 32 jump content padding used to make
+   in one move at 1200 is now two. */
+@media (min-width: 960px) {
+  body[data-page="admin"],
+  body[data-page="ledger"] {
+    --portal-content-padding: var(--space-3); /* 24px */
+    --portal-card-padding: var(--space-3); /* 24px */
+  }
+}
+
+@media (min-width: 1200px) {
+  body[data-page="admin"],
+  body[data-page="ledger"] {
+    --portal-files-sidebar-width: 240px;
+    --portal-content-padding: var(--space-4); /* 32px */
+    --portal-card-padding: var(--space-3); /* 24px */
+  }
+}
+
+@media (min-width: 1400px) {
+  body[data-page="admin"],
+  body[data-page="ledger"] {
+    --portal-files-sidebar-width: 280px;
+    --portal-content-padding: var(--space-5); /* 40px */
+    --portal-card-padding: var(--space-4); /* 32px */
+  }
+}

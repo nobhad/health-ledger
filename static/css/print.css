@@ -1,0 +1,144 @@
+/* Print and PDF Styles - Minimalist Design */
+
+@media print {
+    * {
+        background: white !important;
+        color: black !important;
+        box-shadow: none !important;
+        text-shadow: none !important;
+    }
+    
+    body {
+        font-family: Georgia, "Times New Roman", serif;
+        font-size: 11pt;
+        line-height: 1.5;
+        color: #000;
+        background: white;
+        margin: 0;
+        padding: 0;
+    }
+    
+    .no-print {
+        display: none !important;
+    }
+    
+    .print-only {
+        display: block !important;
+    }
+    
+    h1, h2, h3, h4, h5, h6 {
+        page-break-after: avoid;
+        color: #000;
+        font-weight: 600;
+    }
+    
+    h1 {
+        font-size: 18pt;
+        margin-top: 0;
+        margin-bottom: 12pt;
+    }
+    
+    h2 {
+        font-size: 14pt;
+        margin-top: 16pt;
+        margin-bottom: 8pt;
+    }
+    
+    h3 {
+        font-size: 12pt;
+        margin-top: 12pt;
+        margin-bottom: 6pt;
+    }
+    
+    p {
+        margin-bottom: 8pt;
+        orphans: 3;
+        widows: 3;
+    }
+    
+    ul, ol {
+        margin-bottom: 8pt;
+        page-break-inside: avoid;
+    }
+    
+    li {
+        margin-bottom: 4pt;
+    }
+    
+    table {
+        border-collapse: collapse;
+        width: 100%;
+        margin-bottom: 12pt;
+        page-break-inside: avoid;
+    }
+    
+    th, td {
+        border: 1px solid #ddd;
+        padding: 6pt;
+        text-align: left;
+    }
+    
+    th {
+        background: #f5f5f5;
+        font-weight: 600;
+    }
+    
+    .page-break {
+        page-break-before: always;
+    }
+    
+    .no-break {
+        page-break-inside: avoid;
+    }
+    
+    a {
+        color: #000;
+        text-decoration: underline;
+    }
+    
+    a[href^="http"]:after {
+        content: " (" attr(href) ")";
+        font-size: 9pt;
+        color: #666;
+    }
+    
+    code, pre {
+        font-family: "Courier New", monospace;
+        font-size: 9pt;
+        background: #f5f5f5;
+        border: 1px solid #ddd;
+        padding: 4pt;
+        page-break-inside: avoid;
+    }
+    
+    blockquote {
+        border-left: 3px solid #ddd;
+        padding-left: 12pt;
+        margin: 8pt 0;
+        font-style: italic;
+    }
+}
+
+@page {
+    size: letter;
+    margin: 0.75in;
+    
+    @top-center {
+        content: "Genetic Profile Database";
+        font-size: 9pt;
+        color: #666;
+    }
+    
+    @bottom-right {
+        content: "Page " counter(page) " of " counter(pages);
+        font-size: 9pt;
+        color: #666;
+    }
+}
+
+@page :first {
+    @top-center {
+        content: "";
+    }
+}
+

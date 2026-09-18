@@ -1,0 +1,28 @@
+/**
+ * ===============================================
+ * UTILITIES
+ * ===============================================
+ * @file static/css/utilities.css  (@layer utilities)
+ *
+ * Atomic helpers only. Highest layer, so they win over everything layered.
+ */
+
+.text-center { text-align: center; }
+.text-muted { color: var(--color-text-secondary); }
+.text-small { font-size: var(--font-size-sm); }
+
+.mt-0 { margin-top: 0; }
+.mt-1 { margin-top: var(--space-1); }
+.mt-2 { margin-top: var(--space-2); }
+.mt-3 { margin-top: var(--space-3); }
+
+.mb-0 { margin-bottom: 0; }
+.mb-1 { margin-bottom: var(--space-1); }
+.mb-2 { margin-bottom: var(--space-2); }
+.mb-3 { margin-bottom: var(--space-3); }
+
+.no-print { }
+
+@media print {
+  .no-print { display: none !important; }
+}

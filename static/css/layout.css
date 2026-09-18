@@ -1,0 +1,599 @@
+/**
+ * ===============================================
+ * LAYOUT — page structure
+ * ===============================================
+ * @file static/css/layout.css  (@layer layouts)
+ *
+ * Header, navigation, the page shell, the footer curtain, grids and the row
+ * patterns pages compose with. Nothing in here paints a component; that is
+ * components.css.
+ *
+ * THE SHELL
+ * The header is sticky. Below it, <main> is exactly the rest of the viewport
+ * and does not scroll as a whole: its page header is a fixed bar and its
+ * body holds the page, with any region that can outgrow it scrolling inside
+ * itself. The footer is the portfolio site's curtain: a band pinned behind
+ * the page at the bottom of the viewport. The document is taller than the
+ * viewport by exactly the band's height, so scrolling to the end slides the
+ * page up off the band (no-bhad-codes components/footer.css: "the curtain
+ * never moves — the page slides up off it").
+ */
+
+/* ============================================
+ * HEADER + NAVIGATION
+ * ============================================ */
+.main-header {
+  position: sticky;
+  top: 0;
+  z-index: var(--z-index-nav-header);
+  width: 100%;
+  min-height: var(--app-header-height);
+  background: var(--color-bg-primary);
+  border-bottom: var(--portal-border);
+}
+
+.header-container {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--space-3);
+  width: 100%;
+  padding: var(--space-1-5) var(--portal-page-gutter);
+}
+
+.header-brand {
+  flex: 0 0 auto;
+}
+
+.brand-link {
+  text-decoration: none;
+  color: inherit;
+}
+
+.site-title {
+  margin: 0;
+  font-family: var(--font-family-mono);
+  font-size: var(--heading-card-font-size);
+  font-weight: var(--heading-card-font-weight);
+  letter-spacing: var(--heading-card-letter-spacing);
+  text-transform: var(--heading-text-transform);
+  color: var(--heading-card-color);
+}
+
+.header-actions {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+}
+
+/* Hamburger: hidden until the nav becomes a drawer (see RESPONSIVE). */
+.nav-toggle {
+  display: none;
+}
+
+.nav-toggle[aria-expanded="false"] .nav-toggle-icon--close,
+.nav-toggle[aria-expanded="true"] .nav-toggle-icon--open {
+  display: none;
+}
+
+.main-nav {
+  flex: 0 1 auto;
+  min-width: 0;
+}
+
+.nav-list {
+  display: flex;
+  flex-wrap: nowrap;
+  align-items: center;
+  gap: var(--space-0-5);
+  list-style: none;
+  margin: 0;
+  padding: 0;
+}
+
+.nav-item {
+  margin: 0;
+}
+
+.nav-link {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--icon-gap);
+  min-height: var(--app-control-height);
+  padding: 0 var(--space-1-5);
+  font-size: var(--font-size-sm);
+  font-weight: var(--font-weight-medium);
+  letter-spacing: var(--letter-spacing-label);
+  text-transform: uppercase;
+  text-decoration: none;
+  color: var(--color-text-secondary);
+  transition: color var(--transition-fast);
+}
+
+.nav-link:hover {
+  color: var(--color-text-primary);
+  text-decoration: none;
+}
+
+.nav-link.active {
+  color: var(--color-accent);
+  box-shadow: inset 0 calc(-1 * var(--border-width)) 0 var(--color-accent);
+}
+
+/* ============================================
+ * PAGE SHELL
+ * ============================================ */
+body[data-page="ledger"] {
+  /* The scroll room that reveals the curtain — nothing else scrolls the
+     document. */
+  padding-bottom: var(--footer-curtain-height);
+}
+
+.main-content {
+  position: relative;
+  z-index: var(--z-index-content); /* above the fixed curtain */
+  display: flex;
+  flex-direction: column;
+  flex: 0 0 auto;
+  height: calc(100dvh - var(--app-header-height));
+  width: 100%;
+  overflow: hidden;
+  background: var(--color-bg-primary);
+}
+
+/* Tier 1 — the container's own top bar, not a floating heading. */
+.page-header {
+  flex-shrink: 0;
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  gap: var(--space-0-5) var(--space-3);
+  margin: 0;
+  padding: var(--space-2) var(--portal-content-padding);
+  border-bottom: var(--portal-border);
+}
+
+.page-header h2 {
+  margin: 0;
+  font-size: var(--heading-page-font-size);
+  font-weight: var(--heading-page-font-weight);
+  color: var(--heading-page-color);
+}
+
+.page-description {
+  margin: 0;
+  color: var(--color-text-secondary);
+}
+
+.page-description:empty {
+  display: none;
+}
+
+/* The page. No gutters at the root: panels tile the body edge to edge and
+   carry their own internal padding (components.css). */
+.page-body {
+  display: flex;
+  flex: 1 1 auto;
+  flex-direction: column;
+  min-height: 0;
+  overflow: auto;
+}
+
+/* Split-panel pages (documents, sources) hold their own scrolling. */
+.page-body--flush {
+  overflow: hidden;
+}
+
+.container {
+  display: flex;
+  flex: 1 1 auto;
+  flex-direction: column;
+  min-height: 0;
+  width: 100%;
+}
+
+/* Loose content that is not a panel gets the panel's padding. */
+.quick-actions-row,
+.results-container:not(:empty),
+.loading.show {
+  padding: var(--portal-content-padding);
+}
+
+/* The one block on a page that takes the remaining height and scrolls
+   inside itself. */
+.is-fill {
+  flex: 1 1 auto;
+  min-height: 0;
+  overflow: hidden;
+}
+
+.is-fill > :is(.table-container, .card-body, .panel-content) {
+  flex: 1 1 auto;
+  min-height: 0;
+  overflow: auto;
+}
+
+/* ============================================
+ * FOOTER CURTAIN
+ * Rules follow no-bhad-codes components/footer.css. The band is fixed to
+ * the viewport bottom beneath the page; body's bottom padding above gives
+ * the scroll that uncovers it.
+ * ============================================ */
+.footer {
+  position: fixed;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  z-index: var(--z-index-base);
+  height: var(--footer-curtain-height);
+}
+
+.footer-curtain {
+  height: 100%;
+  background: var(--footer-curtain-bg);
+  color: var(--footer-curtain-text);
+  overflow: hidden;
+  /* Clear the iOS home indicator without shortening the band. */
+  padding-bottom: env(safe-area-inset-bottom, 0px);
+}
+
+.footer-curtain__inner {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  align-items: end;
+  gap: var(--space-3);
+  height: 100%;
+  padding: var(--curtain-inset) var(--portal-page-gutter);
+}
+
+.footer-curtain__note {
+  margin: 0;
+  max-width: var(--form-section-max-width);
+  font-size: var(--font-size-xs);
+  letter-spacing: var(--letter-spacing-label);
+  text-transform: uppercase;
+  color: var(--footer-curtain-text-muted);
+}
+
+/* Two cells on a diagonal: the credit top-left, the lockup bottom-right. */
+.footer-curtain__mark {
+  display: grid;
+  grid-template-columns: auto auto;
+  gap: var(--curtain-mark-gap);
+  min-width: 0;
+  justify-self: end;
+}
+
+.footer-curtain__lockup {
+  grid-column: 2;
+  grid-row: 2;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+}
+
+.footer-curtain__brand {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+  min-width: 0;
+  color: inherit;
+  text-decoration: none;
+  transition: opacity var(--transition-mouse) ease;
+}
+
+.footer-curtain__brand:hover,
+.footer-curtain__brand:focus-visible {
+  opacity: var(--opacity-subtle);
+  text-decoration: none;
+}
+
+/* Solid black silhouette, partially inverted onto the band so it lands on
+   the off-white the type uses rather than true white. */
+.footer-curtain__avatar {
+  display: block;
+  height: var(--curtain-avatar-height);
+  width: auto;
+  margin-right: calc(var(--curtain-avatar-trim) * -1);
+  filter: invert(0.878);
+}
+
+/* Stacked NO / BHAD / CODES: min-content wraps one word per line. */
+.footer-curtain__wordmark {
+  width: min-content;
+  margin: var(--space-1) 0 0;
+  font-family: var(--font-family-acme);
+  font-weight: var(--font-weight-semibold);
+  font-size: var(--curtain-wordmark-size);
+  line-height: 0.95;
+  letter-spacing: var(--letter-spacing-wide);
+  text-transform: uppercase;
+  color: var(--footer-curtain-text);
+}
+
+.footer-curtain__credit,
+.footer-curtain__year {
+  margin: 0;
+  line-height: var(--line-height-snug);
+  white-space: nowrap;
+  color: var(--footer-curtain-text-muted);
+}
+
+.footer-curtain__credit {
+  grid-column: 1;
+  grid-row: 1;
+  justify-self: start;
+  margin-bottom: calc(var(--curtain-credit-pull) * -1);
+  font-size: var(--curtain-credit-size);
+  line-height: var(--curtain-credit-leading);
+  letter-spacing: var(--letter-spacing-widest);
+  text-transform: uppercase;
+}
+
+.footer-curtain__year {
+  margin-top: calc(var(--curtain-year-lift) * -1);
+  margin-left: calc(
+    var(--curtain-avatar-width) - var(--curtain-avatar-trim) + var(--space-2) +
+      var(--curtain-year-nudge)
+  );
+  font-size: var(--curtain-year-size);
+  text-align: left;
+}
+
+/* ============================================
+ * GRIDS + ROWS
+ * ============================================ */
+.grid {
+  display: grid;
+  flex-shrink: 0;
+  gap: 0;
+}
+
+/* Cells draw only their right and bottom rules; the last column drops the
+   right one so the grid never doubles a rule or draws one at the edge. */
+.grid > :is(.card, .section, .stat-card) {
+  border-width: 0 var(--border-width) var(--border-width) 0;
+}
+
+.grid-2 > :is(.card, .section, .stat-card):nth-child(2n),
+.grid-3 > :is(.card, .section, .stat-card):nth-child(3n) {
+  border-right-width: 0;
+}
+
+.grid-2 {
+  grid-template-columns: repeat(2, 1fr);
+}
+
+.grid-3 {
+  grid-template-columns: repeat(3, 1fr);
+}
+
+.grid-auto {
+  grid-template-columns: repeat(auto-fit, minmax(var(--aside-width-narrow), 1fr));
+}
+
+/* Overview stat tiles: one row that tiles the width. */
+.stat-grid {
+  display: grid;
+  flex-shrink: 0;
+  grid-template-columns: repeat(auto-fit, minmax(var(--table-col-md), 1fr));
+}
+
+.stat-grid > .stat-card {
+  border-width: 0 var(--border-width) var(--border-width) 0;
+}
+
+.stat-grid > .stat-card:last-child {
+  border-right-width: 0;
+}
+
+/* A card grid that is the whole page: it takes the remaining height, its
+   rows share it, and a card that outgrows its row scrolls inside. */
+.grid--fill {
+  flex: 1 1 auto;
+  grid-auto-rows: minmax(0, 1fr);
+  min-height: 0;
+}
+
+.grid--fill > .card {
+  min-height: 0;
+}
+
+.grid--fill > .card > .card-body {
+  min-height: 0;
+  overflow: auto;
+}
+
+.quick-actions-row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-2);
+  padding: var(--portal-content-padding);
+}
+
+/* Filter controls in a row, buttons aligned to the controls' baseline. */
+.filters-form {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(var(--table-col-lg), 1fr));
+  gap: var(--space-2);
+  align-items: end;
+}
+
+/* The submit and clear buttons are one cell, so they never split across
+   rows when the grid wraps. */
+.filter-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-1);
+}
+
+/* A checkbox filter has no control box; its row stands the control height
+   so the checkbox sits on the same line as the inputs beside it. */
+.filter-group--check {
+  justify-content: center;
+  min-height: var(--app-control-height);
+}
+
+/* When the label wraps, the box stays on its first line — the portal's
+   status-dot arithmetic: top-aligned, then offset to the centre of one
+   line box. */
+.filter-group--check .check-label {
+  align-items: flex-start;
+}
+
+.filter-group--check input[type="checkbox"] {
+  margin-top: calc((1lh - var(--space-2)) / 2);
+}
+
+/* A label and its control on one line. */
+.form-row {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--space-1-5);
+  margin-bottom: var(--field-group-gap);
+}
+
+.form-row .field-label {
+  margin-bottom: 0;
+}
+
+.form-row :is(.form-input, .dropdown) {
+  width: auto;
+  flex: 0 1 var(--app-inline-input-width);
+}
+
+/* ============================================
+ * RESPONSIVE
+ * ============================================ */
+
+/* Below 1300px the eight links no longer fit on one row beside the brand
+   and the actions, so the nav becomes a drawer under the header, opened by
+   the hamburger (static/js/nav.ts). The breakpoint is --wide-down; nav.ts
+   carries the same figure. */
+@media (--wide-down) {
+  .nav-toggle {
+    display: inline-flex;
+  }
+
+  .main-nav {
+    position: fixed;
+    top: var(--app-header-height);
+    right: 0;
+    bottom: 0;
+    left: 0;
+    z-index: var(--z-index-nav-menu);
+    display: none;
+    overflow-y: auto;
+    background: var(--color-bg-primary);
+  }
+
+  .main-nav.is-open {
+    display: block;
+  }
+
+  .nav-list {
+    flex-direction: column;
+    align-items: stretch;
+    gap: 0;
+  }
+
+  .nav-link {
+    min-height: var(--space-7);
+    padding: 0 var(--portal-page-gutter);
+    font-size: var(--font-size-base);
+    border-bottom: var(--portal-input-border);
+  }
+
+  .nav-link.active {
+    box-shadow: var(--app-edge-mark) var(--color-accent);
+  }
+}
+
+/* Tablet and down: three-up grids become two-up. */
+@media (--tablet-down) {
+  .grid-3 {
+    grid-template-columns: repeat(2, 1fr);
+  }
+
+  .grid-3 > :is(.card, .section, .stat-card):nth-child(3n) {
+    border-right-width: var(--border-width);
+  }
+
+  .grid-3 > :is(.card, .section, .stat-card):nth-child(2n) {
+    border-right-width: 0;
+  }
+}
+
+/* Phones: single-column grids, split panels stack, the band stacks its
+   note over the mark. */
+@media (--mobile) {
+  .grid-2,
+  .grid-3,
+  .stat-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .grid > :is(.card, .section, .stat-card) {
+    border-right-width: 0;
+  }
+
+  .grid--fill {
+    grid-auto-rows: auto;
+  }
+
+  .grid--fill > .card > .card-body {
+    overflow: visible;
+  }
+
+  .page-body--flush {
+    overflow: auto;
+  }
+
+  .doc-layout {
+    grid-template-columns: minmax(0, 1fr);
+    flex: 0 0 auto;
+  }
+
+  .doc-nav {
+    border-right: none;
+    border-bottom: var(--portal-border);
+  }
+
+  .form-row :is(.form-input, .dropdown) {
+    flex-basis: 100%;
+  }
+
+  .footer-curtain__inner {
+    grid-template-columns: minmax(0, 1fr);
+    align-items: start;
+    gap: var(--space-2);
+  }
+
+  .footer-curtain__note {
+    order: 2;
+  }
+
+  .footer-curtain__mark {
+    justify-self: center;
+  }
+}
+
+/* The narrowest phones: the credit and the lockup stack in one column. */
+@media (--narrow-mobile) {
+  .footer-curtain__mark {
+    grid-template-columns: auto;
+  }
+
+  .footer-curtain__credit {
+    grid-column: 1;
+    grid-row: 1;
+    justify-self: end;
+    text-align: left;
+  }
+
+  .footer-curtain__lockup {
+    grid-column: 1;
+    grid-row: 2;
+  }
+}

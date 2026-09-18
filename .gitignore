@@ -1,0 +1,83 @@
+# Database files
+*.db
+*.db-shm
+*.db-wal
+*.sqlite
+*.sqlite3
+
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.Python
+build/
+develop-eggs/
+/dist/
+downloads/
+eggs/
+.eggs/
+lib/
+lib64/
+parts/
+sdist/
+var/
+wheels/
+*.egg-info/
+.installed.cfg
+*.egg
+
+# Virtual environments
+env/
+venv/
+ENV/
+env.bak/
+venv.bak/
+
+# Logs
+logs/
+*.log
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+
+# OS
+.DS_Store
+.DS_Store?
+._*
+.Spotlight-V100
+.Trashes
+ehthumbs.db
+Thumbs.db
+
+# Output files (regenerated)
+output/*.html
+
+# Temporary files
+*.tmp
+*.bak
+*.backup
+
+# Primary sources (large files)
+# Uncomment if you don't want to track PDFs
+# primary_sources/*.pdf
+# primary_sources/*.dcm
+# primary_sources/*.tif
+# primary_sources/*.jpg
+
+# Node
+node_modules/
+# static/css/dist/health-ledger.css is the built stylesheet and IS committed
+# (see README "Styling"); only a top-level /dist/ is ignored above.
+
+# Personal medical records - never commit
+primary_sources/
+output/
+data/rename_mapping.json
+
+# Local settings (HEALTH_LEDGER_DATA_DIR etc.) - never commit
+.env

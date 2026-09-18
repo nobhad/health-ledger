@@ -1,0 +1,41 @@
+{
+  "compilerOptions": {
+    "target": "ES2020",
+    "module": "None",
+    "lib": ["ES2020", "DOM"],
+    "moduleResolution": "node",
+    "strict": true,
+    "skipLibCheck": true,
+    "forceConsistentCasingInFileNames": true,
+    "outDir": "static/js",
+    "noEmit": false,
+    "checkJs": false,
+    "allowJs": false,
+    "typeRoots": ["./static/js", "./node_modules/@types"],
+    "noImplicitAny": true,
+    "strictNullChecks": true,
+    "strictFunctionTypes": true,
+    "strictBindCallApply": true,
+    "strictPropertyInitialization": true,
+    "noImplicitThis": true,
+    "alwaysStrict": true,
+    "noUnusedLocals": true,
+    "noUnusedParameters": true,
+    "noImplicitReturns": true,
+    "noFallthroughCasesInSwitch": true,
+    "baseUrl": ".",
+    "paths": {
+      "@/*": ["static/js/*"]
+    }
+  },
+  "include": [
+    "static/js/**/*.ts",
+    "static/js/types.d.ts"
+  ],
+  "exclude": [
+    "node_modules",
+    "primary_sources/**",
+    "output/**"
+  ]
+}
+

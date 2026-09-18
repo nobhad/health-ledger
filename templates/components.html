@@ -1,0 +1,90 @@
+{#
+Reusable Jinja components for Health Ledger
+#}
+
+{% macro card(title=None, class="") %}
+<div class="card {{ class }}">
+    {% if title %}
+    <div class="card-header">
+        <h3>{{ title }}</h3>
+    </div>
+    {% endif %}
+    <div class="card-body">
+        {{ caller() }}
+    </div>
+</div>
+{% endmacro %}
+
+{% macro button(text, onclick=None, type="button", class="btn-primary", href=None) %}
+{% if href %}
+<a href="{{ href }}" class="btn {{ class }}">{{ text }}</a>
+{% else %}
+<button type="{{ type }}" onclick="{{ onclick }}" class="btn {{ class }}">{{ text }}</button>
+{% endif %}
+{% endmacro %}
+
+{% macro multiselect(id, label, placeholder, type) %}
+<div class="form-group">
+    <label for="{{ id }}Input">{{ label }}</label>
+    <div class="multiselect-wrapper" id="{{ id }}Multiselect">
+        <div class="multiselect-tags" id="{{ id }}Tags"></div>
+        <div class="multiselect-input-wrapper">
+            <i data-lucide="search" class="multiselect-search-icon"></i>
+            <input type="text" class="multiselect-input" id="{{ id }}Input" placeholder="{{ placeholder }}" autocomplete="off">
+            <i data-lucide="chevron-down" class="dropdown-indicator"></i>
+        </div>
+        <div class="multiselect-dropdown" id="{{ id }}Dropdown"></div>
+    </div>
+</div>
+{% endmacro %}
+
+{% macro loading_spinner(id="loading") %}
+<div class="loading" id="{{ id }}">
+    <div class="spinner"></div>
+    <p>Loading...</p>
+</div>
+{% endmacro %}
+
+{% macro results_container(id="results") %}
+<div id="{{ id }}" class="results-container"></div>
+{% endmacro %}
+
+{% macro table(data, title=None) %}
+{% if title %}
+<h3>{{ title }}</h3>
+{% endif %}
+<div class="table-responsive">
+    <table class="data-table">
+        <thead>
+            <tr>
+                {% for key in data[0].keys() %}
+                <th>{{ key.replace('_', ' ').title() }}</th>
+                {% endfor %}
+            </tr>
+        </thead>
+        <tbody>
+            {% for row in data %}
+            <tr>
+                {% for key in data[0].keys() %}
+                <td>{{ row[key] or '' }}</td>
+                {% endfor %}
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+</div>
+{% endmacro %}
+
+{% macro alert(message, type="info") %}
+<div class="alert alert-{{ type }}">
+    {{ message }}
+</div>
+{% endmacro %}
+
+{% macro section(title, id=None, class="") %}
+<section {% if id %}id="{{ id }}"{% endif %} class="content-section {{ class }}">
+    <h2>{{ title }}</h2>
+    {{ caller() }}
+</section>
+{% endmacro %}
+

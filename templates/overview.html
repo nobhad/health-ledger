@@ -1,0 +1,134 @@
+{% extends "base.html" %}
+
+{% block title %}Overview - Health Ledger{% endblock %}
+{% block page_body_class %} page-body--flush{% endblock %}
+
+{% block page_title %}Overview{% endblock %}
+{% block page_description %}Everything here stays on this computer. This is what the ledger holds and where to go next.{% endblock %}
+
+{% block content %}
+<div class="stat-grid">
+    <a class="stat-card" href="/profile">
+        <span class="stat-label">Genes</span>
+        <span class="stat-value">{{ stats.genes }}</span>
+        <span class="stat-hint">{{ stats.pharmacogenomic }} with drug-metabolism data</span>
+    </a>
+    <a class="stat-card" href="/query">
+        <span class="stat-label">Trait associations</span>
+        <span class="stat-value">{{ stats.traits }}</span>
+        <span class="stat-hint">Search by trait</span>
+    </a>
+    <a class="stat-card" href="/query">
+        <span class="stat-label">Health conditions</span>
+        <span class="stat-value">{{ stats.conditions }}</span>
+        <span class="stat-hint">Search by condition</span>
+    </a>
+    <a class="stat-card" href="/sources">
+        <span class="stat-label">Primary sources</span>
+        <span class="stat-value">{{ stats.sources }}</span>
+        <span class="stat-hint">{{ stats.findings }} extracted findings</span>
+    </a>
+    <a class="stat-card" href="/metrics">
+        <span class="stat-label">Health metrics</span>
+        <span class="stat-value">{{ stats.metrics }}</span>
+        {% if stats.abnormal %}
+        <span class="stat-hint stat-hint--alert">{{ stats.abnormal }} flagged abnormal</span>
+        {% else %}
+        <span class="stat-hint">None flagged abnormal</span>
+        {% endif %}
+    </a>
+    <a class="stat-card" href="/backup">
+        <span class="stat-label">Last backup</span>
+        {% if last_backup %}
+        <span class="stat-value">{{ last_backup.created[:10] }}</span>
+        <span class="stat-hint">{{ backup_count }} backup{{ '' if backup_count == 1 else 's' }} on disk</span>
+        {% else %}
+        <span class="stat-value">Never</span>
+        <span class="stat-hint stat-hint--alert">Create one before you rely on this</span>
+        {% endif %}
+    </a>
+</div>
+
+<div class="grid grid-3 grid--fill">
+    <div class="card">
+        <div class="card-header"><h3>Start here</h3></div>
+        <div class="card-body">
+            <a class="action-link" href="/summary">
+                <i data-lucide="bar-chart-3"></i>
+                <span class="action-link-text">
+                    <span class="action-link-title">Read the summary</span>
+                    <span class="action-link-hint">Key findings, strengths and sensitivities in plain language</span>
+                </span>
+            </a>
+            <a class="action-link" href="/query">
+                <i data-lucide="search"></i>
+                <span class="action-link-text">
+                    <span class="action-link-title">Ask a question</span>
+                    <span class="action-link-hint">Which genes relate to a condition, trait or medication</span>
+                </span>
+            </a>
+            <a class="action-link" href="/doctor-docs">
+                <i data-lucide="stethoscope"></i>
+                <span class="action-link-text">
+                    <span class="action-link-title">Prepare for an appointment</span>
+                    <span class="action-link-hint">A PDF tailored to a specialty, with your current numbers</span>
+                </span>
+            </a>
+            <a class="action-link" href="/sources">
+                <i data-lucide="folder-open"></i>
+                <span class="action-link-text">
+                    <span class="action-link-title">Browse the records</span>
+                    <span class="action-link-hint">Every lab, scan and letter, with the text pulled out</span>
+                </span>
+            </a>
+            <a class="action-link" href="/backup">
+                <i data-lucide="download"></i>
+                <span class="action-link-text">
+                    <span class="action-link-title">Back up</span>
+                    <span class="action-link-hint">A timestamped copy of the database, yours to keep anywhere</span>
+                </span>
+            </a>
+        </div>
+    </div>
+
+    <div class="card">
+        <div class="card-header"><h3>Recent sources</h3></div>
+        <div class="card-body">
+            {% if recent_sources %}
+            <ul class="list">
+                {% for source in recent_sources %}
+                <li>
+                    <a class="list-item" href="/sources">
+                        <span class="list-item-title">{{ source.source_name }}</span>
+                        <span class="list-item-meta">{{ (source.source_type or 'unknown').replace('_', ' ') }}{% if source.institution %} &middot; {{ source.institution }}{% endif %}{% if source.document_date %} &middot; {{ source.document_date }}{% endif %}</span>
+                    </a>
+                </li>
+                {% endfor %}
+            </ul>
+            {% else %}
+            <p class="no-data">No sources yet. Add records with <code>scripts/add_primary_sources.py</code>.</p>
+            {% endif %}
+        </div>
+    </div>
+
+    <div class="card">
+        <div class="card-header"><h3>Flagged results</h3></div>
+        <div class="card-body">
+            {% if abnormal_metrics %}
+            <ul class="list">
+                {% for metric in abnormal_metrics %}
+                <li>
+                    <a class="list-item" href="/metrics?metric_type={{ metric.metric_type }}&routine_only=false">
+                        <span class="list-item-title">{{ metric.metric_name or metric.metric_type.replace('_', ' ').title() }}: {% if metric.metric_value is not none %}{{ "%.2f"|format(metric.metric_value) }}{% else %}{{ metric.metric_value_text or 'N/A' }}{% endif %}{% if metric.unit %} {{ metric.unit }}{% endif %}</span>
+                        <span class="list-item-meta">{{ metric.collection_date or 'undated' }}</span>
+                    </a>
+                </li>
+                {% endfor %}
+            </ul>
+            {% else %}
+            <p class="no-data">Nothing flagged abnormal.</p>
+            {% endif %}
+        </div>
+    </div>
+</div>
+{% endblock %}

@@ -1,0 +1,55 @@
+/**
+ * ===============================================
+ * BASE — element defaults
+ * ===============================================
+ * @file static/css/base.css  (@layer base)
+ *
+ * Element-level defaults on top of the vendored reset. No classes here;
+ * anything reusable by class belongs in components.css.
+ */
+
+body {
+  color: var(--color-text-primary);
+  font-size: var(--font-size-base);
+  line-height: var(--line-height-normal);
+}
+
+/* Lucide icons size to the text beside them and take the text's stroke
+   weight — the same root rule the portal carries in portal-primitives.css. */
+svg.lucide {
+  width: 1em;
+  height: 1em;
+  flex-shrink: 0;
+  stroke-width: var(--svg-stroke-width);
+}
+
+code,
+pre,
+kbd {
+  font-family: var(--font-family-mono);
+  font-size: var(--font-size-sm);
+}
+
+code {
+  padding: 0 var(--space-0-5);
+  background: var(--portal-alpha-white-05);
+}
+
+pre {
+  white-space: pre-wrap;
+  word-wrap: break-word;
+}
+
+hr {
+  border: none;
+  border-top: var(--portal-input-border);
+  margin: var(--space-3) 0;
+}
+
+strong {
+  font-weight: var(--font-weight-bold);
+}
+
+small {
+  font-size: var(--font-size-xs);
+}

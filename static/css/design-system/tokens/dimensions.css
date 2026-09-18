@@ -1,0 +1,225 @@
+/**
+ * ===============================================
+ * DIMENSION DESIGN TOKENS
+ * ===============================================
+ * @file src/design-system/tokens/dimensions.css
+ *
+ * Semantic dimension variables for widths, heights,
+ * and size constraints. Prevents hardcoded px values.
+ */
+
+:root {
+  /* ============================================
+   * LAYOUT CONSTANTS (migrated from variables.css)
+   * ============================================ */
+  --header-height: 60px;
+  --footer-height: 40px;
+  --size-container: min(1200px, 100vw - 2rem);
+  --container-padding: clamp(1rem, 4vw, 2rem);
+  --gap: clamp(0.75rem, 3vw, 1.5rem);
+  
+  /* ============================================
+   * MODAL SIZES (migrated from variables.css)
+   * ============================================ */
+  --modal-width-sm: 400px;
+  --modal-width-md: 560px;
+  --modal-width-lg: 860px;
+
+  /* ============================================
+   * ICON GLYPH SIZES (migrated from variables.css)
+   * Container sizes are below (--icon-btn-size-*)
+   * ============================================ */
+  --icon-size-xs: 12px;
+  --icon-size-sm: 14px;
+  /* Height of one line of body text. An icon that leads a stacked text block
+     gets a box this tall so it centres on the block's first line rather than
+     on the middle of the whole block. */
+  --icon-first-line-box: calc(var(--font-size-base) * var(--line-height-normal));
+  --icon-size-md: 16px;
+  --icon-size-lg: 20px;
+  --icon-size-xl: 24px;
+  --icon-size-2xl: 32px;
+
+/* 14px — matches body text */
+
+  /* ============================================
+   * PORTAL NAVIGATION FONT SIZE (migrated from variables.css)
+   * ============================================ */
+
+  /* Shared by header logo text + sidebar buttons */
+  --portal-nav-font-size: 1.25rem;
+
+  /* ============================================
+   * SIDEBAR ICON SIZE (migrated from variables.css)
+   * ============================================
+   * Single value for both open and collapsed states.
+   */
+  --sidebar-icon-size: 20px;
+
+        /* Icon SVG size inside buttons — matches text */
+
+  /* ============================================
+   * DROPDOWN SIZING (migrated from variables.css)
+   * ============================================ */
+
+  /* Dropdown caret sizing */
+  --dropdown-caret-size: var(--icon-size-xs);
+  --dropdown-caret-gap: var(--space-2);
+
+  /* The caret artwork itself. Shared rather than portal-scoped because
+     components/form-fields.css styles `.form-container select` with
+     `appearance: none` for every surface — so without these the public site
+     removed the native arrow and drew nothing in its place. */
+  --select-caret: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 24 24' fill='none' stroke='%23888888' stroke-width='2.5' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='m6 9 6 6 6-6'/%3E%3C/svg%3E");
+  --select-caret-light: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 24 24' fill='none' stroke='%23404040' stroke-width='2.5' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='m6 9 6 6 6-6'/%3E%3C/svg%3E");
+
+        
+  /* ============================================
+   * STATUS DOT (migrated from variables.css)
+   * ============================================ */
+  --status-dot-size: 8px;
+  
+  /* ============================================
+   * NAVIGATION SIZING (migrated from variables.css)
+   * ============================================ */
+  --menu-padding: clamp(0.5rem, 2vw, 1rem);
+  --nav-base-gap: clamp(0.5rem, 1.5vw, 0.8rem);
+  --menu-multiplier: 0.15;
+  --list-multiplier: 0.12;
+  --menu-heading-size: clamp(2.5rem, 6vw, 4rem);
+      --menu-width-desktop: 35rem;
+  --menu-width-tablet: 32rem;
+  --menu-width-mobile: 100vw;
+  --menu-border-radius: 1.25rem;
+      
+    --business-card-aspect-ratio: 1.784582;
+  --business-card-base-width: 35vw;
+    --business-card-large-width: 525px;
+    --business-card-medium-width: 420px;
+    --business-card-small-width: 350px;
+    --business-card-tiny-width: 280px;
+  
+  /* ============================================
+   * CONTACT FORM DIMENSIONS (migrated from variables.css)
+   * ============================================ */
+  --contact-input-height: clamp(52px, 14vw, 60px);
+  --contact-input-width: min(520px, 100%);
+  --contact-textarea-height: 175px;
+  --contact-textarea-width: min(520px, 100%);
+        --contact-field-border-width: var(--border-width);
+  --contact-field-border-color: var(--color-text-primary);
+
+  /* ============================================
+   * TERMINAL DIMENSIONS (migrated from variables.css)
+   * ============================================ */
+  --terminal-font-family:
+    "Menlo", "Monaco", "Consolas", "Liberation Mono", "Courier New", monospace;
+  --terminal-line-height: 1.7;
+  --terminal-font-size: var(--font-size-base);
+
+  /* ============================================
+   * SIDEBAR DIMENSIONS
+   * ============================================ */
+  /* 24 + the longest nav label + 24, so the strip's padding is equal either
+     side of the icon-and-text block (Noelle, 2026-09-13). At 240 the leading
+     space was 24 and the trailing space 52, which read as the labels hugging
+     the left of an over-wide box.
+
+     Measured, not guessed: `DELIVERABLES` in the client portal is the longest
+     label in either portal — the admin's longest are DASHBOARD, DOCUMENTS and
+     ANALYTICS at nine characters — and its text ends at 188. A label longer
+     than that wants this number re-measured; the badges do not, being
+     absolutely positioned and display:none until they carry a count. */
+  --sidebar-width-open: 212px;
+  --header-search-width: 18rem; /* global header search trigger */
+  
+  /* Aside/column variations */
+  --aside-width-narrow: 240px;
+  --aside-width-medium: 280px;
+  --aside-width-wide: 320px;
+
+  --icon-btn-size-md: 36px;
+  --icon-btn-size-lg: 40px;
+  --icon-btn-size-xl: 48px;
+
+  /* Large icon / logo containers */
+  --icon-size-3xl: 64px;
+  --icon-size-4xl: 96px; /* Sign-in marks — two steps above the 3xl icon */
+
+  /* ============================================
+   * TOOLTIP / POPOVER CONSTRAINTS
+   * ============================================ */
+  --tooltip-max-width: 280px;
+  --tooltip-max-width-sm: 250px;
+
+    --chart-height-md: 200px;
+    /* In-portal form sections (settings and the like). A label/value row stops
+     being readable long before it stops fitting: past this the label and its
+     value sit at opposite ends of the screen. */
+  --form-section-max-width: 48rem;
+  
+  --divider-size: 2px;
+    --tooltip-arrow-size: 6px;
+
+  /* ============================================
+   * INDICATOR DOTS
+   * ============================================ */
+  --indicator-dot-md: 10px;
+  --indicator-dot-sm: 6px;
+
+  --search-input-max-width: 20rem;
+
+  /* ============================================
+   * PROGRESS COMPONENT
+   * ============================================ */
+  --progress-bar-height: 16px;
+
+  /* ============================================
+   * TOAST NOTIFICATIONS
+   * ============================================
+   * Here rather than in portal-theme.css because the toast component is not
+   * portal-only: bundles/foundation.css imports portal-toast-notifications.css
+   * for the public site too, and src/main-site.ts reaches showToast() through
+   * code-protection-service. Scoped to body[data-page="admin"|"client"] as
+   * these were, the site read them and got nothing, so .toast had no width
+   * bounds at all. A component's tokens belong wherever the component reaches.
+   */
+  --toast-min-width: 250px;
+  --toast-max-width: 400px;
+
+  /* ============================================
+   * TABLE PAGINATION
+   * ============================================
+   * Shared for the same reason as the carets: mobile/responsive-fixes.css is
+   * in both bundles and sizes .pagination-btn from this. 44px is the WCAG
+   * 2.5.5 touch target, which is not a portal-specific opinion. */
+  --table-pagination-btn-size-touch: calc(var(--space-base) * 5.5); /* 44px — WCAG touch target */
+}
+
+/* ============================================
+ * FORM AND SEARCH CONTROL TOKENS
+ * ============================================
+ * Lifted out of the `body[data-page="admin"], body[data-page="client"]` block
+ * in portal-theme.css, which is 556 lines of *dashboard* theming. A page that
+ * renders a form — `/intake` is the live case — wanted these and could only
+ * get them by claiming `data-page="client"` and inheriting the dashboard with
+ * them.
+ *
+ * All four are literals or read tokens the dashboard block does not override,
+ * so they resolve identically wherever they are declared.
+ *
+ * TWO OF THE NINE STAYED BEHIND, and the reason is the substitution rule: a
+ * custom property resolves its `var()`s **where it is declared**.
+ * `--portal-alpha-white-10` reads `--color-text-primary` and
+ * `--portal-placeholder-color` reads `--color-text-tertiary`; the dashboard
+ * block overrides both, so moving them here would silently re-point them at
+ * the site's text colours and the portal's placeholder would stop following
+ * the portal's own ramp.
+ */
+:root {
+  --min-height-textarea-lg: 80px; /* Tall textareas in prompt dialogs and resizable forms */
+  --search-font-size: var(--font-size-sm);
+  --search-icon-gap: var(--space-1-5); /* icon to the first character */
+  --search-icon-inset: var(--space-1); /* icon's distance from the left edge */
+}
+

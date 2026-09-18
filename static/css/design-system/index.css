@@ -1,0 +1,106 @@
+/**
+ * ===============================================
+ * DESIGN SYSTEM - MAIN INDEX
+ * ===============================================
+ * @file src/design-system/index.css
+ *
+ * Design system tokens and base styles.
+ * Utility classes are in src/styles/base/utilities.css
+ */
+
+/* ============================================
+ * DESIGN TOKENS
+ * ============================================ */
+
+/* Import all design tokens */
+@import "./tokens/index.css";
+
+/* ============================================
+ * BASE STYLES
+ * ============================================ */
+
+/* Modern CSS reset and base styles */
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+html {
+  line-height: 1.5;
+  -webkit-text-size-adjust: 100%;
+  -moz-tab-size: 4;
+  tab-size: 4;
+  font-family: var(--font-family-sans);
+  font-feature-settings: normal;
+  font-variation-settings: normal;
+  -webkit-tap-highlight-color: transparent;
+}
+
+body {
+  font-family: var(--font-family-body);
+  font-size: var(--font-size-base);
+  line-height: var(--line-height-normal);
+  color: var(--color-text-primary);
+  background-color: var(--color-bg-primary);
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  text-rendering: optimizeLegibility;
+}
+
+/* ============================================
+ * ACCESSIBILITY
+ * ============================================ */
+
+/* ============================================
+ * INTERACTION STATE UTILITIES
+ * ============================================ */
+
+/* Focus states */
+.focus\:outline-none:focus {
+  outline: none;
+}
+.focus\:ring:focus {
+  outline: 2px solid transparent;
+  box-shadow: 0 0 0 2px var(--color-border-focus);
+}
+
+/* Disabled states */
+.disabled,
+[disabled] {
+  opacity: 0.5;
+  cursor: not-allowed;
+  pointer-events: none;
+}
+
+/* ============================================
+ * ACCESSIBILITY ENHANCEMENTS
+ * ============================================ */
+
+/* High contrast mode support */
+@media (prefers-contrast: high) {
+  .card {
+    border-width: 2px;
+  }
+
+  .btn {
+    border-width: 2px;
+  }
+
+  .input {
+    border-width: 2px;
+  }
+}
+
+/* Reduced motion support */
+@media (prefers-reduced-motion: reduce) {
+  .card,
+  .btn,
+  .input {
+    transition: none;
+    transform: none;
+    animation: none;
+  }
+}

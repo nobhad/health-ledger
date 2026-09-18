@@ -1,0 +1,7 @@
+node_modules/
+primary_sources/
+output/
+*.min.js
+genetic_profile.db*
+static/js/*.js
+

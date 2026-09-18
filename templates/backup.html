@@ -1,0 +1,164 @@
+{% extends "base.html" %}
+
+{% block title %}Backup & Export - Health Ledger{% endblock %}
+
+{% block page_title %}Backup & Export{% endblock %}
+{% block page_description %}Create backups and export your data for cloud storage sync{% endblock %}
+
+{% block content %}
+<div class="grid grid-2 grid--fill">
+<div class="card">
+    <div class="card-header">
+        <h3>Create Backup</h3>
+    </div>
+    <div class="card-body">
+        <p>Create a timestamped backup of your database. Backups are saved in the <code>backups/</code> directory.</p>
+        <button type="button" class="btn btn-primary" id="createBackupBtn">Create Backup</button>
+        <div id="backupStatus" class="status-message"></div>
+    </div>
+</div>
+
+<div class="card">
+    <div class="card-header">
+        <h3>Export Database</h3>
+    </div>
+    <div class="card-body">
+        <p>Export your database to a file for backup or cloud storage sync.</p>
+        <div class="form-row">
+            <label for="exportFormat" class="field-label">Format:</label>
+            <select id="exportFormat" name="exportFormat" autocomplete="off" class="form-select">
+                <option value="db">SQLite Database (.db)</option>
+                <option value="json">JSON (.json)</option>
+            </select>
+        </div>
+        <div class="form-row">
+            <label for="exportPath" class="field-label">Output Path:</label>
+            <input type="text" id="exportPath" name="exportPath" autocomplete="off" placeholder="backups/export.db" class="form-input">
+        </div>
+        <button type="button" class="btn btn-primary" id="exportBtn">Export</button>
+        <div id="exportStatus" class="status-message"></div>
+    </div>
+</div>
+
+<div class="card">
+    <div class="card-header">
+        <h3>Available Backups</h3>
+    </div>
+    <div class="card-body">
+        <button type="button" class="btn btn-secondary" id="refreshBackupsBtn">Refresh List</button>
+        <div id="backupsList" class="mt-2">
+            <p>Loading backups...</p>
+        </div>
+    </div>
+</div>
+
+<div class="card">
+    <div class="card-header">
+        <h3>Cloud Storage Sync</h3>
+    </div>
+    <div class="card-body">
+        <p>To sync your backups to cloud storage:</p>
+        <ol>
+            <li>Create a backup using the button above</li>
+            <li>Locate the backup file in the <code>backups/</code> directory</li>
+            <li>Add the <code>backups/</code> directory to your cloud storage sync folder (Dropbox, iCloud, Google Drive, etc.)</li>
+            <li>Your backups will automatically sync to the cloud</li>
+        </ol>
+        <p><strong>Privacy Note:</strong> All data stays on your local machine. Cloud sync is optional and controlled by you.</p>
+    </div>
+</div>
+</div>
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    const createBackupBtn = document.getElementById('createBackupBtn');
+    const exportBtn = document.getElementById('exportBtn');
+    const refreshBackupsBtn = document.getElementById('refreshBackupsBtn');
+    const backupStatus = document.getElementById('backupStatus');
+    const exportStatus = document.getElementById('exportStatus');
+    const backupsList = document.getElementById('backupsList');
+    
+    createBackupBtn.addEventListener('click', async function() {
+        createBackupBtn.disabled = true;
+        backupStatus.textContent = 'Creating backup...';
+        
+        try {
+            const response = await fetch('/api/backup/create', { method: 'POST' });
+            const data = await response.json();
+            
+            if (data.success) {
+                backupStatus.textContent = 'Backup created: ' + data.path;
+                refreshBackupsList();
+            } else {
+                backupStatus.textContent = 'Error: ' + data.message;
+            }
+        } catch (error) {
+            backupStatus.textContent = 'Error: ' + error.message;
+        } finally {
+            createBackupBtn.disabled = false;
+        }
+    });
+    
+    exportBtn.addEventListener('click', async function() {
+        const format = document.getElementById('exportFormat').value;
+        const path = document.getElementById('exportPath').value;
+        
+        if (!path) {
+            exportStatus.textContent = 'Please enter an output path';
+            return;
+        }
+        
+        exportBtn.disabled = true;
+        exportStatus.textContent = 'Exporting...';
+        
+        try {
+            const response = await fetch('/api/backup/export', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ format: format, path: path })
+            });
+            const data = await response.json();
+            
+            if (data.success) {
+                exportStatus.textContent = 'Exported to: ' + data.path;
+            } else {
+                exportStatus.textContent = 'Error: ' + data.message;
+            }
+        } catch (error) {
+            exportStatus.textContent = 'Error: ' + error.message;
+        } finally {
+            exportBtn.disabled = false;
+        }
+    });
+    
+    function refreshBackupsList() {
+        backupsList.textContent = 'Loading...';
+        fetch('/api/backup/list')
+            .then(response => response.json())
+            .then(data => {
+                if (data.success && data.backups.length > 0) {
+                    const list = document.createElement('ul');
+                    data.backups.forEach(backup => {
+                        const li = document.createElement('li');
+                        li.textContent = backup.filename + ' (' + 
+                            (backup.size / 1024).toFixed(1) + ' KB, ' + 
+                            new Date(backup.created).toLocaleDateString() + ')';
+                        list.appendChild(li);
+                    });
+                    backupsList.innerHTML = '';
+                    backupsList.appendChild(list);
+                } else {
+                    backupsList.textContent = 'No backups found';
+                }
+            })
+            .catch(error => {
+                backupsList.textContent = 'Error loading backups: ' + error.message;
+            });
+    }
+    
+    refreshBackupsBtn.addEventListener('click', refreshBackupsList);
+    refreshBackupsList();
+});
+</script>
+{% endblock %}
+

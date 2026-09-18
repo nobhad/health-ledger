@@ -1,0 +1,123 @@
+/**
+ * ===============================================
+ * BUTTON DESIGN TOKENS
+ * ===============================================
+ * @file src/design-system/tokens/buttons.css
+ *
+ * Shared button tokens for consistent styling across portals.
+ * Main site has its own creative button aesthetic and does NOT use these.
+ */
+
+/* ============================================
+ * PORTAL BUTTON TOKENS - BRUTALIST DESIGN
+ * ============================================
+ * Used by admin and client portal buttons.
+ * Design: Black background, white border, monospace font
+ * SCOPED to portal pages only to prevent main site bleed.
+ * data-page="auth" is the server-rendered set/reset/forgot-password pages —
+ * they draw the portal's card and submit button, so they need these tokens.
+ * Without them `border: var(--portal-btn-border-width) solid currentColor`
+ * has no width, the whole shorthand is invalid, and the button loses its box.
+ */
+[data-page="admin"],
+[data-page="ledger"],
+[data-page="auth"] {
+  /* Button sizing */
+  --portal-btn-padding-y: var(--space-2);
+  --portal-btn-padding-x: var(--space-4);
+  --portal-btn-padding: var(--portal-btn-padding-y) var(--portal-btn-padding-x);
+  --portal-btn-min-height: var(--space-5);
+
+  /* Button typography - Portal: Inconsolata monospace */
+  --portal-btn-font-family: "Inconsolata", ui-monospace, monospace;
+  --portal-btn-font-size: 0.875rem;
+  --portal-btn-font-weight: 500;
+  /* Positive, and only just. Every button on the site is uppercase
+     Inconsolata at 0.875rem, and uppercase has no ascenders or descenders to
+     separate one letter from the next — negative tracking closed the last of
+     the gap and ran DECLINE and ACCEPT ALL together. 0.03em is about half a
+     pixel at that size: enough to part the letters, too little to read as
+     spaced-out lettering. */
+  --portal-btn-letter-spacing: 0.03em;
+  --portal-btn-text-transform: uppercase;
+
+  /* Button borders - Portal: no radius, even 2px border on all four sides */
+  --portal-btn-border-width: 2px;
+  /* Was 6px — the heavy bottom edge. Kept as its own token rather than
+     deleted so the ten rules that read it still resolve; it now simply
+     matches the other three sides. */
+  --portal-btn-border-bottom-width: var(--portal-btn-border-width);
+  --portal-btn-border-radius: 0;
+  --portal-btn-border-color: var(--color-text-primary);
+
+  --portal-btn-color: var(--color-text-primary);
+  --portal-btn-border: var(--color-text-primary);
+
+  /* Button colors - hover (inverted: dark bg = light text, light bg = dark text) */
+  --portal-btn-hover-bg: var(--color-text-primary);
+  --portal-btn-hover-color: var(--color-bg-primary);
+  --portal-btn-hover-border: var(--color-text-primary);
+
+  /* Button colors - danger (transparent bg, red text/border). The background
+     is not a token: it is `transparent` in both themes, so the two
+     declarations only made you look in two places to learn nothing. */
+  --portal-btn-danger-color: var(--color-error-500);
+  --portal-btn-danger-border: var(--color-error-500);
+
+  /* Button colors - danger hover */
+  --portal-btn-danger-hover-bg: var(--color-error-500);
+  --portal-btn-danger-hover-color: var(--color-text-primary);
+  --portal-btn-danger-hover-border: var(--color-error-500);
+
+  /* Button effects - BRUTALIST: no shadows. There is no token for the
+     shadow: it was `none` in every declaration and every reference already
+     fell back to `none`, so the buttons say it themselves. */
+  --portal-btn-transition: all var(--transition-fast);
+  
+    --portal-btn-sm-font-size: 0.8rem;
+  --portal-btn-sm-min-height: var(--space-4);
+
+  /* Icon button sizes (square) */
+  --portal-btn-icon-size: calc(var(--space-4) + var(--space-0-5));
+  --portal-btn-icon-size-sm: var(--space-4);
+  --portal-btn-icon-size-xs: calc(var(--space-3) + var(--space-0-5));
+  /* 24px — the row-action rung, and the smallest a button may be: it is the
+     minimum target size a pointer can reliably hit. Row actions used to take
+     `--icon-size-sm` instead, which is a GLYPH token, so the button collapsed
+     onto its own icon: 14x14 with no padding, no target and nothing for a
+     hover state to fill. A button's size comes from this ladder; only what is
+     drawn inside it comes from the icon ladder. */
+  --portal-btn-icon-size-2xs: var(--space-3);
+  
+  /* Icon sizes within buttons */
+  --portal-btn-icon-inner-size: var(--icon-size-lg);
+  }
+
+/* ============================================
+ * PORTAL LIGHT MODE - Button colors inverted
+ * ============================================
+ * Transparent background, black text/border (matches dark mode pattern)
+ */
+html[data-theme="light"] body[data-page="ledger"],
+html[data-theme="light"] body[data-page="admin"],
+html[data-theme="light"] [data-page="ledger"],
+html[data-theme="light"] [data-page="admin"] {
+  /* Button borders - matches portal text color */
+  --portal-btn-border-color: var(--color-gray-900);
+
+  --portal-btn-color: var(--color-gray-900);
+  --portal-btn-border: var(--color-gray-900);
+
+  /* Button colors - hover (dark bg, light text) */
+  --portal-btn-hover-bg: var(--color-gray-900);
+  --portal-btn-hover-color: var(--color-off-white);
+  --portal-btn-hover-border: var(--color-gray-900);
+
+}
+
+/* ============================================
+ * PORTAL BUTTON STYLES
+ * ============================================
+ * Applied styles moved to: src/styles/portal/shared/portal-buttons.css
+ * This file contains only CSS variables (tokens).
+ */

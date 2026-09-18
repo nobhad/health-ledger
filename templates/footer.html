@@ -1,0 +1,24 @@
+{#
+  The portfolio site's footer band (no-bhad-codes templates/partials/shell/footer.ejs),
+  rendered in flow rather than as a scroll-revealed curtain: this app has no page to
+  slide off it. Same classes, same lockup: credit, avatar + wordmark, year.
+#}
+<footer class="footer">
+    <div class="footer-curtain">
+        <div class="footer-curtain__inner">
+            <p class="footer-curtain__note">
+                For personal record-keeping. Not a substitute for professional medical advice.
+            </p>
+            <div class="footer-curtain__mark">
+                <p class="footer-curtain__credit">Made &amp; Designed<br>by</p>
+                <div class="footer-curtain__lockup">
+                    <a class="footer-curtain__brand" href="https://nobhad.codes" aria-label="No Bhad Codes">
+                        <img class="footer-curtain__avatar" src="{{ url_for('static', filename='images/avatar.svg') }}" alt="" width="288" height="356" loading="lazy" decoding="async">
+                        <p class="footer-curtain__wordmark">no bhad codes</p>
+                    </a>
+                    <p class="footer-curtain__year">&copy; <span class="js-copyright-year"></span></p>
+                </div>
+            </div>
+        </div>
+    </div>
+</footer>

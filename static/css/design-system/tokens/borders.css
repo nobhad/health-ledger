@@ -1,0 +1,95 @@
+/**
+ * ===============================================
+ * BORDER DESIGN TOKENS
+ * ===============================================
+ * @file src/design-system/tokens/borders.css
+ * 
+ * Border widths, radius, and styles.
+ */
+
+:root {
+  /* ============================================
+   * BORDER WIDTHS
+   * ============================================ */
+
+        --border-width-4: 4px;
+  
+  /* Semantic aliases (migrated from variables.css)
+   * DISCOTHÈQUE uses 2px borders consistently */
+  --border-width-thin: 1px; /* Subtle borders, kbd badges, dividers */
+  --border-width: 2px; /* Default border width */
+  --border-width-thick: 3px; /* Header branding row, emphasized borders */
+  --border-width-heavy: 4px; /* Dialog/modal borders, strong visual emphasis */
+
+  /* ============================================
+   * SVG STROKE WIDTH (migrated from variables.css)
+   * ============================================
+   * Matches border thickness for visual consistency.
+   */
+  --svg-stroke-width: 2.5;
+  /* A label's icon takes the label's weight — see portal-labels.css. Moved
+     off body[data-page] so it resolves outside the portal too. */
+  --svg-stroke-width-bold: 2.75;
+
+  /* ============================================
+   * BORDER RADIUS - BRUTALIST DESIGN
+   * All scale values set to 0 (sharp corners)
+   * Exception: --border-radius-full for circular elements
+   * ============================================ */
+
+    --border-radius-xs: 0;
+  --border-radius-sm: 0;
+  --border-radius-md: 0;
+  --border-radius-lg: 0;
+  --border-radius-xl: 0;
+      --border-radius-full: 9999px;
+
+  /* ============================================
+   * COMPONENT BORDER RADIUS
+   * BRUTALIST DESIGN: All components use 0 radius
+   * ============================================ */
+
+      --border-radius-card: 0;
+      /* Keep circular for avatars */
+
+  /* ============================================
+   * BORDER STYLES
+   * ============================================ */
+
+        }
+
+/* ============================================
+ * NOTE: Border utility classes removed - use CSS variables directly
+ * Example: border-radius: var(--border-radius-md);
+ * ============================================ */
+
+/* ============================================
+ * FOCUS RING
+ * ============================================
+ * The base declaration, shared by every bundle.
+ *
+ * These lived only in `portal-theme.css`, which the site bundle does not
+ * import, so `:focus-visible` in `base/reset.css` had been running on the
+ * fallbacks inside its own `var()` — a value that cannot answer to theme or
+ * surface, and a token name that was telling the truth nowhere but the portal.
+ *
+ * The values here are what the site has been rendering all along, so nothing
+ * moves. `portal-theme.css` still narrows the width to 1px for the dashboards
+ * — a deliberate choice recorded there ("inherits the element's own border
+ * visually, no thick glow") — and its `body[data-page]` selector still wins
+ * inside them.
+ */
+:root {
+  --focus-ring-color: var(--color-accent);
+  --focus-ring-width: 2px;
+}
+
+/* The two the form controls read, beside the ring they belong to.
+   They were inside portal-theme.css's `body[data-page]` block, so a page had
+   to claim `data-page="client"` — and inherit 556 lines of dashboard theming —
+   to reach them. Neither depends on anything that block overrides. */
+:root {
+  --focus-ring-width-thick: 2px;
+  --focus-ring-offset-sm: 2px;
+}
+

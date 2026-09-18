@@ -1,0 +1,720 @@
+/**
+ * ===============================================
+ * PORTAL THEME - SINGLE SOURCE OF TRUTH
+ * ===============================================
+ * @file src/design-system/tokens/portal-theme.css
+ *
+ * Portal-specific CSS variable overrides.
+ * All portal theme values are defined here — this is the ONLY place.
+ *
+ * LOAD ORDER: Imported UNLAYERED in admin.css and client.css only.
+ * NOT in @layer tokens. This ensures portal overrides beat all layered styles.
+ * Main site pages do NOT load this file — complete style isolation.
+ *
+ * Strategy: portal overrides the same semantic variables the main site uses
+ * (--color-text-*, --color-bg-*, --color-border-*) within portal scope.
+ * Components use one consistent variable name everywhere.
+ *
+ * DARK/LIGHT MODE PHILOSOPHY:
+ * The ONLY values that differ between dark and light mode are the two primary
+ * colors: --color-bg-primary and --color-text-primary. All other colors are
+ * derived from those two via color-mix() and CSS variable references.
+ * The light mode block (below) contains only those two overrides.
+ *
+ * Portal-specific extensions (no main-site equivalent):
+ * - --color-bg-raised/elevated/prominent/hover/readonly (extra bg ramp levels)
+ * - --color-hover-bg/text/icon/border (hover state colors)
+ * - --portal-alpha-* (alpha utility colors)
+ * - --portal-border (border shorthand)
+ * - --portal-radius-pill (brutalist pill = 0, differs from --border-radius-full)
+ *
+ * Includes:
+ * - Dark mode (default): black background, white text
+ * - Light mode overrides: off-white background, off-black text
+ */
+
+/* ============================================
+ * PORTAL LIGHT MODE (DEFAULT) - INVERTED DISCOTHÈQUE
+ * Portal light mode — inherits bg from design system (colors.css).
+ * Uses body[data-page] for higher specificity than :root in colors.css
+ * ============================================ */
+/* ----------------------------------------
+ * OPACITY TOKENS
+ * ----------------------------------------
+ * A plain numeric scale — nothing about it is portal-specific. It sat inside
+ * body[data-page="admin"|"client"], so a page that was not the dashboard could
+ * not read it, and the auth pages had to claim data-page="ledger" (and the
+ * dashboard's entire 456-line theme with it) to style a password field.
+ */
+:root {
+  /* The portal's 1px rule. It lived in body[data-page="admin"|"client"], so a
+     page outside the dashboard carried `border: var(--portal-border)` that
+     resolved to nothing — which is why the activation card had no border. */
+  --portal-border: var(--border-width) solid var(--color-border-primary);
+  --opacity-faint: 0.3;
+  --opacity-inactive: 0.4;
+  --opacity-disabled: 0.5;
+  --opacity-muted: 0.6;
+  --opacity-subtle: 0.7;
+  --opacity-secondary: 0.8;
+  --opacity-high: 0.9;
+  --opacity-completed: 0.5; /* Completed/done items — same as disabled */
+}
+
+
+body[data-page="admin"],
+body[data-page="ledger"] {
+  /* Portal uses mono font everywhere — set on body so Radix portals inherit */
+  font-family: var(--font-family-mono);
+  background-color: var(--color-bg-primary);
+
+  /* ----------------------------------------
+   * PRIMARY COLORS — solid hex, no mixing
+   * ---------------------------------------- */
+  --color-text-primary: #333333;
+  --color-bg-primary: var(--color-off-white);
+  --color-bg-hover: var(--color-gray-100);
+
+  /* ----------------------------------------
+   * TEXT COLORS — derived from primaries
+   * ---------------------------------------- */
+  /* A real ramp again, 2026-09-13. These three were all aliased to
+     --color-text-primary (88cb0b24, 2026-03-08), so .text-secondary — 165 call
+     sites — rendered identically to .text-primary and nothing in the portal
+     could be de-emphasised. The complaint that started it was field labels
+     reading the same weight as their values; the bold half of that is already
+     fixed, this is the colour half.
+
+     Measured against this block's own ground, --color-off-white #e0e0e0:
+
+         --color-text-primary    #333333   9.57:1
+         --color-text-secondary  #525252   5.92:1   <- the step
+         gray-500                #737373   3.59:1   fails AA
+
+     **Which is why tertiary and muted follow secondary rather than stepping
+     down again.** The portal's background ramp is deliberately flat — every
+     surface is #e0e0e0 — and on that ground gray-500 is the first step below
+     secondary and it does not clear 4.5:1 for normal text. Three names and two
+     colours is still one name too many, but it is the honest maximum here: a
+     third level needs a lighter surface to sit on, not a lighter grey. */
+  --color-text-secondary: var(--color-gray-600);
+  --color-text-tertiary: var(--color-text-secondary);
+  --color-text-muted: var(--color-text-secondary);
+  --color-text-inverse: var(--color-bg-primary);
+
+  /* ----------------------------------------
+   * BACKGROUND RAMP — flat design: all steps equal bg-primary
+   * ---------------------------------------- */
+  --color-bg-secondary: var(--color-bg-primary);
+  --color-bg-tertiary: var(--color-bg-primary);
+  --color-bg-raised: var(--color-bg-primary);
+  --color-bg-elevated: var(--color-bg-primary);
+  --color-bg-prominent: var(--color-bg-primary);
+  --color-bg-readonly: var(--color-bg-primary);
+  /* Active/pressed state — slightly stronger than hover */
+  --color-bg-active: color-mix(in srgb, var(--color-bg-primary), var(--color-text-primary) 15%);
+
+  /* ----------------------------------------
+   * BORDER SYSTEM — derived from primaries
+   * ---------------------------------------- */
+  --color-border-primary: var(--color-text-primary);
+  --color-border-secondary: var(--color-text-primary);
+
+  /* Portal border shorthand — convenience alias.
+     A custom property substitutes its var()s where it is *declared*, not where
+     it is read, so the :root copy resolves against the site's grey border and
+     stays grey however the portal redefines --color-border-primary below it.
+     The portal's 97 users of this token need it declared here, in the scope
+     that decides the colour. */
+  --portal-border: var(--border-width) solid var(--color-border-primary);
+  /* Input border — 1px via root alias, since inputs are nested inside bordered panels */
+  --portal-input-border: var(--border-width-thin) solid var(--color-border-primary);
+
+  /* ----------------------------------------
+   * ALPHA COLORS
+   * portal-alpha-white-* = text-primary at various opacities.
+   * Name is historical — these are always "foreground text at X opacity".
+   * portal-alpha-black-* = true black overlays (shadows, scrims); never inverted.
+   * ---------------------------------------- */
+  --portal-alpha-white-02: color-mix(in srgb, var(--color-text-primary), transparent 98%);
+  --portal-alpha-white-05: color-mix(in srgb, var(--color-text-primary), transparent 95%);
+  --portal-alpha-white-08: color-mix(in srgb, var(--color-text-primary), transparent 92%);
+  --portal-alpha-white-10: color-mix(in srgb, var(--color-text-primary), transparent 90%);
+  --portal-alpha-white-15: color-mix(in srgb, var(--color-text-primary), transparent 85%);
+  --portal-alpha-white-20: color-mix(in srgb, var(--color-text-primary), transparent 80%);
+  --portal-alpha-white-30: color-mix(in srgb, var(--color-text-primary), transparent 70%);
+  /* Portal-only, and the prefix means it. Three site sheets used to reach for
+     these behind an `rgba()` fallback — which is what actually rendered, since
+     this file is not in the site bundle. They were the last entries in the
+     bundle contract's "living on a fallback" list, and five permanent benign
+     entries are how a sixth real one hides. The site sheets carry the `rgba()`
+     directly now; if the site ever wants a shared alpha ramp it should get one
+     in tokens/colors.css rather than borrow the portal's. */
+  --portal-alpha-black-05: color-mix(in srgb, black, transparent 95%);
+  --portal-alpha-black-10: color-mix(in srgb, black, transparent 90%);
+  --portal-alpha-black-30: color-mix(in srgb, black, transparent 70%);
+  --portal-alpha-black-50: color-mix(in srgb, black, transparent 50%);
+  --portal-alpha-black-60: color-mix(in srgb, black, transparent 40%);
+  --portal-alpha-black-80: color-mix(in srgb, black, transparent 20%);
+
+  /* Semantic color alphas - for colored highlights/backgrounds */
+  --portal-alpha-primary-08: rgba(var(--color-accent-rgb), 0.08);
+  --portal-alpha-primary-10: rgba(var(--color-accent-rgb), 0.1);
+
+  /* ----------------------------------------
+   * FOCUS STATE COLORS
+   * ---------------------------------------- */
+  --focus-ring-color: var(--color-accent);
+  --focus-ring-width: 1px;
+  --focus-ring-offset: var(--space-0);
+  /* Thin 1px ring — inherits element's own border visually, no thick glow */
+  --focus-ring: 0 0 0 var(--focus-ring-width) var(--focus-ring-color);
+  /* Thick 2px outline-based focus ring — for interactive controls (buttons, inputs) */
+  /* Standard outline-offset for focus indicators */
+  /* Inset outline-offset — draws focus ring inside element bounds (e.g. details cards) */
+  --focus-ring-offset-inset: -2px;
+
+  /* 12px 24px — on 8px grid */
+  --portal-panel-padding-x: var(--space-3); /* 24px — on 8px grid */
+
+  /* ----------------------------------------
+   * LAYOUT TOKENS
+   * ---------------------------------------- */
+  /* The page's horizontal rhythm: the gutter either side of the content, the
+     gap between cards, and the space the content keeps from the sidebar are
+     all this one value, so they cannot drift apart.
+
+     32 at desktop, stepping down as the viewport does (Noelle, 2026-09-13:
+     greater spacing at default, tighter on compact views). A 32px gutter on a
+     phone spends a tenth of the screen on empty margin, so it narrows rather
+     than holding a number that only makes sense wide. The steps are on the
+     ramp: 32 → 24 → 16. */
+  --portal-page-gutter: var(--space-4); /* 32px */
+
+  /* The padding INSIDE a panel — the space between its edge and the cards,
+     rows and states it holds. 16 is the base; it opens up as the page does,
+     because at 1600px a card sitting 16px off its panel's border reads as
+     cramped while the same 16 is right on a laptop (Noelle, 2026-09-13).
+     Steps 16 / 32 / 40 — the first pass at 16 / 24 / 32 was still tight.
+
+     Deliberately NOT --content-gutter, which this used to spend. That token
+     also sets the sidebar's own inset and the header row's, and growing it
+     would pull the header avatar out of line with the nav icons below it. */
+  --portal-content-padding: var(--space-2); /* 16px */
+
+  /* The portal has no display face. --heading-font-family is Acme on :root —
+     the site's heading type — and `.portal h3` reads it, so every card heading
+     in both portals was set in the marketing site's display face (Noelle,
+     2026-09-14: "should not use acme, i wont to remove acme from portal").
+     base/typography.css already excludes the portal from the site's own
+     h1-h3 rule; this closes the same leak coming through the token instead.
+     The portal is one typeface, the body face, at different weights. */
+  --heading-font-family: var(--font-family-mono);
+
+  /* A card's OWN padding — the space between its border and its contents.
+     Separate from --portal-content-padding, which is the space between a panel
+     and the cards inside it: the two want different amounts, and a card that
+     pads itself as much as the panel pads it reads as hollow. */
+  --portal-card-padding: var(--space-2); /* 16px */
+
+  --portal-section-gap: var(--space-3); /* 24px */
+  --portal-stack-gap: var(--space-5); /* 40px — see spacing.css */
+  --portal-table-stack-gap: var(--space-8); /* 64px — see spacing.css */
+  --space-neg-px: -1px; /* Negative 1px — tab bottom-border overlap alignment */
+  --transform-scale-press: 0.95; /* Scale-down on button press (touch interaction) */
+
+  /* ----------------------------------------
+   * FIELD/LABEL SPACING
+   * ---------------------------------------- */
+  /* --field-label-value-gap lives in design-system/tokens/typography.css
+     with the rest of the label contract. */
+  --field-group-gap: var(--space-1-5); /* 12px */
+  --portal-field-group-gap: var(
+    --field-group-gap
+  ); /* alias — used in project-detail and modal layouts */
+  /* icon + gap = ~36px */
+
+  /* The heading tier tokens live in design-system/tokens/typography.css —
+     the public site spends them too (its h4 is a table title). */
+
+  /* ----------------------------------------
+   * WEIGHT SCALE — TWO STEPS, NOT FOUR
+   *
+   * fonts.css loads two Inconsolata faces: Regular (400) and Bold (700).
+   * CSS font matching therefore resolves 500 to the 400 face and 600 to the
+   * 700 face, so "medium" and "semibold" are not weights the portal can
+   * render — they are 52 and 49 stylesheet declarations asking for something
+   * that silently becomes regular or bold. The tokens are re-pointed at what
+   * actually renders so the stylesheets tell the truth.
+   *
+   * To get the middle steps back, add Inconsolata Medium and SemiBold faces
+   * to base/fonts.css and delete these two lines.
+   * ---------------------------------------- */
+  --font-weight-medium: var(--font-weight-regular);
+  --font-weight-semibold: var(--font-weight-bold);
+
+  /* ----------------------------------------
+   * ICON STROKE — A WEIGHT OF THE TEXT, NOT A CONSTANT
+   *
+   * Portal icons are sized 1em (see the root `.portal svg.lucide` rule), so a
+   * Lucide icon's stroke and the adjacent text's stem are directly
+   * comparable: at stroke-width W in a 24 viewBox the stroke renders at
+   * W/24 em. Measured off the shipped faces, an Inconsolata stem is 0.083em
+   * regular and 0.115em bold — which is 2.0 and 2.75 in stroke-width terms.
+   * So an icon inherits its stroke from the weight of the text it sits in,
+   * rather than the flat 2.5 that read heavier than every regular label.
+   * ---------------------------------------- */
+  --svg-stroke-width: 2;
+
+  /* ----------------------------------------
+   * SEARCH SURFACES
+   * The global header trigger and the inline .search-bar are different
+   * elements — a button and an input — and had drifted to different icon
+   * insets, different icon-to-text gaps and different text sizes. These three
+   * tokens are the contract both read, so the two read as one control.
+   * ---------------------------------------- */
+
+  /* ----------------------------------------
+   * DETAIL HEADER
+   * The page title on a detail view. It is a token because the gap between
+   * the title and its status pill is expressed against it — see
+   * portal-detail-header.css.
+   * ---------------------------------------- */
+  --detail-title-size: clamp(1.5rem, 4vw, 2rem);
+
+  /* The subtab type tokens live in design-system/tokens/typography.css —
+     the design system page's jump nav is the site's version of them. */
+
+  /* ----------------------------------------
+   * PORTAL HEADER / SIDEBAR LAYOUT TOKENS
+   * ---------------------------------------- */
+  --portal-header-height: calc(
+    2 * var(--space-5) + var(--space-1) + 2 * var(--space-2)
+  ); /* 2 rows (40px) + gap (8px) + branding row padding (32px) = 120px */
+  --portal-header-top: var(--space-2-5); /* 20px */
+  --portal-header-height-line: var(--space-4); /* 32px */
+  /* 18px */
+  --portal-page-top: var(--space-3);
+  --portal-page-bottom: var(--space-6);
+  /* 24 + icon + 24 = 68px, stated as the sum so the space around a collapsed
+     icon stays tied to `--sidebar-icon-size` rather than to a number that
+     drifts from it.
+
+     It was 56px, which centred a 20px glyph at 18px a side — the one uneven
+     gap in a row that is otherwise the page step. Matching the page exactly at
+     32 was tried and read as too much: a strip that is mostly empty space
+     looks like a mistake rather than a margin, because there is no content in
+     it to justify the room. One step down keeps the increase and loses the
+     hole (Noelle, 2026-09-13). */
+  --sidebar-collapsed-width: calc(2 * var(--space-3) + var(--sidebar-icon-size)); /* 68px */
+
+  /* ----------------------------------------
+   * FORM / FIELD TOKENS
+   * ---------------------------------------- */
+  --portal-placeholder-color: var(--color-text-tertiary);
+  --action-bar-item-height: var(--portal-btn-icon-size); /* 36px */
+  /* Gap between adjacent icon/action buttons (edit, delete, save, close clusters) */
+  --action-btn-gap: var(--space-1); /* 8px */
+
+  /* ----------------------------------------
+   * TABLE TOKENS
+   * ---------------------------------------- */
+  --table-header-height: var(--space-4);
+  --table-row-height: var(--space-5);
+  --table-cell-padding-x: clamp(var(--space-1), 2vw, var(--space-2));
+  /* Row action icons: the air BETWEEN THE BOXES. The buttons are 24px squares
+     around a 14px glyph, so the boxes' own inset already puts 10px of clear
+     space between two glyphs with no gap at all — that is the separation, and
+     it is set once here for every table in both portals. Adding to it was what
+     read as loose: 4px here made 14px between glyphs and "the spacing needs
+     to be tighter" (Noelle, 2026-09-15). The crowding step lives in
+     portal-tables.css, beside the other things a narrowing table gives up. */
+  --table-actions-gap: 0px;
+  /* The gap a badge keeps from the text it follows — one number, portal
+     wide. The Badge component's own doc promised this was "decided once, in
+     CSS" and it never was: a badge sat 4px from a card heading, 16 from a
+     project title and 24 from a contact's name, and the invoices header
+     carried --space-3 as a stand-in (Noelle, 2026-09-15: "Badges need a set
+     gap from the text they follow, portal wide"). --space-3 is the value
+     that stand-in chose and Noelle read as right ("spacied like badge gap"). */
+  --badge-gap: var(--space-3);
+  --table-header-font-size: var(--font-size-sm);
+  --table-cell-font-size: var(--font-size-sm);
+  --table-header-letter-spacing: var(--letter-spacing-label);
+  --table-header-color: var(--color-text-secondary);
+  --table-cell-color: var(--color-text-primary);
+  --table-identity-max-width: calc(var(--space-base) * 27.5);
+  --table-truncate-max-width: calc(var(--space-base) * 37.5);
+  --table-checkbox-width: var(--space-5);
+  --table-cell-max-width: calc(var(--space-base) * 25);
+  /* The primary column hugs its content and stops here. 44 * 8px = 352px fits
+     the longest thing these columns carry on ONE line — a full email
+     ("clementine.carter-rutledge@demo.nobhad.codes" ~334px) or a project
+     title — so nothing wraps or truncates at a normal desktop width (Noelle:
+     "i dont want the emails to wrap", 2026-09-17). A rarer, longer string (a
+     six-name contact) ellipsizes; its hover card carries the whole thing. */
+  --table-name-max-width: calc(var(--space-base) * 44);
+  /* The ceiling on a SHORT-VALUE column — type, status, date, amount, count.
+     It is there to stop one of them growing into the primary column's space,
+     not to cut the values themselves, and at 120px it was cutting them: the
+     traffic sessions table renders "desktop · Chrome" in a .type-col, which
+     needs about 135px at this size, and it truncated to "desktop · C…" while
+     the visitor column beside it held several hundred pixels of slack (Noelle,
+     2026-09-15: "vistor column width is HUGE while device is turncated!!!").
+
+     192px is roughly 22 characters of the portal's mono at --font-size-sm —
+     past every value these columns actually carry, and still a ceiling. */
+  --table-compact-max-width: calc(var(--space-base) * 24);
+  --table-icon-size: var(--icon-size-md);
+  --table-sort-indicator-size: calc(var(--icon-size-xs) - var(--border-width));
+  --table-pagination-btn-size: var(--space-3-5); /* 28px */
+  --table-col-xs: calc(var(--space-base) * 7.5);
+  --table-col-sm: calc(var(--space-base) * 12.5);
+  --table-col-md: calc(var(--space-base) * 18.75);
+  --table-col-lg: calc(var(--space-base) * 25);
+  --table-col-xl: calc(var(--space-base) * 35);
+
+  /* ----------------------------------------
+   * DROPDOWN TOKENS
+   * ---------------------------------------- */
+  --dropdown-padding-x: var(--space-1-5);
+  --dropdown-padding-y: var(--space-1);
+  --dropdown-item-height: var(--space-4); /* 32px — fixed-height dropdown rows */
+  /* Left padding on a checkbox or radio item, clearing the indicator that sits
+     absolutely at the row's left edge. It was written as a fallback at both
+     use sites — `var(--dropdown-indicator-inset, 28px)` against a property
+     nothing declared — so the literal was the value, twice, and could not
+     answer to anything. 28px is --space-3-5 on the scale. */
+  --dropdown-indicator-inset: var(--space-3-5);
+  --status-dropdown-width: var(--space-20); /* 160px */
+  --portal-dropdown-min-width: var(--status-dropdown-width); /* default trigger min-width */
+  /* The status trigger's resting border: the ground it sits on, so the border
+     reserves its width invisibly until hover or open. A details panel sets it
+     to the panel's own ground (admin/modal-system.css). */
+  --dropdown-trigger-resting-color: var(--color-bg-primary);
+
+
+  /* ----------------------------------------
+   * BLUR TOKENS
+   * ---------------------------------------- */
+  --blur-backdrop: 4px; /* Overlay backdrops: keyboard shortcuts, command palette, confirm dialog */
+  --blur-modal: 8px; /* Full modal overlays */
+
+  /* ----------------------------------------
+   * LAYOUT / ASIDE WIDTH TOKENS
+   * ---------------------------------------- */
+  --aside-width-narrow: 240px;
+  --aside-width-medium: 280px;
+  --aside-width-wide: 320px;
+
+  /* ----------------------------------------
+   * CONTROL HEIGHT TOKENS
+   * ---------------------------------------- */
+  --min-height-textarea: 60px; /* Min height for multiline inputs and reply boxes */
+
+  --chart-height: 320px;
+  --chart-placeholder-min-height: 200px;
+
+  /* Group: Progress Bar (portal overrides base 16px) */
+  --progress-bar-height: 12px;
+  --progress-bar-height-sm: 8px;
+  --progress-bar-height-lg: 16px;
+
+  /* Group: Kanban (shared portal-kanban.css) */
+  --kanban-board-min-height: 500px;
+  --kanban-column-min-width: 200px;
+  --kanban-column-offset: 320px;
+  --kanban-content-min-height: 120px;
+  --hover-lift-sm: -2px;
+
+  --kanban-skeleton-height: 256px;
+  --tasks-textarea-min-height: 60px;
+  --tasks-progress-track-max-width: 200px;
+
+  /* Group: Configuration */
+  --config-overview-grid-min-width: 180px;
+  --config-textarea-min-height: 72px;
+  --config-field-label-min-width: 64px;
+
+  /* Group: Project Detail */
+  --pd-truncate-filename-max-width: 300px;
+
+  /* Group: Modal / Details Panel */
+  --detail-row-label-width: 140px;
+  --detail-message-max-height: 200px;
+  --details-panel-width: 500px;
+
+  /* Group: Modal widths (portal additions) */
+  --modal-width-xl: 1000px;
+  /* Modal viewport constraints */
+  --modal-max-height: 90vh; /* Default max-height for portal modals */
+  --modal-edge-padding: 2rem; /* Horizontal edge clearance for modal calc() values */
+
+  /* Group: Files */
+  --files-folder-panel-width: 220px;
+  --files-browser-min-height: 300px;
+  --files-filter-group-min-width: 140px;
+  --files-filter-date-min-width: 120px;
+  --files-action-btn-min-width: 90px;
+  --files-filter-select-max-width: 300px;
+  /* The folder rail on the Files screen. 200 is the floor, for the narrowest
+     width at which it is shown at all (--tablet, 768px); it steps up with the
+     viewport rather than staying at a phone-adjacent number on a wide screen,
+     where a 200px rail beside a full-width table reads as an offcut
+     (Noelle, 2026-09-13). Folder names are the thing it has to fit, and they
+     are the part that was truncating first. */
+  --portal-files-sidebar-width: 200px;
+  --files-grid-item-min-width: 150px;
+  --files-folder-tree-max-height: 150px;
+
+  /* Group: Inline Edit */
+  --inline-edit-date-min-width: 130px;
+  --inline-edit-label-min-width: 140px;
+  --inline-edit-date-icon-size: 13px; /* Calendar icon inside compact date input */
+  --inline-edit-compact-padding-x: 6px; /* Horizontal padding for compact row inputs */
+  --inline-edit-required-margin: 2px; /* Left gap before required asterisk */
+  --inline-edit-compact-height: 22px; /* Compact override height (page-layer) */
+
+  /* Small action/pagination buttons */
+  --icon-container-lg: var(--space-6); /* 48px — large icon/status containers */
+  --modal-input-height: var(--space-6); /* 48px — modal dropdown trigger height */
+  --inline-pill-height: 18px; /* Inline badge/pill height */
+
+  /* Group: Help Center */
+  --help-right-column-min-height: 400px; /* Article column floor height */
+  /* One height for the help panel in every view. Without it the panel is as
+     tall as whichever article is open, so switching articles resizes the whole
+     table under the cursor. Clamped: never shorter than the column floor,
+     never taller than a screenful. */
+  --help-grid-height: clamp(var(--help-right-column-min-height), 55vh, 760px);
+  --help-contact-min-width: 200px; /* Contact card text block min-width */
+
+  /* Group: Progress / Indicators */
+  --progress-track-height: var(--space-0-5); /* 4px — horizontal progress bars */
+  --status-dot-size: 6px; /* Inline status indicator dot */
+
+  /* ----------------------------------------
+   * NOTIFICATION BELL TOKENS
+   * ---------------------------------------- */
+  --notification-badge-size: var(--icon-size-md); /* 16px — corner count badge */
+  --notification-badge-offset: 2px; /* tight corner offset */
+  --notification-unread-dot-size: var(--space-1); /* 8px — inline unread dot */
+  --notification-dropdown-gap: var(--space-1); /* 8px gap above dropdown */
+  --notification-dropdown-width: 320px;
+  --notification-dropdown-max-height: 420px;
+  --notification-list-max-height: 360px; /* inner scroll area */
+  --notification-dropdown-mobile-bleed: 10px; /* overhang on xs screens */
+
+  /* ----------------------------------------
+   * COMMAND PALETTE TOKENS
+   * ---------------------------------------- */
+  --cmd-palette-max-width: calc(var(--space-base) * 70); /* 560px */
+  /* 20px */
+  --cmd-palette-item-icon-size: var(--icon-size-md); /* 16px */
+
+  /* ----------------------------------------
+   * SEMANTIC COLOR TOKENS — derived from primaries
+   * Portal inverts the neutral scale: 100 = near-bg, 900 = near-text.
+   * ---------------------------------------- */
+  --color-neutral-100: color-mix(in srgb, var(--color-bg-primary), var(--color-text-primary) 10%);
+  --color-neutral-200: color-mix(in srgb, var(--color-bg-primary), var(--color-text-primary) 4%);
+  --color-neutral-300: var(--color-bg-primary);
+  --color-neutral-400: color-mix(in srgb, var(--color-bg-primary), var(--color-text-primary) 47%);
+  --color-neutral-500: color-mix(in srgb, var(--color-bg-primary), var(--color-text-primary) 63%);
+  --color-neutral-600: color-mix(in srgb, var(--color-bg-primary), var(--color-text-primary) 75%);
+  --color-neutral-700: color-mix(in srgb, var(--color-bg-primary), var(--color-text-primary) 88%);
+  --color-neutral-800: color-mix(in srgb, var(--color-bg-primary), var(--color-text-primary) 96%);
+  --color-neutral-900: var(--color-text-primary);
+  --color-dark: var(--color-text-primary);
+  --color-light: var(--color-bg-primary);
+  --color-nav-text: var(--color-text-primary);
+  /* App-level aliases — derived from primaries */
+  --app-color-primary: var(--color-text-primary);
+
+  /* Form variables — derived from primaries */
+  --form-input-border: var(--color-text-primary);
+  --form-input-placeholder: var(--color-neutral-400); /* ~47% between bg and text */
+
+  /* ----------------------------------------
+   * DROPDOWN COMPONENT DEFAULTS
+   * Context variables — override per-component via selector scope.
+   * Defaults provide safe fallback when no context is set.
+   * ---------------------------------------- */
+  --dropdown-bg: var(--color-bg-secondary);
+  --dropdown-border-color: var(--color-border-primary);
+  --dropdown-border-width: var(--border-width);
+  --dropdown-radius: var(--border-radius-sm);
+
+  /* ----------------------------------------
+   * FILTER TOKENS — theme-aware native control filters
+   * Light mode: native controls are already visible, no filter needed.
+   * Dark mode override below sets invert(1) so dark native controls
+   * (e.g. date picker calendar icon) become visible on dark backgrounds.
+   * ---------------------------------------- */
+  --filter-invert-controls: none;
+
+  /* ----------------------------------------
+   * UTILITY ALIASES
+   * Map non-standard token names used in component CSS.
+   * ---------------------------------------- */
+  --portal-bg: var(--color-bg-primary); /* background context alias */
+  /* Tailwind ring utility alias */
+  --card-grid-gap: var(--space-4); /* configurable grid gap default */
+  /* compact mobile table text */
+}
+
+/* ============================================
+ * PORTAL DARK MODE - DISCOTHÈQUE THEME
+ * Near-black background, white text.
+ * ============================================ */
+html[data-theme="dark"] body[data-page="admin"],
+html[data-theme="dark"] body[data-page="ledger"] {
+  /* Same near-black dim the site uses in dark mode. The site's dark block is
+     scoped away from the portal, so without this the portal's backdrops would
+     resolve to the light value and a modal would open over a page barely
+     darker than itself. */
+  --nav-overlay-rgb: 0, 0, 0;
+  /* LIGHTER than light mode's 0.7, not darker. A scrim's job is to push the
+     page back from what is on top of it, and how much dimming that needs
+     depends on what it is dimming: on a near-white page 0.7 black is a strong
+     veil, and on a near-black one it is almost the page's own colour, so the
+     same number reads as heavier the darker the ground gets. 0.9 blacked the
+     page out and 0.8 still did (Noelle, 2026-09-14: "overlay is too dark on
+     dark mode"). At 0.6 the page stays legible behind the blur, which is what
+     tells you the panel is over something rather than instead of it. */
+  --nav-overlay-alpha: 0.6;
+  /* Redeclared here because a custom property substitutes its var()s where
+     it is declared: --overlay-backdrop is composed on :root, and the site's
+     dark block redefines the two ingredients on <html> — so the :root value
+     was already rgba(0,0,0,0.9) before this block's alpha could be read. */
+  --overlay-backdrop: rgba(var(--nav-overlay-rgb), var(--nav-overlay-alpha));
+  --color-text-primary: #ffffff;
+  /* The same step, inverted. --color-text-secondary is declared in the light
+     block as var(--color-gray-600) — a fixed grey, not a derivation — so unlike
+     the old alias it does NOT follow --color-text-primary into white here, and
+     #525252 on #171717 is 1.9:1. It has to be restated.
+
+         --color-text-primary    #ffffff  17.93:1
+         --color-text-secondary  #d4d4d4  12.09:1   <- the step
+         gray-500                #737373   3.78:1   fails AA
+
+     gray-300 rather than gray-400 (7.11:1) because it matches the light theme's
+     perceptual drop; gray-400 reads as a much bigger jump on a dark ground. */
+  --color-text-secondary: var(--color-gray-300);
+  --color-bg-primary: #171717;
+  --color-bg-hover: color-mix(in srgb, var(--color-bg-primary), var(--color-text-primary) 6%);
+  --filter-invert-controls: invert(1);
+}
+
+/* ============================================
+ * ADMIN-ONLY TOKENS
+ * Activity type colors for admin client detail
+ * ============================================ */
+[data-page="admin"] {
+  --activity-email-color: var(--app-color-info);
+  --activity-invoice-color: var(--app-color-success);
+  --activity-project-color: var(--color-admin-purple);
+  --activity-file-color: var(--app-color-warning);
+  --activity-message-color: var(--color-cyan);
+  --activity-contact-color: var(--color-pink);
+  --activity-status-color: var(--app-color-warning);
+}
+
+/* ============================================
+ * HTML ELEMENT - PORTAL DARK MODE
+ * Must define --color-bg-primary on html itself since html does not have
+ * data-page="admin" — without this, html inherits the main-site :root value.
+ * ============================================ */
+html:has(body[data-page="admin"]),
+html:has(body[data-page="ledger"]) {
+  --color-bg-primary: var(--portal-neutral-0); /* Portal dark = black */
+  background-color: var(--color-bg-primary);
+  height: 100%;
+}
+
+/* ============================================
+ * HTML ELEMENT - PORTAL LIGHT MODE
+ * ============================================ */
+html[data-theme="light"]:has(body[data-page="admin"]),
+html[data-theme="light"]:has(body[data-page="ledger"]) {
+  --color-bg-primary: var(--color-off-white); /* Portal light = #e0e0e0 */
+  background-color: var(--color-bg-primary);
+}
+
+/* Portal component primitives (checkbox, panel header, active-icon
+   colours, root icon sizing, icon-text defaults, menu trigger) moved
+   to portal/shared/portal-primitives.css on 2026-09-16 — imported
+   unlayered right after this file. This file is the palette only. */
+
+/* ============================================
+ * RESPONSIVE CARD PADDING
+ * Reduce card/panel padding on small screens.
+ * Overrides --portal-card-padding token defined in :root above.
+ * ============================================ */
+@media (--compact-mobile) {
+  body[data-page="admin"],
+  body[data-page="ledger"] {
+    /* 8px 16px */
+    --portal-panel-padding-x: var(--space-2); /* 16px */
+  }
+}
+
+/* Responsive steps.
+
+   THESE MUST REPEAT `body[data-page=...]`, not narrow to `:root`. The tokens
+   above are defined on that selector at (0,1,1), so a `:root` redefinition at
+   (0,1,0) loses no matter which media query it sits in — the rule applies and
+   the value simply never wins. Written as `:root` first, and both steps were
+   silently dead until the folder rail refused to widen and showed it.
+
+   The gutter narrows as the viewport does: a 32px margin on a phone spends a
+   tenth of the screen on nothing. The folder rail goes the other way: 200 is
+   the floor for the narrowest width it is shown at, and a wide screen should
+   not get a number chosen for a tablet. */
+@media (--tablet-wide) {
+  body[data-page="admin"],
+  body[data-page="ledger"] {
+    --portal-page-gutter: var(--space-3); /* 24px */
+  }
+}
+
+@media (--mobile) {
+  body[data-page="admin"],
+  body[data-page="ledger"] {
+    --portal-page-gutter: var(--space-2); /* 16px */
+  }
+}
+
+/* The first step up, at 960.
+
+   The ramp used to sit flat at 16px until 1200, which put an ordinary desktop
+   window — a 1115px browser on a 14" display — on the same card padding as a
+   phone. A nested card can be tight when the screen is; 1115px is not that
+   screen (Noelle, 2026-09-13). Card padding opens to 24 here and content
+   padding follows halfway, so the 16 -> 32 jump content padding used to make
+   in one move at 1200 is now two. */
+@media (--tablet-wide-up) {
+  body[data-page="admin"],
+  body[data-page="ledger"] {
+    --portal-content-padding: var(--space-3); /* 24px */
+    --portal-card-padding: var(--space-3); /* 24px */
+  }
+}
+
+@media (--wide) {
+  body[data-page="admin"],
+  body[data-page="ledger"] {
+    --portal-files-sidebar-width: 240px;
+    --portal-content-padding: var(--space-4); /* 32px */
+    --portal-card-padding: var(--space-3); /* 24px */
+  }
+}
+
+@media (--ultra-wide) {
+  body[data-page="admin"],
+  body[data-page="ledger"] {
+    --portal-files-sidebar-width: 280px;
+    --portal-content-padding: var(--space-5); /* 40px */
+    --portal-card-padding: var(--space-4); /* 32px */
+  }
+}

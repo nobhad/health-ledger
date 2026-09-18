@@ -1,0 +1,47 @@
+/**
+ * ===============================================
+ * HEALTH LEDGER CSS BUNDLE
+ * ===============================================
+ * @file static/css/health-ledger.css
+ *
+ * Source entry point. Built by `npm run build:css` into
+ * static/css/dist/health-ledger.css, which is what base.html loads.
+ *
+ * The cascade mirrors no-bhad-codes' portal bundle (bundles/admin.css):
+ * layer order first, fonts unlayered, reset, tokens, then this app's own
+ * sheets in their layers, and portal-theme.css LAST and UNLAYERED so the
+ * surface palette beats every layered rule (see design-system/VENDORED.md).
+ *
+ * @import must precede every rule, so this file contains only imports.
+ */
+
+/* Cascade layer order — the single declaration for the whole app */
+@import "./design-system/layer-order.css";
+
+/* @font-face must be unlayered and first */
+@import "./design-system/fonts.css";
+
+/* 1. Reset */
+@import "./design-system/reset.css" layer(reset);
+
+/* 2. Tokens — the vendored design system, then the handful this app adds */
+@import "./design-system/index.css" layer(tokens);
+@import "./app-tokens.css" layer(tokens);
+
+/* 3. Element defaults */
+@import "./base.css" layer(base);
+
+/* 4. Reusable component classes — ALL of them live in components.css */
+@import "./components.css" layer(components);
+
+/* 5. Page structure: header, nav, footer, grids, page-level rows */
+@import "./layout.css" layer(layouts);
+
+/* 6. Page-specific: rendered documents, query results, sources workspace */
+@import "./pages.css" layer(pages);
+
+/* 9. Utilities */
+@import "./utilities.css" layer(utilities);
+
+/* Surface palette — unlayered, last. Keys off body[data-page="ledger"]. */
+@import "./design-system/tokens/portal-theme.css";

@@ -1,0 +1,125 @@
+{% extends "base.html" %}
+
+{% block title %}Health Metrics{% endblock %}
+
+{% block page_title %}Health Metrics{% endblock %}
+{% block page_description %}View health metrics including vitals and lab values. Averages automatically exclude sick visits.{% endblock %}
+
+{% block content %}
+<div class="container">
+    <!-- Filters -->
+    <div class="section">
+        <div class="section-header">
+            <h3 class="section-title">Filters</h3>
+        </div>
+        <form method="GET" action="/metrics" class="filters-form">
+            <div class="filter-group">
+                <label for="metric_type">Metric Type:</label>
+                <select name="metric_type" id="metric_type" class="form-select">
+                    <option value="">All Types</option>
+                    {% for mt in metric_types %}
+                    <option value="{{ mt.metric_type }}" {% if current_metric_type == mt.metric_type %}selected{% endif %}>
+                        {{ mt.metric_type.replace('_', ' ').title() }} ({{ mt.count }})
+                    </option>
+                    {% endfor %}
+                </select>
+            </div>
+            
+            <div class="filter-group filter-group--check">
+                <label class="check-label">
+                    <input type="checkbox" name="routine_only" value="true" {% if routine_only %}checked{% endif %}>
+                    Routine visits only (exclude sick visits)
+                </label>
+            </div>
+            
+            <div class="filter-group">
+                <label for="start_date">Start Date:</label>
+                <input type="date" name="start_date" id="start_date" class="form-input" value="{{ start_date or '' }}">
+            </div>
+            
+            <div class="filter-group">
+                <label for="end_date">End Date:</label>
+                <input type="date" name="end_date" id="end_date" class="form-input" value="{{ end_date or '' }}">
+            </div>
+            
+            <div class="filter-actions">
+                <button type="submit" class="btn btn-primary">Apply Filters</button>
+                <a href="/metrics" class="btn btn-secondary">Clear Filters</a>
+            </div>
+        </form>
+    </div>
+
+    <!-- Metrics Table -->
+    <div class="section is-fill">
+        <div class="section-header">
+            <h3 class="section-title">All Metrics ({{ metrics|length }} total)</h3>
+        </div>
+        {% if metrics %}
+        <div class="table-container">
+            <table class="table">
+                <thead>
+                    <tr>
+                        <th>Date</th>
+                        <th>Time</th>
+                        <th>Type</th>
+                        <th>Name</th>
+                        <th>Value</th>
+                        <th>Unit</th>
+                        <th>Visit Type</th>
+                        <th>Abnormal</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for metric in metrics[:500] %}
+                    <tr class="{% if metric.is_abnormal %}abnormal{% endif %}">
+                        <td>{{ metric.collection_date or 'N/A' }}</td>
+                        <td>{{ metric.collection_time or 'N/A' }}</td>
+                        <td>{{ metric.metric_type.replace('_', ' ').title() }}</td>
+                        <td>{{ metric.metric_name or 'N/A' }}</td>
+                        <td>
+                            {% if metric.metric_value %}
+                                {% if metric.metric_type == 'temperature' %}
+                                    {{ metric.metric_value|temp_display(metric.unit or 'F') }}
+                                {% else %}
+                                    {{ "%.2f"|format(metric.metric_value) }}
+                                {% endif %}
+                            {% elif metric.metric_value_text %}
+                                {{ metric.metric_value_text }}
+                            {% else %}
+                                N/A
+                            {% endif %}
+                        </td>
+                        <td>
+                            {% if metric.metric_type == 'temperature' %}
+                                F/C
+                            {% else %}
+                                {{ metric.unit or 'N/A' }}
+                            {% endif %}
+                        </td>
+                        <td>
+                            <span class="badge {% if metric.visit_type == 'routine_visit' %}badge-primary{% else %}badge-secondary{% endif %}">
+                                {{ (metric.visit_type or 'unknown').replace('_', ' ').title() }}
+                            </span>
+                        </td>
+                        <td>
+                            {% if metric.is_abnormal %}
+                                <span class="abnormal-badge">Yes</span>
+                            {% else %}
+                                No
+                            {% endif %}
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+        {% if metrics|length > 500 %}
+        <p class="table-note">Showing first 500 of {{ metrics|length }} metrics. Use filters to narrow results.</p>
+        {% endif %}
+        {% else %}
+        <p class="no-data">No metrics found. Try adjusting your filters.</p>
+        {% endif %}
+    </div>
+</div>
+{% endblock %}
+

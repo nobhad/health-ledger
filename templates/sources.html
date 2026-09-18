@@ -1,0 +1,72 @@
+{% extends "base.html" %}
+
+{% block title %}Primary Sources - Health Ledger{% endblock %}
+{% block page_body_class %} page-body--flush{% endblock %}
+
+{% block content %}
+<div class="panel-container" id="sourcesContainer">
+    <!-- Left Panel: Source List with Filters -->
+    <div class="panel sources-panel-left">
+        <div class="panel-header">Sources</div>
+        <div class="source-filters">
+            <div class="filter-group">
+                <label class="filter-label">Search</label>
+                <input type="text" class="filter-input" id="searchInput" name="searchInput" autocomplete="off" placeholder="Search sources...">
+            </div>
+            <div class="filter-group">
+                <label class="filter-label">Type</label>
+                <select class="filter-select" id="typeFilter" name="typeFilter" autocomplete="off">
+                    <option value="">All Types</option>
+                    <option value="lab_result">Lab Results</option>
+                    <option value="medical_record">Medical Records</option>
+                    <option value="test_report">Test Reports</option>
+                    <option value="health_log">Health Logs</option>
+                    <option value="imaging">Imaging</option>
+                    <option value="evaluation">Evaluations</option>
+                </select>
+            </div>
+            <div class="filter-group">
+                <label class="filter-label">Date Range</label>
+                <input type="date" class="form-input filter-input" id="startDate" name="startDate" autocomplete="off" placeholder="Start date">
+                <input type="date" class="form-input filter-input" id="endDate" name="endDate" autocomplete="off" placeholder="End date">
+            </div>
+        </div>
+        <div class="panel-content">
+            <ul class="sources-list" id="sourcesList">
+                <li class="sources-list-item">Loading sources...</li>
+            </ul>
+        </div>
+    </div>
+    
+    <!-- Splitter -->
+    <div class="panel-splitter" id="splitter1"></div>
+    
+    <!-- Middle Panel: Source Details and Text -->
+    <div class="panel sources-panel-middle">
+        <div class="panel-header">Source Details</div>
+        <div class="panel-content">
+            <div id="sourceDetails" class="source-details">
+                <p>Select a source from the list to view details</p>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Splitter -->
+    <div class="panel-splitter" id="splitter2"></div>
+    
+    <!-- Right Panel: Findings -->
+    <div class="panel sources-panel-right">
+        <div class="panel-header">Findings</div>
+        <div class="panel-content">
+            <div id="findingsPanel">
+                <p>Select a source to view findings</p>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script src="{{ url_for('static', filename='js/sources.js') }}"></script>
+{% endblock %}
+

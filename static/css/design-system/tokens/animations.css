@@ -1,0 +1,125 @@
+/**
+ * ===============================================
+ * ANIMATION DESIGN TOKENS
+ * ===============================================
+ * @file src/design-system/tokens/animations.css
+ * 
+ * Animation timing, easing, and duration tokens.
+ */
+
+:root {
+  /* ============================================
+   * BASE DURATION & TRANSITION TOKENS
+   * ============================================
+   * Migrated from variables.css.
+   * These are consumed by animations.css component tokens (--animation-*) below.
+   */
+
+  /* Duration-only tokens — for complex multi-property transitions */
+  --duration-faster: 0.15s;
+  --duration-fast: 0.2s;
+  --duration-medium: 0.3s;
+  --duration-normal: 0.3s;
+  --duration-slow: 0.4s;
+  
+  /* Shorthand transition tokens — duration + ease combined */
+  --transition-faster: 0.15s ease;
+  --transition-fast: 0.2s ease;
+  --transition-medium: 0.3s ease;
+  --transition-slow: 0.4s ease;
+  
+  /* ============================================
+   * EASING ALIASES (from variables.css)
+   * ============================================ */
+
+  /* Default cubic-bezier — matches --easing-smooth */
+  --cubic-default: cubic-bezier(0.4, 0, 0.2, 1);
+
+  /* Menu open/close easing */
+  --cubic-menu: cubic-bezier(0.65, 0.05, 0, 1);
+
+  /* ============================================
+   * PAGE & SECTION TRANSITION TOKENS
+   * ============================================
+   * Consumed by page-transitions.css and GSAP modules.
+   */
+
+              --page-blur-amount: 12px;
+
+  /* ============================================
+   * DURATION & TRANSITION TOKENS
+   * ============================================
+   * Semantic timing tokens for specific use cases.
+   */
+
+  /* Theme color transitions (slower for smooth color changes) */
+  --transition-theme: 0.4s;
+
+  /* Mouse/hover interactions (fast for responsive feel) */
+  --transition-mouse: 0.2s;
+
+  /* Standard animation timing (for most UI transitions) */
+  --transition-normal: 0.3s;
+
+  /* Standard animation length (most common duration) */
+  --transition-length: 0.5s;
+
+  /* Dramatic entrance animations (longer for impact) */
+  --transition-long: 0.8s;
+
+  /* ============================================
+   * EASING TOKENS
+   * ============================================ */
+
+  /* Standard easing curves */
+  --easing-linear: linear;
+        --easing-ease-in-out: ease-in-out;
+
+  /* Custom cubic-bezier curves */
+  --easing-smooth: cubic-bezier(0.4, 0, 0.2, 1);
+  --easing-sharp: cubic-bezier(0.4, 0, 0.6, 1);
+  --easing-emphasized: cubic-bezier(0.2, 0, 0, 1);
+  --easing-decelerated: cubic-bezier(0, 0, 0.2, 1);
+  --easing-accelerated: cubic-bezier(0.4, 0, 1, 1);
+  
+  /* Spring-like animations */
+  --easing-bounce: cubic-bezier(0.68, -0.55, 0.265, 1.55);
+  
+
+  /* Smooth easing (standard animations) - THE DEFAULT */
+  --easing-smooth-sal: cubic-bezier(0.3, 0.9, 0.3, 0.9);
+
+  /* ============================================
+   * COMPONENT-SPECIFIC ANIMATIONS
+   * ============================================ */
+
+  
+  /* Card animations */
+  --animation-card-hover: var(--duration-normal) var(--easing-smooth);
+    
+    
+  
+  
+  /* Loading animations */
+  --animation-spinner: 1s var(--easing-linear) infinite;
+  --animation-spinner-fast: 0.8s var(--easing-linear) infinite;
+    --animation-pulse-loading: 1.5s var(--easing-ease-in-out) infinite;
+  --animation-pulse-skeleton: 2s var(--easing-ease-in-out) infinite;
+  --animation-skeleton-shimmer: 1.5s var(--easing-ease-in-out) infinite;
+      
+  }
+
+/* ============================================
+ * NOTE: Keyframes and animation utilities migrated to GSAP
+ * See: src/utils/gsap-utilities.ts for all animation functions
+ * This codebase follows a GSAP-first animation approach
+ * ============================================ */
+
+/* ============================================
+ * ACCESSIBILITY CONSIDERATIONS
+ * ============================================ */
+
+/* Reduced-motion reset lives in base/reset.css (@layer reset), which zeroes
+   animation-duration, animation-iteration-count, transition-duration and
+   scroll-behavior on * — a superset of what was duplicated here. Removed
+   2026-09-16; GSAP still checks prefers-reduced-motion in JS. */

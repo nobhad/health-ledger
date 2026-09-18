@@ -1,0 +1,1141 @@
+/**
+ * ===============================================
+ * COMPONENTS — every reusable class
+ * ===============================================
+ * @file static/css/components.css  (@layer components)
+ *
+ * The single home for reusable component classes: buttons, form controls,
+ * labels, cards and sections, tables, badges, alerts, the multiselect, the
+ * loading state, and the sources workspace panels. Before adding a class,
+ * grep this file for one that already does the job.
+ *
+ * Every value is a token from static/css/design-system/ or app-tokens.css.
+ * The recipes follow the no-bhad-codes portal (portal-buttons.css,
+ * portal-forms.css, portal-tables.css, portal-cards.css, portal-labels.css,
+ * portal-badges.css): flat ground, 2px rules, no radius, no shadows,
+ * uppercase letter-spaced labels, inverted hover on buttons.
+ */
+
+/* ============================================
+ * BUTTONS
+ * ============================================ */
+.btn,
+.btn-primary,
+.btn-secondary,
+.btn-danger {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: var(--icon-gap-md);
+  min-height: var(--app-control-height);
+  padding: 0 var(--portal-btn-padding-x);
+  border: var(--portal-btn-border-width) solid var(--portal-btn-border-color);
+  border-radius: var(--portal-btn-border-radius);
+  background: transparent;
+  color: var(--portal-btn-color);
+  font-family: var(--portal-btn-font-family);
+  font-size: var(--portal-btn-font-size);
+  font-weight: var(--portal-btn-font-weight);
+  letter-spacing: var(--portal-btn-letter-spacing);
+  text-transform: var(--portal-btn-text-transform);
+  text-decoration: none;
+  white-space: nowrap;
+  cursor: pointer;
+  box-shadow: none;
+  transition: var(--portal-btn-transition);
+}
+
+.btn-primary {
+  background: var(--portal-btn-hover-bg);
+  color: var(--portal-btn-hover-color);
+}
+
+.btn-primary:hover {
+  background: transparent;
+  color: var(--portal-btn-color);
+  text-decoration: none;
+}
+
+.btn-secondary:hover,
+.btn:not(.btn-primary):not(.btn-danger):not(.icon-btn):hover {
+  background: var(--portal-btn-hover-bg);
+  color: var(--portal-btn-hover-color);
+  border-color: var(--portal-btn-hover-border);
+  text-decoration: none;
+}
+
+.btn-danger {
+  color: var(--portal-btn-danger-color);
+  border-color: var(--portal-btn-danger-border);
+}
+
+.btn-danger:hover {
+  background: var(--portal-btn-danger-hover-bg);
+  color: var(--portal-btn-danger-hover-color);
+  border-color: var(--portal-btn-danger-hover-border);
+  text-decoration: none;
+}
+
+.btn-block {
+  display: flex;
+  width: 100%;
+}
+
+:is(.btn, .btn-primary, .btn-secondary, .btn-danger):disabled,
+:is(.btn, .btn-primary, .btn-secondary, .btn-danger)[aria-disabled="true"] {
+  opacity: var(--opacity-disabled);
+  cursor: not-allowed;
+  pointer-events: none;
+}
+
+/* Square icon-only button: no box until hovered, accent on hover. */
+.icon-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: var(--portal-btn-icon-size);
+  height: var(--portal-btn-icon-size);
+  padding: 0;
+  border: none;
+  background: transparent;
+  color: var(--color-text-primary);
+  cursor: pointer;
+  transition: color var(--transition-fast);
+}
+
+.icon-btn:hover,
+.icon-btn:focus-visible {
+  color: var(--color-accent);
+}
+
+.icon-btn svg.lucide {
+  width: var(--icon-size-lg);
+  height: var(--icon-size-lg);
+}
+
+/* Theme toggle shows the icon for the mode you would switch TO. */
+html[data-theme="light"] .theme-toggle-icon--light,
+html[data-theme="dark"] .theme-toggle-icon--dark {
+  display: none;
+}
+
+/* ============================================
+ * LABELS — Tier 4
+ * ============================================ */
+label,
+.field-label,
+.form-label,
+.filter-label,
+.label {
+  display: block;
+  margin-bottom: var(--portal-field-label-gap);
+  font-size: var(--label-font-size);
+  font-weight: var(--label-font-weight);
+  letter-spacing: var(--label-letter-spacing);
+  text-transform: var(--label-text-transform);
+  line-height: var(--line-height-tight);
+  color: var(--color-text-secondary);
+  --svg-stroke-width: var(--svg-stroke-width-bold);
+}
+
+html[data-theme="light"] :is(label, .field-label, .form-label, .filter-label, .label) {
+  color: var(--color-label-ink);
+}
+
+/* A checkbox and its text on one line — Tier 4b, sentence case. */
+.check-label,
+label:has(> input[type="checkbox"]) {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--icon-gap);
+  margin-bottom: 0;
+  font-size: var(--font-size-base);
+  font-weight: var(--font-weight-regular);
+  letter-spacing: var(--letter-spacing-normal);
+  text-transform: none;
+  line-height: var(--line-height-snug);
+  color: var(--color-text-primary);
+  cursor: pointer;
+}
+
+.check-list {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-1);
+  margin-bottom: var(--field-group-gap);
+}
+
+.helper-text {
+  display: block;
+  margin-top: var(--space-0-5);
+  font-size: var(--font-size-xs);
+  color: var(--color-text-tertiary);
+}
+
+/* ============================================
+ * FORM CONTROLS
+ * ============================================ */
+.form-group,
+.form-field,
+.filter-group {
+  display: flex;
+  flex-direction: column;
+  margin-bottom: var(--field-group-gap);
+}
+
+.form-group:last-child,
+.form-field:last-child,
+.filter-group:last-child {
+  margin-bottom: 0;
+}
+
+.filter-group > .form-input + .form-input {
+  margin-top: var(--space-0-5);
+}
+
+.form-input,
+.form-control,
+.form-select,
+.filter-input,
+.filter-select,
+.multiselect-input,
+.form-textarea {
+  width: 100%;
+  height: var(--app-control-height);
+  padding: 0 var(--space-1-5);
+  border: var(--portal-border);
+  background-color: var(--color-bg-primary);
+  color: var(--color-text-primary);
+  font-family: inherit;
+  font-size: var(--font-size-sm);
+  font-weight: var(--font-weight-medium);
+  line-height: var(--app-control-height);
+  caret-color: var(--color-text-primary);
+  box-sizing: border-box;
+  transition: border-color var(--transition-fast);
+}
+
+.form-textarea,
+textarea.form-input {
+  height: auto;
+  min-height: var(--min-height-textarea-lg);
+  padding: var(--space-1) var(--space-1-5);
+  line-height: var(--line-height-snug);
+  resize: vertical;
+}
+
+:is(.form-input, .form-control, .form-select, .filter-input, .filter-select, .multiselect-input, .form-textarea)::placeholder {
+  color: var(--portal-placeholder-color);
+  font-size: var(--search-font-size);
+  font-weight: var(--font-weight-regular);
+  letter-spacing: var(--letter-spacing-label);
+  text-transform: uppercase;
+  text-overflow: ellipsis;
+}
+
+:is(.form-input, .form-control, .form-select, .filter-input, .filter-select, .multiselect-input, .form-textarea):is(:focus, :focus-visible) {
+  outline: none;
+  border-color: var(--color-accent);
+}
+
+/* Native select: no system chrome, the theme's caret. */
+.form-select,
+.filter-select,
+select.form-input {
+  appearance: none;
+  padding-right: var(--space-4);
+  background-image: var(--app-select-caret);
+  background-repeat: no-repeat;
+  background-position: right var(--space-1-5) center;
+  background-size: var(--dropdown-caret-size);
+  cursor: pointer;
+}
+
+input[type="checkbox"] {
+  width: var(--space-2);
+  height: var(--space-2);
+  margin: 0;
+  accent-color: var(--color-text-primary);
+  cursor: pointer;
+}
+
+input[type="date"] {
+  filter: var(--filter-invert-controls);
+}
+
+/* ============================================
+ * CARDS + SECTIONS
+ * ============================================ */
+/* A card or section is a tile: it pads itself and draws a rule along its
+   bottom. Side rules come from the grid it sits in (layout.css), so a stack
+   of panels reads as one surface divided by rules, not boxes in a gutter. */
+.card,
+.section,
+.results,
+.preview-panel {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-2);
+  padding: var(--portal-card-padding) var(--portal-content-padding);
+  border: var(--portal-border);
+  border-width: 0 0 var(--border-width);
+  background-color: inherit;
+  box-shadow: none;
+}
+
+.results,
+.preview-panel {
+  border-width: var(--border-width);
+}
+
+.card-header,
+.section-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--space-2);
+  margin: 0;
+}
+
+/* Card title — Tier 2 */
+.card-header h3 {
+  margin: 0;
+  font-family: var(--font-family-mono);
+  font-size: var(--heading-card-font-size);
+  font-weight: var(--heading-card-font-weight);
+  letter-spacing: var(--heading-card-letter-spacing);
+  text-transform: var(--heading-text-transform);
+  color: var(--heading-card-color);
+}
+
+/* Section title — Tier 3 */
+.section-title,
+.panel-header,
+.results-header h2 {
+  margin: 0;
+  font-family: var(--font-family-mono);
+  font-size: var(--heading-section-font-size);
+  font-weight: var(--heading-section-font-weight);
+  letter-spacing: var(--heading-section-letter-spacing);
+  text-transform: var(--heading-text-transform);
+  color: var(--heading-section-color);
+}
+
+.section-description {
+  margin: 0;
+  color: var(--color-text-secondary);
+}
+
+.card-body {
+  margin: 0;
+  color: var(--color-text-primary);
+}
+
+.card-body > * + * {
+  margin-top: var(--space-2);
+}
+
+.preview-panel {
+  margin-top: var(--space-2);
+}
+
+/* ============================================
+ * TABLES — the portal's .data-table
+ * ============================================ */
+.table-container,
+.table-responsive,
+.results-table-wrapper {
+  width: 100%;
+  overflow-x: auto;
+}
+
+.results-table-wrapper {
+  max-height: var(--app-results-max-height);
+  overflow-y: auto;
+}
+
+.data-table,
+.table,
+.results-table {
+  width: 100%;
+  max-width: 100%;
+  border-collapse: collapse;
+  border-spacing: 0;
+  border: none;
+  background-color: inherit;
+  font-family: inherit;
+  font-size: var(--table-cell-font-size);
+  color: var(--table-cell-color);
+}
+
+:is(.data-table, .table, .results-table) thead tr {
+  height: var(--table-header-height);
+  border-bottom: var(--portal-border);
+}
+
+:is(.data-table, .table, .results-table) th {
+  padding: 0 var(--table-cell-padding-x);
+  text-align: left;
+  vertical-align: middle;
+  font-size: var(--table-header-font-size);
+  font-weight: var(--font-weight-medium);
+  letter-spacing: var(--table-header-letter-spacing);
+  text-transform: uppercase;
+  white-space: nowrap;
+  color: var(--table-header-color);
+  background: transparent;
+  border: none;
+}
+
+:is(.data-table, .table, .results-table) tbody tr {
+  height: var(--table-row-height);
+  transition: background var(--transition-faster);
+}
+
+:is(.data-table, .table, .results-table) td {
+  padding: var(--space-1) var(--table-cell-padding-x);
+  vertical-align: middle;
+  color: inherit;
+  background: transparent;
+  border: none;
+  border-bottom: var(--border-width-thin) solid var(--portal-alpha-white-10);
+}
+
+:is(.data-table, .table, .results-table) tbody tr:hover td {
+  background: var(--color-bg-hover);
+}
+
+:is(.data-table, .table, .results-table) tbody tr.abnormal td:first-child {
+  box-shadow: var(--app-edge-mark) var(--color-danger);
+}
+
+:is(.data-table, .table, .results-table) thead {
+  position: sticky;
+  top: 0;
+  z-index: var(--z-index-elevated);
+  background: var(--color-bg-primary);
+}
+
+.results-table tbody tr.result-row[style*="display: none"] {
+  display: none !important;
+}
+
+.table-note,
+.no-data {
+  margin: var(--space-2) 0 0;
+  text-align: center;
+  font-size: var(--font-size-sm);
+  color: var(--color-text-secondary);
+}
+
+.no-data {
+  padding: var(--space-5) var(--space-2);
+}
+
+/* ============================================
+ * BADGES — coloured text, no fill
+ * ============================================ */
+.badge,
+.status-badge,
+.abnormal-badge {
+  display: inline-flex;
+  align-items: center;
+  font-size: var(--font-size-xs);
+  font-weight: var(--font-weight-semibold);
+  letter-spacing: var(--letter-spacing-label);
+  text-transform: uppercase;
+  white-space: nowrap;
+  background: transparent;
+  border: none;
+}
+
+.badge-primary {
+  color: var(--color-text-primary);
+}
+
+.badge-secondary {
+  color: var(--color-text-secondary);
+}
+
+.abnormal-badge,
+.badge-danger {
+  color: var(--color-danger);
+}
+
+.badge-success {
+  color: var(--status-completed);
+}
+
+/* ============================================
+ * ALERTS + STATUS MESSAGES
+ * ============================================ */
+.alert,
+.error,
+.success,
+.status-message {
+  padding: var(--space-1) var(--space-2);
+  border-left: var(--border-width-thick) solid var(--color-text-secondary);
+  font-size: var(--font-size-sm);
+}
+
+.status-message {
+  margin-top: var(--space-1-5);
+}
+
+.status-message:empty {
+  display: none;
+}
+
+.error,
+.alert-error,
+.alert-danger,
+.status-message.is-error {
+  border-left-color: var(--color-danger);
+  color: var(--color-danger);
+}
+
+.success,
+.alert-success,
+.status-message.is-success {
+  border-left-color: var(--status-completed);
+  color: var(--status-completed);
+}
+
+.alert-info {
+  border-left-color: var(--color-info);
+}
+
+.alert-warning {
+  border-left-color: var(--color-text-warning);
+  color: var(--color-text-warning);
+}
+
+/* ============================================
+ * LOADING
+ * ============================================ */
+.loading {
+  display: none;
+  padding: var(--space-5) var(--space-2);
+  text-align: center;
+  color: var(--color-text-secondary);
+}
+
+.loading.show {
+  display: block;
+}
+
+.spinner {
+  width: var(--space-5);
+  height: var(--space-5);
+  margin: 0 auto var(--space-2);
+  border: var(--border-width-thick) solid var(--portal-alpha-white-20);
+  border-top-color: var(--color-accent);
+  border-radius: var(--border-radius-full);
+  animation: spin var(--animation-spinner);
+}
+
+@keyframes spin {
+  to { transform: rotate(360deg); }
+}
+
+/* ============================================
+ * MULTISELECT
+ * ============================================ */
+.multiselect-wrapper {
+  position: relative;
+  display: block;
+  width: 100%;
+}
+
+.multiselect-tags {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-0-5);
+}
+
+.multiselect-tags:not(:empty) {
+  margin-bottom: var(--space-0-5);
+}
+
+.multiselect-tag {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-1);
+  height: var(--space-3);
+  padding: 0 var(--space-1);
+  background: var(--color-text-primary);
+  color: var(--color-bg-primary);
+  font-size: var(--font-size-xs);
+  letter-spacing: var(--letter-spacing-label);
+  text-transform: uppercase;
+}
+
+.multiselect-tag-remove {
+  cursor: pointer;
+  font-weight: var(--font-weight-bold);
+  opacity: var(--opacity-subtle);
+}
+
+.multiselect-tag-remove:hover {
+  opacity: 1;
+}
+
+.multiselect-input-wrapper {
+  position: relative;
+}
+
+.multiselect-input {
+  padding-left: var(--app-control-icon-pad);
+  padding-right: calc(var(--icon-size-xl) + var(--space-1));
+  cursor: text;
+}
+
+.multiselect-search-icon,
+.dropdown-indicator {
+  position: absolute;
+  top: 50%;
+  transform: translateY(-50%);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: var(--icon-size-md);
+  height: var(--icon-size-md);
+  color: var(--color-text-tertiary);
+  pointer-events: none;
+  z-index: var(--z-index-content);
+}
+
+.multiselect-search-icon {
+  left: var(--search-icon-inset);
+}
+
+.dropdown-indicator {
+  right: var(--space-1-5);
+}
+
+:is(.multiselect-search-icon, .dropdown-indicator) svg {
+  width: var(--icon-size-md);
+  height: var(--icon-size-md);
+}
+
+.multiselect-dropdown {
+  position: absolute;
+  top: 100%;
+  left: 0;
+  right: 0;
+  z-index: var(--z-index-dropdown);
+  display: none;
+  max-height: var(--app-dropdown-max-height);
+  overflow-y: auto;
+  margin-top: calc(-1 * var(--border-width));
+  border: var(--dropdown-border-width) solid var(--dropdown-border-color);
+  background: var(--dropdown-bg);
+  box-shadow: none;
+}
+
+.multiselect-dropdown.show,
+.multiselect-wrapper:focus-within .multiselect-dropdown {
+  display: block !important;
+  visibility: visible !important;
+  opacity: 1 !important;
+}
+
+.multiselect-option {
+  display: flex;
+  align-items: center;
+  gap: var(--icon-gap);
+  min-height: var(--dropdown-item-height);
+  padding: var(--dropdown-padding-y) var(--dropdown-padding-x);
+  font-size: var(--font-size-sm);
+  cursor: pointer;
+  transition: background var(--transition-faster);
+}
+
+.multiselect-option:hover {
+  background: var(--color-bg-hover);
+}
+
+.multiselect-option.selected {
+  background: var(--color-bg-active);
+}
+
+.multiselect-option--empty {
+  justify-content: center;
+  padding: var(--space-2);
+  color: var(--color-text-secondary);
+  cursor: default;
+}
+
+.multiselect-option--empty:hover {
+  background: transparent;
+}
+
+.multiselect-option input[type="checkbox"] {
+  margin: 0;
+}
+
+.multiselect-option-icon {
+  display: inline-flex;
+  align-items: center;
+  width: var(--icon-size-md);
+  height: var(--icon-size-md);
+  flex-shrink: 0;
+  color: var(--color-text-tertiary);
+}
+
+.multiselect-option-icon svg {
+  width: var(--icon-size-md);
+  height: var(--icon-size-md);
+}
+
+/* ============================================
+ * RESULTS (query page)
+ * ============================================ */
+.results-container {
+  margin-top: var(--portal-stack-gap);
+}
+
+.results-container .results-container {
+  margin-top: 0;
+}
+
+.results-container:empty {
+  margin-top: 0;
+}
+
+.results-header {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--space-2);
+  margin-bottom: var(--space-2);
+  padding-bottom: var(--space-2);
+  border-bottom: var(--portal-border);
+}
+
+.results-controls {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--space-2);
+}
+
+.results-controls .filter-input {
+  width: auto;
+  min-width: var(--search-input-max-width);
+}
+
+.results-count {
+  font-size: var(--font-size-sm);
+  color: var(--color-text-secondary);
+}
+
+/* ============================================
+ * WORKSPACE PANELS (sources page)
+ * ============================================ */
+.panel-container {
+  display: flex;
+  flex: 1 1 auto;
+  min-height: 0;
+  overflow: hidden;
+}
+
+.panel {
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+  overflow: hidden;
+}
+
+.panel-header {
+  flex-shrink: 0;
+  padding: var(--space-1-5) var(--content-gutter);
+  border-bottom: var(--portal-border);
+}
+
+.panel-content {
+  flex: 1;
+  overflow-y: auto;
+  padding: var(--content-gutter);
+}
+
+.panel-splitter {
+  flex-shrink: 0;
+  width: var(--divider-size);
+  background: var(--color-border-primary);
+  cursor: col-resize;
+  transition: background var(--transition-fast);
+}
+
+.panel-splitter:hover,
+.panel-splitter.active {
+  background: var(--color-accent);
+}
+
+.panel-collapsed {
+  width: 0;
+  padding: 0;
+  margin: 0;
+  overflow: hidden;
+}
+
+.panel-resizing {
+  user-select: none;
+}
+
+.sources-panel-left {
+  width: var(--app-sources-list-width);
+  min-width: var(--app-sources-list-min-width);
+}
+
+.sources-panel-middle {
+  flex: 1;
+  min-width: var(--app-sources-detail-min-width);
+}
+
+.sources-panel-right {
+  width: var(--app-sources-findings-width);
+  min-width: var(--app-sources-findings-min-width);
+}
+
+.source-filters {
+  display: flex;
+  flex-direction: column;
+  gap: var(--field-group-gap);
+  padding: var(--content-gutter);
+  border-bottom: var(--portal-border);
+}
+
+.source-filters .filter-group {
+  margin-bottom: 0;
+}
+
+.sources-list {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+}
+
+.sources-list-item {
+  padding: var(--space-1) var(--space-1-5);
+  overflow-wrap: anywhere;
+  border-bottom: var(--border-width-thin) solid var(--portal-alpha-white-10);
+  font-size: var(--font-size-sm);
+  cursor: pointer;
+  transition: background var(--transition-faster);
+}
+
+.sources-list-item:hover {
+  background: var(--color-bg-hover);
+}
+
+.sources-list-item.active {
+  background: var(--color-bg-active);
+  box-shadow: var(--app-edge-mark) var(--color-accent);
+}
+
+.source-details {
+  line-height: var(--line-height-relaxed);
+}
+
+.source-text {
+  max-height: var(--app-source-text-max-height);
+  overflow-y: auto;
+  padding: var(--content-gutter);
+  border: var(--portal-input-border);
+  font-family: var(--font-family-mono);
+  font-size: var(--font-size-sm);
+  line-height: var(--line-height-relaxed);
+  white-space: pre-wrap;
+  word-wrap: break-word;
+}
+
+.findings-list {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+}
+
+.finding-item {
+  margin-bottom: var(--space-1);
+  padding: var(--space-1) var(--space-1-5);
+  border: var(--portal-input-border);
+}
+
+.finding-type {
+  margin-bottom: var(--space-0-5);
+  font-size: var(--font-size-xs);
+  font-weight: var(--label-font-weight);
+  letter-spacing: var(--label-letter-spacing);
+  text-transform: uppercase;
+  color: var(--color-text-secondary);
+}
+
+.finding-text {
+  font-size: var(--font-size-sm);
+  line-height: var(--line-height-normal);
+}
+
+.finding-date {
+  margin-top: var(--space-0-5);
+  font-size: var(--font-size-xs);
+  color: var(--color-text-tertiary);
+}
+
+@media (--mobile) {
+  .panel-container {
+    flex-direction: column;
+    height: auto;
+  }
+
+  .sources-panel-left,
+  .sources-panel-middle,
+  .sources-panel-right {
+    width: 100%;
+    min-width: 100%;
+    max-width: 100%;
+  }
+
+  .panel-splitter {
+    display: none;
+  }
+
+  .results-controls .filter-input {
+    min-width: 0;
+    width: 100%;
+  }
+}
+
+/* ============================================
+ * DROPDOWN — the portal's PortalDropdown, for a native <select>
+ * static/js/dropdown.ts wraps select.form-select / select.filter-select in
+ * this. The native select stays in the DOM (hidden) for forms and scripts;
+ * the trigger and menu are one box: the shared edge is drawn zero times.
+ * ============================================ */
+.dropdown {
+  position: relative;
+  width: 100%;
+}
+
+.dropdown-native {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  opacity: 0;
+  pointer-events: none;
+}
+
+.dropdown-trigger {
+  display: flex;
+  align-items: center;
+  gap: var(--dropdown-caret-gap);
+  width: 100%;
+  height: var(--app-control-height);
+  padding: 0 var(--dropdown-padding-x);
+  border: var(--dropdown-border-width) solid var(--dropdown-border-color);
+  background: var(--dropdown-bg);
+  color: var(--color-text-primary);
+  font-family: inherit;
+  font-size: var(--font-size-sm);
+  font-weight: var(--font-weight-medium);
+  text-align: left;
+  cursor: pointer;
+  transition: border-color var(--transition-fast);
+}
+
+.dropdown-trigger:focus-visible {
+  border-color: var(--color-accent);
+  box-shadow: none;
+}
+
+.dropdown-trigger[data-state="open"] {
+  border-bottom-color: transparent;
+  transition: none;
+}
+
+.dropdown-value {
+  flex: 1 1 auto;
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.dropdown-caret {
+  flex-shrink: 0;
+  margin-left: auto;
+  width: var(--dropdown-caret-size);
+  height: var(--dropdown-caret-size);
+  color: currentColor;
+  transition: transform var(--transition-fast);
+}
+
+.dropdown-trigger[data-state="open"] .dropdown-caret {
+  transform: rotate(180deg);
+}
+
+.dropdown-menu {
+  position: absolute;
+  top: 100%;
+  left: 0;
+  right: 0;
+  z-index: var(--z-index-dropdown);
+  margin: calc(-1 * var(--dropdown-border-width)) 0 0;
+  padding: 0;
+  list-style: none;
+  max-height: var(--app-dropdown-max-height);
+  overflow-y: auto;
+  border: var(--dropdown-border-width) solid var(--dropdown-border-color);
+  border-top: none;
+  background: var(--dropdown-bg);
+  box-shadow: none;
+}
+
+.dropdown-item {
+  display: flex;
+  align-items: center;
+  gap: var(--icon-gap);
+  min-height: var(--dropdown-item-height);
+  padding: var(--dropdown-padding-y) var(--dropdown-padding-x);
+  font-size: var(--font-size-sm);
+  color: var(--color-text-primary);
+  cursor: pointer;
+  user-select: none;
+  outline: none;
+  transition: background-color var(--transition-faster);
+}
+
+.dropdown-item:hover,
+.dropdown-item:focus {
+  background: var(--color-bg-hover);
+  box-shadow: none;
+}
+
+.dropdown-item[aria-selected="true"] {
+  background: var(--color-bg-active);
+}
+
+/* ============================================
+ * STAT CARD (overview) — the portal's stat-card tier
+ * ============================================ */
+.stat-card {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-0-5);
+  padding: var(--portal-card-padding) var(--portal-content-padding);
+  border: var(--portal-border);
+  color: inherit;
+  text-decoration: none;
+  transition: background var(--transition-faster);
+}
+
+a.stat-card:hover {
+  background: var(--color-bg-hover);
+  text-decoration: none;
+}
+
+.stat-label {
+  font-size: var(--label-font-size);
+  font-weight: var(--label-font-weight);
+  letter-spacing: var(--label-letter-spacing);
+  text-transform: uppercase;
+  color: var(--color-text-secondary);
+}
+
+.stat-value {
+  font-size: var(--font-size-2xl);
+  font-weight: var(--font-weight-bold);
+  line-height: var(--line-height-tight);
+}
+
+.stat-hint {
+  font-size: var(--font-size-sm);
+  color: var(--color-text-secondary);
+}
+
+.stat-hint--alert {
+  color: var(--color-danger);
+}
+
+/* ============================================
+ * LIST ROWS (overview panels)
+ * ============================================ */
+.list {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+}
+
+.list-item {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-0-25);
+  padding: var(--space-1) 0;
+  border-bottom: var(--border-width-thin) solid var(--portal-alpha-white-10);
+  color: inherit;
+  text-decoration: none;
+}
+
+.list-item:last-child {
+  border-bottom: none;
+}
+
+a.list-item:hover {
+  color: var(--color-accent);
+  text-decoration: none;
+}
+
+.list-item-title {
+  font-size: var(--font-size-sm);
+  overflow-wrap: anywhere;
+}
+
+.list-item-meta {
+  font-size: var(--font-size-xs);
+  color: var(--color-text-tertiary);
+}
+
+/* A row that is a link to somewhere in the app: icon, title, one line. */
+.action-link {
+  display: flex;
+  align-items: center;
+  gap: var(--icon-gap-md);
+  padding: var(--space-1) 0;
+  border-bottom: var(--border-width-thin) solid var(--portal-alpha-white-10);
+  color: inherit;
+  text-decoration: none;
+  transition: color var(--transition-fast);
+}
+
+.action-link:last-child {
+  border-bottom: none;
+}
+
+.action-link:hover {
+  color: var(--color-accent);
+  text-decoration: none;
+}
+
+.action-link svg.lucide {
+  width: var(--icon-size-lg);
+  height: var(--icon-size-lg);
+}
+
+.action-link-text {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-0-25);
+}
+
+.action-link-title {
+  font-size: var(--font-size-sm);
+  font-weight: var(--font-weight-bold);
+  letter-spacing: var(--letter-spacing-label);
+  text-transform: uppercase;
+}
+
+.action-link-hint {
+  font-size: var(--font-size-xs);
+  color: var(--color-text-secondary);
+}

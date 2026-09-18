@@ -1,0 +1,219 @@
+/**
+ * ===============================================
+ * TYPOGRAPHY DESIGN TOKENS
+ * ===============================================
+ * @file src/design-system/tokens/typography.css
+ * 
+ * Typography scale, font families, and text styles.
+ */
+
+:root {
+  /* ============================================
+   * FONT FAMILIES
+   * ============================================
+   * Dual-font system:
+   * - Headings: Cormorant Garamond (classic serif)
+   * - Body/UI: Inconsolata (monospace)
+   */
+
+  /* Acme display font (main site headings) */
+  --font--acme: "Acme", sans-serif;
+  --font-family-acme: var(--font--acme);
+
+  /* Body/UI: Inconsolata monospace */
+  --font-family-sans:
+    "Inconsolata", ui-monospace, "Cascadia Code", "Source Code Pro", Menlo, monospace;
+
+  /* No display face is loaded. Cormorant Garamond was dropped and a
+     replacement has not been chosen (CURRENT_WORK.md, "Serif face to
+     replace"), so this points at the body face rather than at a system serif
+     — a heading in Georgia beside Inconsolata body copy reads as a mistake,
+     where the body face reads as a deliberate single-typeface page. */
+  --font-family-serif: var(--font-family-mono);
+
+  /* Code: Inconsolata monospace */
+  --font-family-mono:
+    "Inconsolata", ui-monospace, "Cascadia Code", "Source Code Pro", Menlo, monospace;
+
+  /* Display headings: same story as --font-family-serif above. */
+  --font-family-display: var(--font-family-mono);
+
+  /* Body copy. Inconsolata, the same face as --font-family-sans and
+     --font-family-mono: the site is one typeface, and Arial sitting under the
+     body copy was the one place it was not. Four stylesheets read this token
+     and three spelled the old stack out inline; they all name Inconsolata now
+     so the fallback cannot disagree with the token. */
+  --font-family-body:
+    "Inconsolata", ui-monospace, "Cascadia Code", "Source Code Pro", Menlo, monospace;
+
+  /* ============================================
+   * FONT SIZES - FLUID TYPOGRAPHY
+   * ============================================ */
+
+  /* Fluid type scale using clamp() */
+  --font-size-2xs: clamp(0.625rem, 0.6rem + 0.125vw, 0.6875rem); /* 10px → 11px */
+  --font-size-xs: clamp(0.75rem, 0.7rem + 0.25vw, 0.875rem); /* 12px → 14px */
+  --font-size-sm: clamp(0.875rem, 0.825rem + 0.25vw, 1rem); /* 14px → 16px */
+  --font-size-md: clamp(1rem, 0.95rem + 0.25vw, 1.125rem); /* 16px → 18px */
+  --font-size-lg: clamp(1.125rem, 1.05rem + 0.375vw, 1.25rem); /* 18px → 20px */
+  --font-size-xl: clamp(1.25rem, 1.125rem + 0.625vw, 1.5rem); /* 20px → 24px */
+  --font-size-2xl: clamp(1.5rem, 1.25rem + 1.25vw, 2rem); /* 24px → 32px */
+  --font-size-3xl: clamp(1.875rem, 1.5rem + 1.875vw, 2.5rem); /* 30px → 40px */
+  --font-size-4xl: clamp(2.25rem, 1.75rem + 2.5vw, 3rem); /* 36px → 48px */
+  --font-size-5xl: clamp(3rem, 2rem + 5vw, 4rem); /* 48px → 64px */
+
+  /* Size of a page's <h2> section heading (.section-heading). Single source of
+     truth: About, Contact and friends all render the same class and must match
+     at every width, so the size lives here and the breakpoints override this
+     token rather than each page re-declaring font-size. */
+  --section-heading-size: var(--font-size-5xl);
+
+  /* Alias for backwards compatibility */
+  --font-size-base: var(--font-size-md);
+
+  /* ============================================
+   * FONT WEIGHTS
+   * ============================================ */
+
+  --font-weight-regular: 400;
+  --font-weight-normal: 400; /* Alias for regular — used by legacy variables.css consumers */
+  --font-weight-base: 400; /* Alias for regular — used by portal components */
+  --font-weight-medium: 500;
+  --font-weight-semibold: 600;
+  --font-weight-bold: 700;
+  --font-weight-extrabold: 800;
+
+  /* ============================================
+   * LINE HEIGHTS
+   * ============================================ */
+
+  --line-height-none: 1;
+  --line-height-tight: 1.25;
+  --line-height-snug: 1.375;
+  --line-height-normal: 1.5;
+  --line-height-relaxed: 1.625;
+
+  /* ============================================
+   * LETTER SPACING
+   * ============================================
+   * Portal uses very tight heading tracking
+   */
+
+  --letter-spacing-tightest: -0.09em; /* Portal heading style */
+  --letter-spacing-normal: 0;
+  --letter-spacing-wide: 0.025em;
+  --letter-spacing-wider: 0.05em;
+  --letter-spacing-widest: 0.1em;
+
+  /* Semantic aliases */
+  --letter-spacing-label: var(--letter-spacing-wider); /* 0.05em */
+  --letter-spacing-title: var(--letter-spacing-wide); /* 0.025em */
+
+  /* ============================================
+   * LABEL TYPE (Tier 4)
+   * ============================================
+   * The contract shared/portal-labels.css reads for .field-label,
+   * .label and .stat-label. These lived in portal-theme.css under
+   * body[data-page="admin"|"client"], so a field label rendered anywhere
+   * else — the project detail page, the login shells — resolved every one
+   * of them to nothing and fell back to plain body text. The values are
+   * type tokens, not portal ones; they belong here.
+   */
+  --label-font-size: var(--font-size-sm);
+  --label-font-weight: var(--font-weight-bold);
+  --label-text-transform: uppercase;
+  --label-letter-spacing: var(--letter-spacing-label);
+
+  /* Gap between a label and the value it names. */
+  --field-label-value-gap: calc(var(--space-px) * 2); /* 2px */
+  --portal-field-label-gap: var(--field-label-value-gap);
+
+  /* ============================================
+   * HEADING TIER SYSTEM
+   * ============================================
+   * Tier 1: Page title (.page-title) — largest, for page-level headings
+   * Tier 2: Card title (.portal-card-header) — entity card names
+   * Tier 3: Section title (.data-table-header h3, .section-title,
+   *          .panel-header-row .heading, .portal-section-title, and the
+   *          public site's h4) — table headers, panel headers, sections
+   * Tier 4: Labels — see LABEL TYPE above
+   *
+   * These were declared under body[data-page="admin"|"client"] in
+   * portal-theme.css, so the public site could not spend them even where it
+   * wanted the same heading.
+   */
+
+  /* Tier 1 — Page title */
+  --heading-page-font-size: var(--font-size-xl);
+  --heading-page-font-weight: var(--font-weight-semibold);
+  --heading-page-color: var(--color-text-primary);
+
+  /* Tier 2 — Card title */
+  --heading-card-font-size: var(--font-size-lg);
+  /* Bold. A card, table or dialog title is the thing you read first in its
+     container — it was at the regular weight, which after the label tier went
+     bold left the title lighter than the labels beneath it. */
+  --heading-card-font-weight: var(--font-weight-bold);
+  --heading-card-color: var(--color-text-primary);
+  --heading-card-letter-spacing: var(--letter-spacing-label);
+
+  /* Tier 3 — Section title (tables, panels, sections) */
+  --heading-section-font-size: var(--font-size-base);
+  --heading-section-font-weight: var(--font-weight-bold);
+  --heading-section-color: var(--color-text-primary);
+  --heading-section-letter-spacing: var(--letter-spacing-label);
+
+  /* Shared heading properties */
+  --heading-text-transform: uppercase;
+  /* The uppercase-heading face (panel, card and table headings). It is only
+     used through this token, so swapping the display face is a one-line
+     change here once one is chosen — see CURRENT_WORK.md.
+
+     ACME, for now (Noelle, 2026-09-13). It is the main site's heading face and
+     is already self-hosted, so the portal borrows it rather than pulling a
+     second webfont onto every page — one of the two reasons Cormorant was
+     dropped.
+
+     IT HAS NO SECOND WEIGHT, and that is fine here rather than a compromise
+     to revisit: Acme's single 400 already reads bold at heading sizes, which
+     is what it was picked for (Noelle, 2026-09-13, on seeing it rendered).
+     A heading asking for 700 gets a SYNTHESISED bold on top of that.
+
+     That is the opposite of the Inconsolata failure, and the distinction is
+     the thing to keep: there the descriptor claimed 400-700, so the browser
+     took it at its word, declined to synthesise, and bold rendered at regular
+     across the whole portal for months. An honest 400-only descriptor is
+     exactly what makes faux-bold available. Declaring a range Acme cannot
+     render would take it away again — and
+     tests/unit/design-system/font-face-contract.test.ts fails the build on
+     that. */
+  --heading-font-family: var(--font-family-acme);
+
+  /* ============================================
+   * SUBTAB / TAB BUTTON TYPE
+   * ============================================
+   * Read by portal-tabs.css and portal-layout.css, and by the design
+   * system page's section nav, which is the same control.
+   */
+  --portal-subtab-family: var(--font-family-mono);
+  --portal-subtab-size: var(--font-size-base);
+  --portal-subtab-weight: var(--font-weight-medium);
+  --portal-subtab-transform: uppercase;
+  --portal-subtab-spacing: var(--letter-spacing-label);
+
+  /* Widest tracking — nav/display contexts */
+}
+
+/* Text utilities (.uppercase/.lowercase/.capitalize, .text-left/center/right)
+   used to be duplicated here at @layer tokens — dead, since base/typography.css
+   (site, @layer base) and portal-layout.css / portal-utilities.css (portal)
+   define them identically at higher layers and always won. Removed 2026-09-16;
+   the real homes are base/typography.css and the portal utility sheets. */
+
+/* Shorthand alias, out of portal-theme.css's dashboard block so any surface
+   with a form can read it. `--font-family-mono` is not overridden there, so it
+   resolves to the same face wherever it is declared. */
+:root {
+  --font-mono: var(--font-family-mono);
+}
+

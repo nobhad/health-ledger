@@ -1,0 +1,206 @@
+/**
+ * ===============================================
+ * PAGES — page-specific styling
+ * ===============================================
+ * @file static/css/pages.css  (@layer pages)
+ *
+ * The rendered documents (profile, summary), and prose that lands inside a
+ * card body or a source detail. Nothing here is a reusable component.
+ */
+
+/* ============================================
+ * PROSE SURFACES
+ * Rendered markdown (profile, summary), instructional card bodies, and the
+ * source detail column all carry running text with real lists and links.
+ * ============================================ */
+/* ============================================
+ * DOCUMENT LAYOUT
+ * A rendered document beside a sticky nav of its sections. The nav is
+ * filled by static/js/doc-nav.ts and stays hidden when the document has
+ * fewer than two sections, in which case the body simply spans the row.
+ * ============================================ */
+.doc-layout {
+  display: grid;
+  flex: 1 1 auto;
+  grid-template-columns: var(--app-doc-nav-width) minmax(0, 1fr);
+  align-items: stretch;
+  min-height: 0;
+}
+
+.doc-layout:has(> .doc-nav[hidden]) {
+  grid-template-columns: minmax(0, 1fr);
+}
+
+/* One split panel: the nav and the body share the layout's border and
+   meet at a single rule, the way the sources workspace does. */
+.doc-nav {
+  display: flex;
+  flex-direction: column;
+  min-height: 0;
+  border-right: var(--portal-border);
+}
+
+.doc-nav-title {
+  padding: var(--space-1-5) var(--content-gutter);
+  border-bottom: var(--portal-border);
+  font-size: var(--heading-section-font-size);
+  font-weight: var(--heading-section-font-weight);
+  letter-spacing: var(--heading-section-letter-spacing);
+  text-transform: var(--heading-text-transform);
+}
+
+.doc-nav-list {
+  list-style: none;
+  margin: 0;
+  padding: var(--space-1) 0;
+  flex: 1 1 auto;
+  min-height: 0;
+  overflow-y: auto;
+}
+
+.doc-nav-link {
+  display: block;
+  padding: var(--space-0-5) var(--content-gutter);
+  font-family: var(--portal-subtab-family);
+  font-size: var(--font-size-sm);
+  font-weight: var(--portal-subtab-weight);
+  letter-spacing: var(--portal-subtab-spacing);
+  text-transform: var(--portal-subtab-transform);
+  color: var(--color-text-secondary);
+  text-decoration: none;
+  transition: color var(--transition-fast);
+}
+
+.doc-nav-link:hover {
+  color: var(--color-text-primary);
+  text-decoration: none;
+}
+
+.doc-nav-link.is-active {
+  color: var(--color-accent);
+  box-shadow: var(--app-edge-mark) var(--color-accent);
+}
+
+.profile-content,
+.summary-content {
+  min-width: 0;
+  min-height: 0;
+  overflow-y: auto;
+  padding: var(--portal-card-padding);
+}
+
+:is(.profile-content, .summary-content, .card-body, .source-details, .preview-panel) p {
+  margin: 0 0 var(--space-2);
+  line-height: var(--line-height-relaxed);
+}
+
+:is(.profile-content, .summary-content, .card-body, .source-details, .preview-panel) :is(ul, ol) {
+  margin: 0 0 var(--space-2);
+  padding-left: var(--space-3);
+}
+
+:is(.profile-content, .summary-content, .card-body, .source-details, .preview-panel) ul {
+  list-style: disc;
+}
+
+:is(.profile-content, .summary-content, .card-body, .source-details, .preview-panel) ol {
+  list-style: decimal;
+}
+
+:is(.profile-content, .summary-content, .card-body, .source-details, .preview-panel) li {
+  margin-bottom: var(--space-0-5);
+  line-height: var(--line-height-relaxed);
+}
+
+:is(.profile-content, .summary-content, .card-body, .source-details, .preview-panel) a {
+  color: var(--color-accent);
+  text-decoration: none;
+}
+
+:is(.profile-content, .summary-content, .card-body, .source-details, .preview-panel) a:hover {
+  text-decoration: underline;
+}
+
+/* Document headings: page title, then the card and section tiers. */
+:is(.profile-content, .summary-content) h1 {
+  margin: 0 0 var(--space-3);
+  font-size: var(--font-size-2xl);
+  font-weight: var(--font-weight-bold);
+  line-height: var(--line-height-tight);
+}
+
+:is(.profile-content, .summary-content, .preview-panel) h2 {
+  margin: var(--space-5) 0 var(--space-2);
+  font-size: var(--heading-card-font-size);
+  font-weight: var(--heading-card-font-weight);
+  letter-spacing: var(--heading-card-letter-spacing);
+  text-transform: var(--heading-text-transform);
+  scroll-margin-top: var(--space-10);
+}
+
+:is(.profile-content, .summary-content, .preview-panel, .card-body) :is(h3, h4) {
+  margin: var(--space-3) 0 var(--space-1);
+  font-size: var(--heading-section-font-size);
+  font-weight: var(--heading-section-font-weight);
+  letter-spacing: var(--heading-section-letter-spacing);
+  text-transform: var(--heading-text-transform);
+}
+
+:is(.profile-content, .summary-content) :is(h1, h2, h3):first-child {
+  margin-top: 0;
+}
+
+:is(.profile-content, .summary-content) table {
+  width: 100%;
+  margin: 0 0 var(--space-2);
+  border-collapse: collapse;
+  font-size: var(--font-size-sm);
+}
+
+:is(.profile-content, .summary-content) th {
+  padding: var(--space-0-5) var(--space-1);
+  text-align: left;
+  font-weight: var(--font-weight-medium);
+  letter-spacing: var(--table-header-letter-spacing);
+  text-transform: uppercase;
+  color: var(--table-header-color);
+  border-bottom: var(--portal-border);
+}
+
+:is(.profile-content, .summary-content) td {
+  padding: var(--space-0-5) var(--space-1);
+  vertical-align: top;
+  border-bottom: var(--border-width-thin) solid var(--portal-alpha-white-10);
+}
+
+/* Citations */
+:is(.profile-content, .summary-content) sup.citation {
+  font-size: var(--font-size-2xs);
+  vertical-align: super;
+}
+
+:is(.profile-content, .summary-content) :is(.cite-num, .cite-link) {
+  color: var(--color-accent);
+  font-weight: var(--font-weight-semibold);
+  text-decoration: none;
+}
+
+:is(.profile-content, .summary-content) .cite-link:hover {
+  text-decoration: underline;
+}
+
+:is(.profile-content, .summary-content) :is(.citation.expandable, .cite-compact) {
+  cursor: pointer;
+}
+
+:is(.profile-content, .summary-content) .cite-expanded {
+  display: inline;
+}
+
+:is(.profile-content, .summary-content) ol > li {
+  font-size: var(--font-size-sm);
+}
+
+:is(.profile-content, .summary-content) ol > li[id^="ref-"] {
+  scroll-margin-top: var(--space-10);
+}

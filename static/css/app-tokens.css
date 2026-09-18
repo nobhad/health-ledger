@@ -1,0 +1,120 @@
+/**
+ * ===============================================
+ * HEALTH LEDGER APP TOKENS
+ * ===============================================
+ * @file static/css/app-tokens.css
+ *
+ * The few values this app needs that the vendored design system does not
+ * name. Each one aliases a design-system token; the only literals here are
+ * viewport fractions. If a value is needed in a component, it is added here
+ * first and referenced by name — never typed into components.css.
+ *
+ * Declared on the same element the portal theme declares its palette on, so
+ * anything derived from a themed token resolves against the themed value.
+ */
+body[data-page="ledger"] {
+  /* The sticky header: one control row plus its padding and rule. <main>
+     is sized against it, so the two cannot drift apart. */
+  --app-header-height: calc(
+    var(--portal-btn-min-height) + 2 * var(--space-1-5) + var(--border-width)
+  );
+
+  /* Every control on the page — inputs, selects, buttons, the multiselect
+     search — stands one height, so a filter row lines up without per-page
+     overrides. The portal's button minimum is that height. */
+  --app-control-height: var(--portal-btn-min-height); /* 40px */
+
+  /* Left inset on a control that carries a leading search icon: the icon's
+     inset, plus the icon, plus the icon-to-text gap (the portal's search-bar
+     arithmetic). */
+  --app-control-icon-pad: calc(
+    var(--search-icon-inset) + var(--icon-size-md) + var(--search-icon-gap)
+  );
+
+  /* A text control sitting inline beside its label (export path, custom
+     save folder). */
+  --app-inline-input-width: calc(var(--space-base) * 37.5); /* 300px */
+
+  /* Open multiselect list before it scrolls. */
+  --app-dropdown-max-height: calc(var(--space-base) * 30); /* 240px */
+
+  /* Column ceilings for the sources workspace. */
+  --app-sources-list-width: var(--aside-width-medium);
+  --app-sources-list-min-width: var(--aside-width-narrow);
+  --app-sources-findings-width: var(--aside-width-wide);
+  --app-sources-findings-min-width: var(--aside-width-narrow);
+  --app-sources-detail-min-width: var(--aside-width-wide);
+
+  /* Scroll ceilings for long text blocks. */
+  --app-results-max-height: 70vh;
+  --app-source-text-max-height: 60vh;
+
+  /* Measure for a rendered document (profile, summary). */
+
+  /* Accent edge that marks a row or block (abnormal metric, active source).
+     The portal's own highlight pattern: an inset edge, not a fill. */
+  --app-edge-mark: inset var(--border-width-thick) 0 0;
+
+  /* The native <select> caret follows the theme. */
+  --app-select-caret: var(--select-caret-light);
+}
+
+html[data-theme="dark"] body[data-page="ledger"] {
+  --app-select-caret: var(--select-caret);
+}
+
+body[data-page="ledger"] {
+  /* The section nav beside a rendered document. */
+  --app-doc-nav-width: var(--aside-width-narrow);
+}
+
+/* ============================================
+ * FOOTER BAND
+ * The portfolio site's curtain dimensions, copied from
+ * no-bhad-codes src/styles/components/footer.css. Same names, so the two
+ * can be diffed. The band is the mark plus its air, nothing chosen.
+ * ============================================ */
+:root {
+  /* Smaller than the site's clamp(88px, 16vh, 150px): there the band is
+     revealed at the end of a scroll; here it is always on screen beside
+     content that must fit the window, so it takes the least the lockup
+     can read at. */
+  --curtain-avatar-height: clamp(72px, 11vh, 96px);
+  --curtain-avatar-width: calc(var(--curtain-avatar-height) * 0.809);
+  --curtain-avatar-trim: calc(var(--curtain-avatar-height) * 0.107);
+  --curtain-mark-gap: var(--space-1);
+  /* The site sets these two as fixed steps tuned to a 150px avatar. Tied
+     to the avatar here so the year keeps clearing the wordmark at the
+     smaller size (0.08 and 0.137 of 150 are the site's 12px and 20.5px). */
+  --curtain-credit-pull: calc(var(--curtain-avatar-height) * 0.08);
+  --curtain-credit-leading: 1.6;
+  --curtain-wordmark-size: calc(var(--curtain-avatar-height) * 0.195);
+  --curtain-credit-size: calc(var(--curtain-wordmark-size) * 0.64);
+  --curtain-year-size: calc(var(--curtain-wordmark-size) * 0.9735);
+  --curtain-year-lift: var(--space-0-5);
+  --curtain-year-nudge: var(--space-0-25);
+  /* The site adds a step to the header gutter; this band keeps the page
+     gutter so the mark lines up with the content above it. */
+  --curtain-inset: var(--space-2);
+  --curtain-credit-height: calc(
+    var(--curtain-credit-size) * var(--curtain-credit-leading) * 2 - var(--curtain-credit-pull) +
+      var(--curtain-mark-gap) + var(--curtain-year-size) * 1.4 - var(--curtain-year-lift)
+  );
+  /* On phones the note stacks above the mark and the band grows by its
+     two lines; zero elsewhere, where the note sits beside the mark. */
+  --curtain-note-height: 0px;
+  --footer-curtain-height: calc(
+    var(--curtain-avatar-height) + var(--curtain-credit-height) + var(--curtain-inset) * 2 +
+      var(--curtain-note-height)
+  );
+  /* One fixed ink slab in both themes, by design. */
+  --footer-curtain-bg: var(--color-gray-900);
+  --footer-curtain-text: var(--color-off-white);
+  --footer-curtain-text-muted: var(--color-gray-400);
+}
+
+@media (--mobile) {
+  :root {
+    --curtain-note-height: calc(var(--font-size-xs) * var(--line-height-normal) * 2 + var(--space-2));
+  }
+}

@@ -1,0 +1,23 @@
+/**
+ * ===============================================
+ * DESIGN SYSTEM TOKENS INDEX
+ * ===============================================
+ * @file src/design-system/tokens/index.css
+ * 
+ * Central import file for all design tokens.
+ */
+
+/* Import all token files in order */
+@import "./colors.css";
+/* NOTE: portal-theme.css is intentionally NOT imported here.
+   It is imported UNLAYERED in src/styles/bundles/admin.css and client.css.
+   Keeping it out of @layer tokens ensures portal overrides beat all layered styles. */
+@import "./typography.css";
+@import "./spacing.css";
+@import "./shadows.css";
+@import "./borders.css";
+@import "./animations.css";
+@import "./breakpoints.css";
+@import "./z-index.css";
+@import "./buttons.css";
+@import "./dimensions.css";

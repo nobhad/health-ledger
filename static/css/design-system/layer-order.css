@@ -1,0 +1,79 @@
+/**
+ * ===============================================
+ * CSS CASCADE LAYER ORDER - SINGLE SOURCE OF TRUTH
+ * ===============================================
+ * @file src/styles/core/layer-order.css
+ *
+ * This file establishes the ONLY layer order declaration for the entire project.
+ * Import this file FIRST in any bundle to ensure consistent cascade behavior.
+ *
+ * LAYER HIERARCHY (lowest to highest priority):
+ * 1. reset      - Browser resets, normalize styles
+ * 2. tokens     - CSS custom properties, design tokens
+ * 3. base       - HTML element defaults, typography
+ * 4. components - Reusable UI components (buttons, forms, cards)
+ * 5. layouts    - Grid/flex layout systems
+ * 6. pages      - Page-specific styles
+ * 7. states     - Visibility and interactive states
+ * 8. responsive - Media query overrides
+ * 9. utilities  - Final overrides (highest priority)
+ *
+ * RULES:
+ * - Never declare @layer order in any other file
+ * - All other CSS files should use @layer(name) { } syntax
+ * - Utilities layer should only contain atomic helper classes
+ */
+
+@layer reset, tokens, base, components, layouts, pages, states, responsive, utilities;
+
+/**
+ * SUB-LAYER DECLARATIONS (for bundle-specific organization)
+ *
+ * These allow bundles to organize within the main hierarchy:
+ * - admin: Admin dashboard specific styles (within pages)
+ * - portal: Client portal specific styles (within pages)
+ * - page-states: Page transition states (within states)
+ * - mobile: Mobile-specific overrides (within responsive)
+ */
+
+/**
+ * ===============================================
+ * HOW A SHEET GETS INTO ITS LAYER
+ * ===============================================
+ *
+ * There are two ways, and mixing them is a silent bug.
+ *
+ * 1. The bundle assigns it:   @import "../x.css" layer(components);
+ * 2. The sheet declares it itself, wrapping its own body in @layer x { }.
+ *
+ * Sheets that already do (2) MUST be imported WITHOUT a layer() clause:
+ *
+ *   - states/visibility.css      @layer states
+ *   - states/interactive.css     @layer states
+ *   - responsive/breakpoints.css @layer responsive
+ *
+ * Adding layer() to those imports nests the file's own @layer inside the
+ * import's, producing a SUB-layer (states.states, responsive.responsive).
+ * A sub-layer sorts BEFORE its parent's own direct content, so the sheet is
+ * demoted below every sibling imported with a plain layer() clause — the
+ * opposite of what the import looks like it is doing. Nothing errors; the
+ * rules just quietly stop winning.
+ *
+ * ===============================================
+ * DELIBERATELY UNLAYERED (the escape hatches)
+ * ===============================================
+ *
+ * Unlayered rules outrank EVERY layer, whatever the layer order says. Four
+ * sheets rely on that on purpose, and each says so in its own header:
+ *
+ *   - pages/projects-detail.css            (site.css)
+ *   - base/site-globals.css                (site.css, imported last)
+ *   - design-system/tokens/portal-theme.css (admin.css, client.css)
+ *   - portal/shared/portal-gutter.css       (admin.css, client.css)
+ *
+ * Nothing else should be imported without a layer() clause. If a sheet needs
+ * to win, give it the right layer rather than a fifth escape hatch — an
+ * unlayered sheet cannot be overridden by any layered rule at any specificity,
+ * which is how the two site.css hatches came to outrank the entire responsive
+ * layer.
+ */

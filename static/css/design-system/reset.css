@@ -1,0 +1,408 @@
+/**
+ * ===============================================
+ * CSS RESET & NORMALIZE
+ * ===============================================
+ * @file src/styles/base/reset.css
+ * 
+ * Modern CSS reset with accessibility considerations
+ * and performance optimizations for CLS prevention.
+ */
+
+/* ============================================
+ * UNIVERSAL BOX MODEL
+ * ============================================ */
+
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+/* ============================================
+ * THE HIDDEN ATTRIBUTE
+ * ============================================
+ * `hidden` is display:none in the UA stylesheet, which any class that sets
+ * its own display silently beats — so an element with `hidden` and, say,
+ * `.intro-left-group { display: flex }` stayed on screen. That is how the
+ * project detail page showed a LAUNCH label with nothing under it. There was
+ * no [hidden] rule anywhere in the tree, so nothing relies on overriding it.
+ *
+ * !important is what makes this hold: for important declarations the cascade
+ * reverses layer order, so the reset layer outranks components rather than
+ * losing to it.
+ */
+[hidden] {
+  display: none !important;
+}
+
+/* ============================================
+ * ROOT DOCUMENT SETUP
+ * ============================================ */
+
+html {
+  line-height: 1.5;
+  -webkit-text-size-adjust: 100%;
+  -moz-tab-size: 4;
+  tab-size: 4;
+  font-feature-settings: normal;
+  font-variation-settings: normal;
+  -webkit-tap-highlight-color: transparent;
+  scroll-behavior: smooth;
+  text-size-adjust: 100%;
+  /* Theme-aware scrollbar */
+  scrollbar-color: rgba(var(--text-rgb, 25, 25, 25), 0.7) transparent;
+}
+
+/* ============================================
+ * SELECTION STYLING
+ * ============================================ */
+
+::selection {
+  background-color: var(--color-accent);
+  color: var(--color-neutral-100);
+}
+
+::-moz-selection {
+  background-color: var(--color-accent);
+  color: var(--color-neutral-100);
+}
+
+/* ============================================
+ * BODY FOUNDATION
+ * ============================================ */
+
+body {
+  font-family: var(
+    --font-family-body,
+    "Inconsolata",
+    ui-monospace,
+    "Cascadia Code",
+    "Source Code Pro",
+    Menlo,
+    monospace
+  );
+  font-weight: 500;
+  line-height: 1.4;
+  margin: 0;
+  padding: 0;
+  min-height: 100vh;
+  min-height: 100dvh; /* Dynamic viewport height for mobile Safari */
+  display: flex;
+  flex-direction: column;
+  overflow-x: hidden;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  text-rendering: optimizeLegibility;
+  /* Prevent layout shift during font loading */
+  font-display: swap;
+}
+
+/* ============================================
+ * TYPOGRAPHY RESET
+ * ============================================ */
+
+h1,
+h2,
+h3,
+h4,
+h5,
+h6 {
+  font-size: inherit;
+  font-weight: inherit;
+  line-height: 1.2;
+  margin: 0;
+}
+
+p {
+  margin: 0;
+  line-height: 1.6;
+}
+
+/* ============================================
+ * LIST RESET
+ * ============================================ */
+
+ul,
+ol {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+}
+
+/* ============================================
+ * FORM ELEMENT RESET
+ * ============================================ */
+
+button,
+input,
+optgroup,
+select,
+textarea {
+  font-family: inherit;
+  font-size: 100%;
+  font-weight: inherit;
+  line-height: inherit;
+  color: inherit;
+  margin: 0;
+  padding: 0;
+}
+
+button,
+select {
+  text-transform: none;
+}
+
+button,
+[type="button"],
+[type="reset"],
+[type="submit"] {
+  -webkit-appearance: button;
+  background-color: transparent;
+  background-image: none;
+}
+
+/* ============================================
+ * MEDIA RESET
+ * ============================================ */
+
+img,
+svg,
+video,
+canvas,
+audio,
+iframe,
+embed,
+object {
+  display: block;
+  vertical-align: middle;
+  max-width: 100%;
+  height: auto;
+}
+
+/* SVGs inside buttons inherit button's text color - ROOT LEVEL FIX
+   Ensures SVG icons match button text color instead of browser default.
+   Works with Lucide icons that use stroke="currentColor". */
+button svg,
+.btn svg,
+[type="button"] svg,
+[type="submit"] svg {
+  color: inherit;
+}
+
+img {
+  border-style: none;
+}
+
+/* ============================================
+ * TABLE RESET
+ * ============================================ */
+
+table {
+  border-collapse: collapse;
+  border-spacing: 0;
+}
+
+/* ============================================
+ * INTERACTIVE ELEMENT RESET
+ * ============================================ */
+
+a {
+  color: inherit;
+  text-decoration: inherit;
+}
+
+/* Content links: underline on hover, no color change.
+   Nav/interactive links opt out via their own text-decoration: none rules. */
+a:hover {
+  text-decoration: underline;
+}
+
+/* Navigation and interactive link contexts: no underline on hover */
+nav a:hover,
+.sidebar a:hover,
+.portal-global-header a:hover,
+.portal-tabs a:hover,
+.tab-list a:hover,
+.stat-card a:hover,
+.btn-primary:hover,
+.btn-secondary:hover,
+.btn-sm:hover {
+  text-decoration: none;
+}
+
+/* ============================================
+ * ACCESSIBILITY IMPROVEMENTS
+ * ============================================ */
+
+/* Screen reader only content */
+.sr-only {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  white-space: nowrap;
+  border: 0;
+}
+
+/* ============================================
+ * FOCUS MANAGEMENT - ACCESSIBILITY
+ * ============================================ */
+
+/* Remove outline on mouse clicks, keep on keyboard navigation */
+:focus {
+  outline: none;
+}
+
+/* Global focus indicator for ALL interactive elements - WCAG 2.4.7 */
+/* Applies to: a, button, input, select, textarea, [tabindex] */
+/* Use box-shadow instead of outline - follows element border-radius naturally */
+/* --focus-ring-* are declared in design-system/tokens/borders.css, which every
+   bundle imports. They used to come only from portal-theme.css, which the site
+   bundle does not ship, so on the marketing site this rule ran on the fallbacks
+   inside its own var() — no longer needed, and the token now means the same
+   thing everywhere it is read. */
+:focus-visible {
+  outline: none;
+  box-shadow: 0 0 0 var(--focus-ring-width) var(--focus-ring-color);
+}
+
+/* Remove focus ring for mouse users (non-keyboard focus) */
+:focus:not(:focus-visible) {
+  outline: none;
+}
+
+/* ============================================
+ * EXPANDABLE ELEMENTS FOCUS STANDARD
+ * ============================================
+ * When expanded/open: focus wraps entire element
+ * Inner triggers have NO focus ring when parent is expanded
+ * ============================================ */
+
+/* Details/Summary */
+details {
+  border-radius: var(--border-radius-lg, 12px);
+}
+
+summary {
+  display: flex;
+  align-items: center;
+  gap: var(--icon-gap-md);
+  cursor: pointer;
+  list-style: none;
+}
+
+summary::-webkit-details-marker {
+  display: none;
+}
+
+/* ============================================
+ * UNIVERSAL ICON-TEXT GAP - SINGLE SOURCE OF TRUTH
+ * Applies standard icon gap to ALL interactive elements
+ * with icons across admin and client portals
+ * ============================================ */
+
+/* ============================================
+ * ICON-TEXT SIZE MATCHING
+ * Root rule in portal-theme.css: .portal svg.lucide { width: 1em; height: 1em }
+ * handles all Lucide icons globally. Rules below cover non-Lucide SVGs
+ * (e.g. custom inline SVGs, .btn-icon wrappers).
+ * ============================================ */
+
+/* Non-Lucide SVGs in buttons/links — match text size */
+.portal
+  :is(button, a, .btn, .btn-primary, .btn-secondary, .btn-outline):not(.icon-btn):not(.nav-btn)
+  > .btn-icon {
+  width: 1em;
+  height: 1em;
+  flex-shrink: 0;
+}
+
+/* ============================================
+ * HOVER STATE COLOR RULES - ROOT LEVEL
+ * Dark bg hover = light text & icons
+ * Light bg hover = dark text & icons
+ * ============================================ */
+
+/* Universal hover rule: when background inverts, so does text/icon color */
+.portal :is(button, a, .btn):hover > svg,
+.portal :is(button, a, .btn):hover > .btn-icon {
+  color: inherit; /* Inherits from parent's hover color */
+}
+
+/* All portal SVGs default to primary text color.
+   Ensures standalone icons (empty states, headings, table icons, etc.)
+   always render in the correct text color rather than browser default or
+   an inherited muted/secondary color from an ancestor.
+   align-self: center ensures SVGs center in their flex parent's cross-axis
+   regardless of the parent's align-items setting (display: block from the
+   media reset kills vertical-align, so this is the correct root fix). */
+.portal svg {
+  color: var(--color-text-primary);
+  align-self: center;
+}
+
+/* Interactive elements: SVGs follow parent's color context instead of
+   the baseline above, so button variants, hover states, danger/success
+   colors, and nav active states all continue to work correctly. */
+.portal button svg,
+.portal a svg {
+  color: inherit;
+}
+
+details:focus-within {
+  outline: 2px solid var(--color-accent);
+  outline-offset: -2px;
+}
+
+details > summary:focus-visible {
+  outline: none;
+  box-shadow: none;
+}
+
+/* ============================================
+ * REDUCED MOTION SUPPORT
+ * ============================================ */
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
+}
+
+/* ============================================
+ * HIGH CONTRAST MODE SUPPORT
+ * ============================================ */
+
+@media (prefers-contrast: high) {
+  :root {
+    --color-shadow: rgba(0, 0, 0, 0.8);
+  }
+}
+
+/* ============================================
+ * PRINT STYLES
+ * ============================================ */
+
+@media print {
+  * {
+    background: transparent !important;
+    color: black !important;
+    box-shadow: none !important;
+    text-shadow: none !important;
+  }
+
+  body {
+    font-size: 12pt;
+    line-height: 1.5;
+  }
+}

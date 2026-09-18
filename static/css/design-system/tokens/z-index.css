@@ -1,0 +1,112 @@
+/**
+ * ===============================================
+ * Z-INDEX DESIGN TOKENS
+ * ===============================================
+ * @file src/design-system/tokens/z-index.css
+ * 
+ * Z-index layering system for consistent stacking order.
+ */
+
+:root {
+  /* ============================================
+   * Z-INDEX SCALE
+   * ============================================ */
+
+  --z-index-1: 1;
+  --z-index-10: 10;
+  --z-index-20: 20;
+      --z-index-50: 50;
+
+  /* Component layers */
+  --z-index-dropdown: 100;
+    --z-index-fixed: 300;
+  --z-index-modal-backdrop: 400;
+  --z-index-modal: 500;
+        --z-index-overlay: 900;
+  --z-index-max: 999;
+
+  /* Application-specific layers */
+  --z-index-behind: -1;
+  --z-index-base: 0;
+  --z-index-content: 1;
+  --z-index-elevated: 10;
+    --z-index-skip-link: 9999;
+
+  /* ============================================
+   * LEGACY SHORT-NAME ALIASES (migrated from variables.css)
+   * ============================================
+   * Many components reference these short names directly.
+   * Kept as aliases pointing at the proper z-index scale.
+   */
+  --z-header: var(--z-index-elevated); /* Alias → --z-index-elevated (10) */
+  --z-nav: var(--z-index-nav); /* Alias → --z-index-nav (100) */
+  --z-modal: var(--z-index-portal-modal); /* Alias → --z-index-portal-modal (9600) */
+
+  --z-index-nav: 100;
+  --z-index-nav-dropdown: 110;
+  --z-index-nav-overlay: 115; /* Blur overlay between header and nav menu */
+  --z-index-nav-menu: 120; /* Nav menu above overlay */
+  --z-index-nav-menu-content: 125; /* Menu content above overlay */
+  --z-index-nav-header: 130; /* Header above all nav layers */
+
+  /* Business card layers */
+  --z-index-business-card: 50;
+  --z-index-business-card-overlay: 400;
+  --z-index-business-card-modal: 500;
+
+  /* Loading and intro layers */
+  --z-index-loading: 999;
+  --z-index-intro: 998;
+
+      --z-index-portal-overlay: 9500;
+  --z-index-portal-modal: 9600;
+  --z-index-portal-dropdown: 9700;
+  --z-index-portal-toast: 9800;
+  
+  /* Performance dashboard */
+  --z-index-debug: 10000;
+}
+
+/* ============================================
+ * LAYERING GUIDELINES
+ * ============================================ */
+
+/*
+ * Z-Index Stacking Order (lowest to highest):
+ * 
+ * -1:      Behind content (::before/::after decorative elements)
+ * 0:       Normal document flow
+ * 1-49:    Content layers (cards, elevated content)
+ * 50-99:   Component interactions (business card, hover states)
+ * 100-199: Navigation elements (menus, dropdowns)
+ * 200-299: Sticky/Fixed elements (headers, sidebars)
+ * 300-399: Fixed overlays (loading screens)
+ * 400-499: Modal backdrops
+ * 500-599: Modal content
+ * 600-699: Popovers and context menus
+ * 700-799: Tooltips
+ * 800-899: Toast notifications
+ * 900-999: Critical overlays (loading, intro)
+ * 1000+:   Debug/Development tools
+ * 
+ * Application Specific Order:
+ * - Base content: 0-10
+ * - Business card: 50
+ * - Navigation: 100-110
+ * - Business card overlay: 400
+ * - Business card modal: 500
+ * - Intro sequence: 998
+ * - Loading screen: 999
+ * - Debug tools: 10000+
+ */
+
+/* ============================================
+ * COMPONENT-SPECIFIC STACKING CONTEXTS
+ * ============================================ */
+
+/* Business card stacking context */
+/* .business-card-container's z-index moved to components/business-card.css
+   on 2026-09-16 (a component rule, not a token). Its position: relative here
+   was dead — business-card.css sets static and page-transitions.css sets
+   absolute, both at higher layers. The --z-index-business-card TOKEN stays
+   defined above. */

@@ -1,0 +1,165 @@
+{% extends "base.html" %}
+{% from "components.html" import card, button, multiselect, loading_spinner, results_container %}
+
+{% block title %}Query - Health Ledger{% endblock %}
+
+{% block page_title %}Quick Queries{% endblock %}
+{% block page_description %}Search for genes, traits, and health conditions in your genetic profile database.{% endblock %}
+
+{% block content %}
+<div class="grid grid-3">
+    {% call card("Find Genes by Health Condition", "query-card") %}
+        {{ multiselect("condition", "Health Condition(s)", "Click here or type to search conditions... (e.g., ADHD, anxiety, depression)", "condition") }}
+        {{ button("Search", "queryByCondition()", class="btn-primary btn-block") }}
+    {% endcall %}
+
+    {% call card("Find Genes by Trait", "query-card") %}
+        {{ multiselect("trait", "Trait(s)", "Click here or type to search traits... (e.g., pain sensitivity, stress response)", "trait") }}
+        {{ button("Search", "queryByTrait()", class="btn-primary btn-block") }}
+    {% endcall %}
+
+    {% call card("Get Gene Information", "query-card") %}
+        {{ multiselect("gene", "Gene(s)", "Click here or type to search genes... (e.g., ADRA2A, COMT, HTR2A)", "gene") }}
+        {{ button("Get Gene Info", "queryByGene()", class="btn-primary btn-block") }}
+    {% endcall %}
+</div>
+
+<div class="quick-actions-row">
+    {{ button("Show All Genes", "queryAllGenes()", class="btn-secondary") }}
+    {{ button("Show Medication Metabolism", "queryPharmacogenomic()", class="btn-secondary") }}
+</div>
+
+{{ loading_spinner() }}
+{{ results_container() }}
+{% endblock %}
+
+{% block scripts %}
+<script>
+// ============================================================================
+// CRITICAL: Filter browser extension errors - MUST RUN FIRST
+// ============================================================================
+(function() {
+    'use strict';
+    
+    // Store original console methods BEFORE any overrides
+    const originalError = console.error;
+    const originalWarn = console.warn;
+    const originalLog = console.log;
+    const originalInfo = console.info;
+    
+    // Comprehensive filter for extension errors
+    function shouldFilterError(args) {
+        if (!args || args.length === 0) return false;
+        
+        // Convert all args to strings for checking
+        const allText = args.map(arg => {
+            if (typeof arg === 'string') return arg;
+            if (typeof arg === 'object' && arg !== null) {
+                if (arg.stack) return arg.stack;
+                if (arg.message) return arg.message;
+                return JSON.stringify(arg);
+            }
+            return String(arg);
+        }).join(' ');
+        
+        // Check for extension error patterns
+        const extensionPatterns = [
+            'content_script.js',
+            'installHook.js',
+            "Cannot read properties of undefined (reading 'control')",
+            'control\'',
+            'at content_script.js',
+            'at installHook.js'
+        ];
+        
+        return extensionPatterns.some(pattern => allText.includes(pattern));
+    }
+    
+    // Override console.error - filter extension errors
+    console.error = function(...args) {
+        if (!shouldFilterError(args)) {
+            originalError.apply(console, args);
+        }
+        // Extension errors are silently filtered
+    };
+    
+    // Override console.warn - filter extension warnings
+    console.warn = function(...args) {
+        if (!shouldFilterError(args)) {
+            originalWarn.apply(console, args);
+        }
+        // Extension warnings are silently filtered
+    };
+    
+    // Keep console.log and console.info unchanged for our debug output
+    // (They're not overridden, so all our logs will show)
+    
+    // Show startup banner IMMEDIATELY
+    originalLog('%c', 'font-size: 1px; line-height: 1px;');
+    originalLog('%c════════════════════════════════════════════════════════════════════', 'color: #0066cc; font-weight: bold; font-size: 12px;');
+    originalLog('%c  GENETIC PROFILE DATABASE - APPLICATION LOADING', 'color: #0066cc; font-weight: bold; font-size: 14px;');
+    originalLog('%c════════════════════════════════════════════════════════════════════', 'color: #0066cc; font-weight: bold; font-size: 12px;');
+    originalLog('%c[OK] Browser extension errors are being filtered', 'color: #28a745; font-weight: bold;');
+    originalLog('%c[OK] Debug logging is enabled', 'color: #28a745; font-weight: bold;');
+    originalLog('%c[OK] Application logs will appear below', 'color: #28a745; font-weight: bold;');
+    originalLog('');
+    
+    // Store reference for later use
+    window._originalConsoleError = originalError;
+    window._originalConsoleWarn = originalWarn;
+})();
+</script>
+
+<script src="{{ url_for('static', filename='js/debug.js') }}"></script>
+<script>
+// Verify debug.js loaded and show status
+(function() {
+    if (typeof window.debugLog === 'function') {
+        console.log('%c[LOAD] [OK] debug.js loaded successfully', 'color: #28a745; font-weight: bold;');
+    } else {
+        console.error('%c[LOAD] [ERROR] debug.js FAILED to load', 'color: #dc3545; font-weight: bold;');
+    }
+})();
+</script>
+
+<script src="{{ url_for('static', filename='js/multiselect.js') }}"></script>
+<script>
+// Verify multiselect.js loaded
+(function() {
+    if (typeof initMultiselect === 'function' && typeof multiselectState !== 'undefined') {
+        console.log('%c[LOAD] [OK] multiselect.js loaded successfully', 'color: #28a745; font-weight: bold;');
+        console.log('%c[LOAD] Multiselect state initialized:', 'color: #17a2b8;', multiselectState);
+    } else {
+        console.error('%c[LOAD] [ERROR] multiselect.js FAILED to load', 'color: #dc3545; font-weight: bold;');
+        console.error('initMultiselect:', typeof initMultiselect);
+        console.error('multiselectState:', typeof multiselectState);
+    }
+})();
+</script>
+
+<script src="{{ url_for('static', filename='js/query.js') }}"></script>
+<script>
+// Verify query.js loaded and show final status
+(function() {
+    const functions = ['loadGenes', 'loadConditions', 'loadTraits', 'queryByCondition', 'queryByTrait', 'queryByGene'];
+    const allLoaded = functions.every(fn => typeof window[fn] === 'function');
+    
+    if (allLoaded) {
+        console.log('%c[LOAD] [OK] query.js loaded successfully', 'color: #28a745; font-weight: bold;');
+        console.log('%c[LOAD] All query functions available:', 'color: #17a2b8;', functions);
+        console.log('%c════════════════════════════════════════════════════════════════════', 'color: #0066cc; font-weight: bold; font-size: 12px;');
+        console.log('%c  READY - Waiting for DOM to load...', 'color: #28a745; font-weight: bold; font-size: 14px;');
+        console.log('%c════════════════════════════════════════════════════════════════════', 'color: #0066cc; font-weight: bold; font-size: 12px;');
+        console.log('');
+    } else {
+        console.error('%c[LOAD] [ERROR] query.js FAILED to load some functions', 'color: #dc3545; font-weight: bold;');
+        functions.forEach(fn => {
+            if (typeof window[fn] !== 'function') {
+                console.error(`Missing function: ${fn}`);
+            }
+        });
+    }
+})();
+</script>
+{% endblock %}
+

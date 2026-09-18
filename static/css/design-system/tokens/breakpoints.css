@@ -1,0 +1,93 @@
+/**
+ * ===============================================
+ * BREAKPOINT DESIGN TOKENS
+ * ===============================================
+ * @file src/design-system/tokens/breakpoints.css
+ *
+ * Responsive breakpoints and container sizes.
+ */
+
+/* ============================================
+ * CUSTOM MEDIA QUERIES (migrated from variables.css)
+ * ============================================
+ * Use these instead of hardcoded breakpoints:
+ *   @media (--small-mobile)        { } - max-width: 479px
+ *   @media (--compact-mobile)      { } - max-width: 600px
+ *   @media (--mobile)              { } - max-width: 767px
+ *   @media (--tablet)              { } - min-width: 768px
+ *   @media (--tablet-only)         { } - 768px to 991px
+ *   @media (--tablet-down)         { } - max-width: 991px
+ *   @media (--desktop)             { } - min-width: 992px
+ *   @media (--desktop-down)        { } - max-width: 1023px
+ *   @media (--tablet-to-desktop)   { } - 600px to 1100px (medium viewport range)
+ *   @media (--wide)                { } - min-width: 1200px
+ *   @media (--ultra-wide)          { } - min-width: 1400px
+ *   @media (--ultra-wide-down)     { } - max-width: 1399px
+ */
+
+/* Mobile breakpoints */
+@custom-media --xs-mobile (max-width: 400px);
+@custom-media --small-mobile (max-width: 479px);
+@custom-media --narrow-mobile (max-width: 500px);
+@custom-media --sm-mobile (max-width: 576px); /* Bootstrap sm equivalent */
+@custom-media --compact-mobile (max-width: 600px); /* Portal sidebar collapse */
+@custom-media --mid-mobile (max-width: 700px);
+@custom-media --mobile (max-width: 767px);
+
+/* Tablet breakpoints */
+@custom-media --tablet (min-width: 768px);
+@custom-media --tablet-only (min-width: 768px) and (max-width: 991px);
+@custom-media --tablet-landscape (max-width: 900px);
+@custom-media --tablet-wide (max-width: 960px);
+@custom-media --tablet-down (max-width: 991px);
+
+/* Desktop breakpoints */
+@custom-media --desktop (min-width: 992px);
+@custom-media --tablet-wide-up (min-width: 960px);
+@custom-media --desktop-down (max-width: 1023px);
+@custom-media --tablet-to-laptop (min-width: 768px) and (max-width: 1024px);
+@custom-media --laptop (max-width: 1024px);
+@custom-media --laptop-up (min-width: 1025px);
+@custom-media --laptop-wide (max-width: 1100px);
+@custom-media --tablet-to-desktop (min-width: 600px) and (max-width: 1100px);
+@custom-media --laptop-to-wide (min-width: 1100px) and (max-width: 1300px);
+@custom-media --desktop-wide (max-width: 1200px);
+@custom-media --desktop-l (min-width: 1200px);
+@custom-media --wide (min-width: 1200px);
+@custom-media --desktop-xl (max-width: 1280px);
+@custom-media --wide-down (max-width: 1300px);
+@custom-media --ultra-wide (min-width: 1400px);
+@custom-media --ultra-wide-down (max-width: 1399px);
+
+:root {
+  /* ============================================
+   * BREAKPOINT TOKENS
+   * ============================================ */
+
+  /* Mobile-first breakpoints */
+  --breakpoint-xs: 475px;
+  --breakpoint-sm: 640px;
+  --breakpoint-md: 768px;
+  --breakpoint-lg: 1024px;
+  --breakpoint-xl: 1280px;
+  --breakpoint-2xl: 1536px;
+
+          
+  /* Content width constraints */
+  --container-xs: 100%;
+  --container-sm: 640px;
+  --container-md: 768px;
+  --container-lg: 1024px;
+  --container-xl: 1280px;
+  --container-2xl: 1536px;
+
+  
+          }
+
+/* The .container utility (a Bootstrap-style responsive container) used to
+   live here at @layer tokens. It was dead: base/layout.css defines
+   .container at @layer base and always won on the site (the only place
+   the standalone class is used, the header partial); the portal uses
+   only compound *-container names, never this one. Removed 2026-09-16.
+   The @custom-media and --container-* tokens above stay — those ARE
+   tokens. */

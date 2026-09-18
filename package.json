@@ -1,0 +1,35 @@
+{
+  "name": "health-ledger",
+  "version": "1.0.0",
+  "description": "Health Ledger - personal medical record tracker",
+  "scripts": {
+    "build": "tsc && npm run build:css",
+    "build:watch": "tsc --watch",
+    "lint": "eslint static/js/**/*.ts",
+    "lint:fix": "eslint static/js/**/*.ts --fix",
+    "typecheck": "tsc --noEmit",
+    "typecheck:watch": "tsc --noEmit --watch",
+    "check": "npm run lint && npm run typecheck",
+    "clean": "rm -f static/js/*.js static/js/*.js.map",
+    "build:css": "postcss static/css/health-ledger.css -o static/css/dist/health-ledger.css",
+    "watch:css": "postcss static/css/health-ledger.css -o static/css/dist/health-ledger.css --watch",
+    "sync:design-system": "./scripts/sync_design_system.sh && npm run build:css",
+    "sync:lucide": "cp node_modules/lucide/dist/umd/lucide.min.js static/js/vendor/lucide.min.js",
+    "dev": "./start.sh"
+  },
+  "devDependencies": {
+    "@typescript-eslint/eslint-plugin": "^6.21.0",
+    "@typescript-eslint/parser": "^6.21.0",
+    "autoprefixer": "^10.4.24",
+    "eslint": "^8.57.0",
+    "lucide": "^1.47.0",
+    "postcss": "^8.5.6",
+    "postcss-cli": "^11.0.1",
+    "postcss-custom-media": "^11.0.6",
+    "postcss-import": "^16.1.1",
+    "typescript": "^5.3.3"
+  },
+  "engines": {
+    "node": ">=16.0.0"
+  }
+}

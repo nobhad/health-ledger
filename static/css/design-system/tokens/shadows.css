@@ -1,0 +1,92 @@
+/**
+ * ===============================================
+ * SHADOW DESIGN TOKENS
+ * ===============================================
+ * @file src/design-system/tokens/shadows.css
+ * 
+ * Box shadow and elevation system.
+ */
+
+:root {
+  /* ============================================
+   * ELEVATION SYSTEM
+   * ============================================ */
+
+  /* Base shadows using semantic color tokens */
+  --shadow-xs: 0 1px 2px 0 var(--color-shadow-sm);
+  --shadow-sm: 0 1px 3px 0 var(--color-shadow-sm), 0 1px 2px -1px var(--color-shadow-sm);
+  --shadow-md: 0 4px 6px -1px var(--color-shadow-md), 0 2px 4px -2px var(--color-shadow-sm);
+  --shadow-lg: 0 10px 15px -3px var(--color-shadow-md), 0 4px 6px -4px var(--color-shadow-sm);
+    --shadow-2xl: 0 25px 50px -12px var(--color-shadow-xl);
+  --shadow-inner: inset 0 2px 4px 0 var(--color-shadow-md);
+  
+  /* ============================================
+   * COLORED SHADOWS
+   * ============================================ */
+
+    
+    
+  /* ============================================
+   * COMPONENT-SPECIFIC SHADOWS
+   * ============================================ */
+
+  /* Card shadows */
+  --shadow-card-rest: var(--shadow-sm);
+    
+      
+  /* Modal shadows */
+  --shadow-modal: var(--shadow-2xl);
+
+  
+  
+    }
+
+/* ============================================
+ * MAIN SITE / PORTAL SPECIFIC SHADOWS (migrated from variables.css)
+ * ============================================
+ * These use explicit rgba() values rather than semantic color tokens
+ * because they are used on both light and dark surfaces.
+ */
+:root {
+  /* Card shadows — subtle elevation for cards and panels */
+  --shadow-card:
+    1px 0 2px rgba(0, 0, 0, 0.2), 2px 0 6px rgba(0, 0, 0, 0.15), 0 1px 2px rgba(0, 0, 0, 0.2),
+    0 2px 6px rgba(0, 0, 0, 0.15);
+
+  --shadow-inset-light:
+    inset 2px 2px 6px rgba(0, 0, 0, 0.3), inset -1px -1px 3px rgba(0, 0, 0, 0.15);
+
+  /* Elevated shadows — for floating elements */
+  --shadow-elevated-sm: 0 4px 12px rgba(0, 0, 0, 0.15);
+  --shadow-elevated-md: 0 8px 32px rgba(0, 0, 0, 0.1);
+  --shadow-elevated-lg: 0 8px 32px rgba(0, 0, 0, 0.3);
+  
+
+  /* Large dropdown shadow — main site only; portal overrides to none */
+
+  /* Terminal/modal shadows — layered depth effect */
+  --shadow-terminal: 4px 4px 10px rgba(0, 0, 0, 0.3), 0 8px 32px rgba(0, 0, 0, 0.4);
+
+    }
+
+/* ============================================
+ * NOTE: Shadow utility classes removed - use CSS variables directly
+ * Example: box-shadow: var(--shadow-md);
+ * ============================================ */
+
+/* ============================================
+ * ACCESSIBILITY CONSIDERATIONS
+ * ============================================ */
+
+/* Box-shadow transitions under reduced motion are covered by base/reset.css,
+   which sets transition-duration: 0.01ms !important on * (all properties,
+   box-shadow included). The rule here was redundant; removed 2026-09-16. */
+
+/* High contrast mode considerations */
+@media (prefers-contrast: high) {
+  :root {
+    --shadow-sm: 0 1px 3px 0 rgba(0, 0, 0, 0.3);
+    --shadow-md: 0 4px 6px -1px rgba(0, 0, 0, 0.3);
+    --shadow-lg: 0 10px 15px -3px rgba(0, 0, 0, 0.3);
+  }
+}

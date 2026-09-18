@@ -1,0 +1,96 @@
+/**
+ * ===============================================
+ * SPACING DESIGN TOKENS
+ * ===============================================
+ * @file src/design-system/tokens/spacing.css
+ * 
+ * Spacing scale for consistent margins, padding, and gaps.
+ */
+
+:root {
+  /* ============================================
+   * SPACING SCALE - BASE 8px GRID
+   * ============================================ */
+
+  /* Base unit */
+  --space-base: 0.5rem; /* 8px */
+
+  /* Fixed Spacing Scale */
+  --space-0: 0;
+  --space-px: 1px;
+  --space-0-25: calc(var(--space-base) * 0.25); /* 2px */
+  --space-0-5: calc(var(--space-base) * 0.5); /* 4px */
+  --space-1: var(--space-base); /* 8px */
+  --space-1-5: calc(var(--space-base) * 1.5); /* 12px */
+  --space-2: calc(var(--space-base) * 2); /* 16px */
+  --space-2-5: calc(var(--space-base) * 2.5); /* 20px */
+  --space-3: calc(var(--space-base) * 3); /* 24px */
+  --space-3-5: calc(var(--space-base) * 3.5); /* 28px */
+  --space-4: calc(var(--space-base) * 4); /* 32px */
+  --space-4-5: calc(var(--space-base) * 4.5); /* 36px */
+  --space-5: calc(var(--space-base) * 5); /* 40px */
+  --space-6: calc(var(--space-base) * 6); /* 48px */
+  --space-7: calc(var(--space-base) * 7); /* 56px */
+  --space-8: calc(var(--space-base) * 8); /* 64px */
+  --space-10: calc(var(--space-base) * 10); /* 80px */
+  --space-12: calc(var(--space-base) * 12); /* 96px */
+  --space-16: calc(var(--space-base) * 16); /* 128px */
+  --space-20: calc(var(--space-base) * 20); /* 160px */
+
+  /* ============================================
+   * RESPONSIVE (FLUID) SPACING (migrated from variables.css)
+   * ============================================
+   * Use for layout that scales with the viewport.
+   * Fixed scale (--space-0, --space-1, ...) is above.
+   */
+  --space-fluid-xs: clamp(0.25rem, 1vw, 0.5rem);
+  --space-fluid-sm: clamp(0.5rem, 2vw, 1rem);
+  --space-fluid-md: clamp(1rem, 3vw, 1.5rem);
+  --space-fluid-lg: clamp(1.5rem, 4vw, 2rem);
+  --space-fluid-xl: clamp(2rem, 5vw, 3rem);
+  
+  /* ============================================
+   * ICON-TEXT GAP - Single Source of Truth
+   * ============================================
+   * Proportionate gaps for icon + text/heading layouts.
+   * Use these instead of hardcoded gap values.
+   */
+
+  /* Icon-text gaps - proportionate to icon size
+   * Rule: icons next to text = 1em (same as text). Gap = one step larger.
+   * Each value bumped one step up from previous defaults. */
+  --icon-gap-xs: 8px; /* bumped from 6px */
+  --icon-gap-sm: 10px; /* bumped from 8px */
+  --icon-gap-md: 12px; /* bumped from 10px */
+  --icon-gap-lg: 16px; /* sidebar nav, loading states — unchanged */
+  --icon-gap-xl: 20px; /* decorative/large contexts — unchanged */
+
+  /* Default icon gap */
+  --icon-gap: clamp(8px, 0.75vw, 10px); /* bumped from clamp(6px, 0.5vw, 8px) */
+
+  /* ============================================
+   * PORTAL SECTION SPACING - Single Source of Truth
+   * ============================================
+   * Uniform spacing for all portal sections and headings.
+   */
+
+  /* Inside a card or panel: its own padding, and the gap between the items
+     stacked in it. The tightest of the three steps. */
+  --content-gutter: var(--space-2); /* 16px */
+  /* Section gap between cards/sections */
+  --portal-section-gap: var(--space-3); /* 24px — between cards in a row or grid */
+  /* Vertical distance between stacked bordered sections in a page's main
+     content. Larger than the grid gap on purpose: two panels one above the
+     other read as separate blocks, two cards side by side read as a row. */
+  --portal-stack-gap: var(--space-5); /* 40px */
+  /* Between full tables stacked on one page (Documents, Work, CRM, Workflows,
+     Knowledge Base). Tables are the densest blocks in the portal and need
+     more air between them than cards do. */
+  --portal-table-stack-gap: var(--space-8); /* 64px */
+
+}
+
+/* ============================================
+ * NOTE: Spacing utility classes are in src/styles/base/utilities.css
+ * This file contains only design tokens (CSS variables)
+ * ============================================ */
