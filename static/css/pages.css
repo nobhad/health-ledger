@@ -40,8 +40,14 @@
   border-right: var(--portal-border);
 }
 
+/* The same band as the sidebar's first row: the nav's top padding plus a
+   nav button's height plus the same padding below, with the label centred,
+   so "Sections" sits on the line of "Overview" across the rule. */
 .doc-nav-title {
-  padding: var(--space-1-5) var(--content-gutter);
+  display: flex;
+  align-items: center;
+  height: calc(var(--space-2) + var(--space-5) + var(--space-2));
+  padding: 0 var(--content-gutter);
   border-bottom: var(--portal-border);
   font-size: var(--heading-section-font-size);
   font-weight: var(--heading-section-font-weight);
