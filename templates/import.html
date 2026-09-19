@@ -7,7 +7,50 @@
 {% if error %}
 <div class="alert alert-error" role="alert">{{ error }}</div>
 {% endif %}
-{% if summary %}
+{% if document %}
+<div class="grid grid-2 grid--fill">
+    <div class="card">
+        <div class="card-header"><h3>What the document holds</h3></div>
+        <div class="card-body">
+            <ul class="list">
+                <li><div class="list-item"><span class="list-item-title">{{ document.file_name }}</span><span class="list-item-meta">{{ document.kind_label }}{% if document.page_count %} &middot; {{ document.page_count }} page{{ '' if document.page_count == 1 else 's' }}{% endif %} &middot; {{ '{:,}'.format(document.text_characters) }} characters of text</span></div></li>
+                {% if document.document_date %}
+                <li><div class="list-item"><span class="list-item-title">Dated {{ document.document_date }}</span><span class="list-item-meta">the first date written in the document</span></div></li>
+                {% endif %}
+            </ul>
+            <p>Adding it keeps a copy of the file in your data folder and files the text with your records, so it can be searched and shown on a doctor document.{% if document.replaces %} This file was imported before; adding it again replaces that copy.{% endif %}</p>
+            <h4>The text it starts with</h4>
+            <p class="note">{{ document.excerpt }}{% if document.text_characters > document.excerpt | length %}&hellip;{% endif %}</p>
+            <form method="post">
+                <input type="hidden" name="token" value="{{ token }}">
+                <div class="card-actions">
+                    <button type="submit" formaction="/import/document" class="btn btn-primary">
+                        <i data-lucide="check"></i>
+                        Add to my ledger
+                    </button>
+                    <button type="submit" formaction="/import/cancel" class="btn btn-secondary">Cancel</button>
+                </div>
+            </form>
+        </div>
+    </div>
+    <div class="card">
+        <div class="card-header"><h3>Readings it would add</h3></div>
+        <div class="card-body">
+            {% if document.metrics %}
+            <p>{{ document.metric_count }} reading{{ '' if document.metric_count == 1 else 's' }} would be added to your numbers{% if document.abnormal_count %}, {{ document.abnormal_count }} outside the range the document states{% endif %}.</p>
+            <ul class="list">
+                {% for metric in document.metrics %}
+                <li><div class="list-item"><span class="list-item-title">{{ metric.metric_name }} &middot; {{ metric.metric_value_text or metric.metric_value }}{% if metric.unit %} {{ metric.unit }}{% endif %}</span><span class="list-item-meta">{{ metric.collection_date }}{% if metric.is_abnormal %} &middot; outside the stated range{% endif %}</span></div></li>
+                {% endfor %}
+            </ul>
+            <p class="note">Values are read from the document as written. Check them against the original before relying on them.</p>
+            {% else %}
+            <p>No readings were found to add. The document is still worth filing: its text is kept with your records and searched with the rest.</p>
+            {% endif %}
+        </div>
+    </div>
+</div>
+{% elif summary %}
 <div class="grid grid-2 grid--fill">
     <div class="card">
         <div class="card-header"><h3>What the file holds</h3></div>
@@ -79,9 +122,22 @@
         </div>
     </div>
     <div class="card">
-        <div class="card-header"><h3>Coming next</h3></div>
+        <div class="card-header"><h3>A document from your care</h3></div>
         <div class="card-body">
-            <p>Lab results, letters and patient-portal exports as PDF, and clinical VCF files. Until those arrive here, they are added with the extraction scripts in <code>scripts/</code> (see the README).</p>
+            <p>Lab results, a visit note, a letter or an export from a patient portal, as a PDF or a text file. The text is read and shown to you first, along with any readings found in it.</p>
+            <form method="post" action="/import/preview" enctype="multipart/form-data">
+                <div class="form-group">
+                    <label for="documentFile" class="field-label">Document</label>
+                    <input type="file" id="documentFile" name="file" accept=".pdf,.txt,.log,.md,.csv,application/pdf,text/plain" class="form-input">
+                </div>
+                <div class="card-actions">
+                    <button type="submit" class="btn btn-primary">
+                        <i data-lucide="file-search"></i>
+                        Read this file
+                    </button>
+                </div>
+            </form>
+            <p class="note">A scanned page photographed into a PDF has no text to read. Clinical VCF files are planned, not yet read.</p>
             <p>To bring in a whole database or go back to a backup, use <a href="/setup">Import or restore</a>.</p>
         </div>
     </div>

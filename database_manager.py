@@ -921,6 +921,30 @@ class GeneticProfileDB:
         return self.add_primary_source_finding(primary_source_id, finding_text, finding_type,
                                                finding_date, related_gene_id, related_condition, notes)
     
+    def get_primary_source_by_file_name(self, file_name: str) -> Optional[Dict]:
+        """The source stored under this file name, if the document was imported before."""
+        cursor = self.conn.cursor()
+        cursor.execute("SELECT * FROM primary_sources WHERE file_name = ? ORDER BY id LIMIT 1",
+                       (file_name,))
+        row = cursor.fetchone()
+        return dict(row) if row else None
+
+    def update_primary_source(self, source_id: int, **fields) -> None:
+        """
+        Update a stored source in place, so importing the same document again
+        refreshes it rather than filing a second copy.
+        """
+        allowed = ('source_name', 'source_type', 'institution', 'patient_name',
+                   'document_date', 'file_path', 'file_name', 'extracted_text', 'metadata')
+        columns = {name: value for name, value in fields.items() if name in allowed}
+        if not columns:
+            return
+        assignments = ', '.join(f'{name} = ?' for name in columns)
+        cursor = self.conn.cursor()
+        cursor.execute(f"UPDATE primary_sources SET {assignments} WHERE id = ?",
+                       (*columns.values(), source_id))
+        self.conn.commit()
+
     def get_all_primary_sources(self) -> List[Dict]:
         """Get all primary sources"""
         cursor = self.conn.cursor()

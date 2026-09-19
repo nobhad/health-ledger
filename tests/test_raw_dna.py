@@ -216,12 +216,24 @@ class TestImportPage(unittest.TestCase):
         self.assertEqual(response.status_code, 302)
         self.assertEqual(list((Path(self.dir) / 'imports').iterdir()), [])
 
-    def test_bad_token_and_bad_file(self):
+    def test_bad_token_is_refused(self):
         self.assertEqual(self.client.post('/import/dna', data={'token': '../x'}).status_code, 400)
+
+    def test_a_file_that_is_not_raw_data_falls_through_to_the_document_reader(self):
+        # The page takes a file, not a file type: text that is not a DNA
+        # download is offered as a document instead of being turned away.
         response = self.client.post('/import/preview', data={
-            'file': (open(write(self.dir, 'letter.txt', 'Dear doctor'), 'rb'), 'letter.txt')})
+            'file': (open(write(self.dir, 'letter.txt', 'Dear doctor, thank you for seeing this patient.'),
+                          'rb'), 'letter.txt')})
+        self.assertEqual(response.status_code, 200)
+        self.assertIn('What the document holds', response.get_data(as_text=True))
+
+    def test_a_zip_that_is_not_raw_data_says_so(self):
+        # Only a DNA download arrives zipped, so the DNA message is the useful one.
+        response = self.client.post('/import/preview', data={
+            'file': (open(write(self.dir, 'photos.zip', 'not a zip'), 'rb'), 'photos.zip')})
         self.assertEqual(response.status_code, 400)
-        self.assertIn('does not look like a DNA raw-data download', response.get_data(as_text=True))
+        self.assertIn('could not be opened', response.get_data(as_text=True))
         self.assertEqual(list((Path(self.dir) / 'imports').iterdir()), [])
 
 

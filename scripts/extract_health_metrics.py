@@ -238,20 +238,21 @@ def extract_health_log_entries(text: str) -> List[Dict]:
     return entries
 
 
-def process_health_log_metrics(source_id: int, text: str, db: GeneticProfileDB, dry_run: bool = False):
-    """Process health log and extract all metrics with proper visit type tagging"""
-    print(f"   📊 Extracting health metrics from health log...")
-    if not dry_run:
-        db.delete_health_metrics_for_source(source_id)
-    
-    total_metrics = 0
-    
+def collect_health_log_metrics(text: str) -> List[Dict]:
+    """
+    Every reading a health log offers, as rows ready for db.add_health_metric.
+
+    Pure: nothing is written and no source id is needed, so the import
+    preview can show exactly what the writer below would add.
+    """
+    metrics = []
+
     # Tabular exports ("Blood Pressure" heading, then one dated row per reading)
     for reading in extract_health_log_table_readings(text):
         date = parse_date(reading['date_text'])
         if not date:
             continue
-        metric = {
+        metrics.append({
             'metric_type': reading['metric_type'],
             'metric_name': reading['metric_type'].replace('_', ' ').title(),
             'metric_value': reading['value'],
@@ -261,79 +262,82 @@ def process_health_log_metrics(source_id: int, text: str, db: GeneticProfileDB, 
             'collection_time': reading['time_text'],
             'visit_type': None,
             'notes': reading['notes'],
-        }
-        try:
-            if not dry_run:
-                db.add_health_metric(primary_source_id=source_id, **metric)
-            total_metrics += 1
-        except Exception as e:
-            print(f"      ⚠️  Error adding table metric: {e}")
-    print(f"   Found {total_metrics} tabular readings")
-    
-    # Extract entries
-    entries = extract_health_log_entries(text)
-    print(f"   Found {len(entries)} entries")
-    
-    # Extract metrics from each entry
-    for entry in entries:
+        })
+
+    # Dated entries, each carrying its own vitals. A tabular export is also a
+    # run of dated lines, so the same reading can arrive twice; the table row
+    # wins, since it carries the time of day and any note.
+    def key_of(metric):
+        return (metric.get('metric_type'), metric.get('collection_date'),
+                metric.get('metric_value_text') or metric.get('metric_value'))
+
+    seen = {key_of(m) for m in metrics}
+    for entry in extract_health_log_entries(text):
         entry_text = entry.get('text', '')
         entry_date = entry.get('date')
         visit_type = entry.get('visit_type')
-        
-        # Extract blood pressure
-        bp_metrics = extract_blood_pressure(entry_text)
-        for metric in bp_metrics:
+        for metric in extract_blood_pressure(entry_text) + extract_temperature(entry_text):
             metric['collection_date'] = entry_date or metric.get('collection_date')
             metric['visit_type'] = visit_type or metric.get('visit_type')
-            try:
-                if not dry_run:
-                    db.add_health_metric(primary_source_id=source_id, **metric)
-                total_metrics += 1
-            except Exception as e:
-                print(f"      ⚠️  Error adding BP metric: {e}")
-        
-        # Extract temperature
-        temp_metrics = extract_temperature(entry_text)
-        for metric in temp_metrics:
-            metric['collection_date'] = entry_date or metric.get('collection_date')
-            metric['visit_type'] = visit_type or metric.get('visit_type')
-            try:
-                if not dry_run:
-                    db.add_health_metric(primary_source_id=source_id, **metric)
-                total_metrics += 1
-            except Exception as e:
-                print(f"      ⚠️  Error adding temp metric: {e}")
-    
-    print(f"   ✅ Extracted {total_metrics} health metrics")
+            key = key_of(metric)
+            if key in seen:
+                continue
+            seen.add(key)
+            metrics.append(metric)
+
+    return metrics
 
 
-def process_lab_results_metrics(source_id: int, text: str, db: GeneticProfileDB,
-                                source_date: Optional[str] = None, dry_run: bool = False):
-    """Process lab results and extract all values"""
-    print(f"   🧪 Extracting lab values...")
-    if not dry_run:
-        db.delete_health_metrics_for_source(source_id)
-    
-    lab_metrics = extract_lab_values(text, source_date)
-    
-    # Determine visit type from context
+def collect_lab_metrics(text: str, source_date: Optional[str] = None) -> List[Dict]:
+    """The lab values a document offers, tagged with the visit type its wording implies."""
     text_lower = text.lower()
     visit_type = None
     if any(word in text_lower for word in ['sick', 'illness', 'symptom', 'abnormal', 'urgent']):
         visit_type = 'sick_visit'
     elif any(word in text_lower for word in ['routine', 'checkup', 'well', 'annual', 'screening']):
         visit_type = 'routine_visit'
-    
-    # Add all lab metrics
-    for metric in lab_metrics:
+
+    metrics = extract_lab_values(text, source_date)
+    for metric in metrics:
         metric['visit_type'] = visit_type
+    return metrics
+
+
+def write_metrics(source_id: int, metrics: List[Dict], db: GeneticProfileDB,
+                  dry_run: bool = False) -> int:
+    """
+    Replace this source's metrics with the ones given. Replacing rather than
+    adding is what lets an extraction be re-run without duplicate rows.
+    """
+    if not dry_run:
+        db.delete_health_metrics_for_source(source_id)
+    written = 0
+    for metric in metrics:
         try:
             if not dry_run:
                 db.add_health_metric(primary_source_id=source_id, **metric)
+            written += 1
         except Exception as e:
-            print(f"      ⚠️  Error adding lab metric: {e}")
-    
-    print(f"   ✅ Extracted {len(lab_metrics)} lab values")
+            print(f"      \u26a0\ufe0f  Error adding metric: {e}")
+    return written
+
+
+def process_health_log_metrics(source_id: int, text: str, db: GeneticProfileDB,
+                               dry_run: bool = False) -> int:
+    """Process health log and extract all metrics with proper visit type tagging"""
+    print(f"   \U0001f4ca Extracting health metrics from health log...")
+    written = write_metrics(source_id, collect_health_log_metrics(text), db, dry_run)
+    print(f"   \u2705 Extracted {written} health metrics")
+    return written
+
+
+def process_lab_results_metrics(source_id: int, text: str, db: GeneticProfileDB,
+                                source_date: Optional[str] = None, dry_run: bool = False) -> int:
+    """Process lab results and extract all values"""
+    print(f"   \U0001f9ea Extracting lab values...")
+    written = write_metrics(source_id, collect_lab_metrics(text, source_date), db, dry_run)
+    print(f"   \u2705 Extracted {written} lab values")
+    return written
 
 
 def main(dry_run: bool = False):

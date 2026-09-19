@@ -39,6 +39,7 @@ from validation import (
 from profile_generator import generate_profile_html
 import ledger_setup
 import pdf_generator
+import documents
 import raw_dna
 import variant_reference
 from doctor_templates import get_available_specialties, DOCTOR_TEMPLATES
@@ -253,6 +254,7 @@ def index():
             'imported': 'Your database was imported.',
             'restored': 'The backup was restored.',
             'dna': 'Your DNA raw data was added.',
+            'document': 'The document was added to your records.',
         }.get(request.args.get('notice', ''))
 
         return render_template('overview.html',
@@ -498,9 +500,20 @@ def import_page():
         return f"Error loading page: {str(e)}", 500
 
 
+# Only a DNA download arrives compressed, so a failure to read one of these
+# is a DNA failure and its message is the useful one.
+DNA_ONLY_SUFFIXES = ('.zip', '.gz')
+
+
 @app.route('/import/preview', methods=['POST'])
 def import_preview():
-    """Read an uploaded raw-data file and show what it holds. Nothing is written."""
+    """
+    Read an uploaded file and show what it holds. Nothing is written.
+
+    The person chooses a file, not a file type: a raw-data download and a
+    document from their care both land here and the reader that recognises
+    it wins. DNA is tried first because its files are the more particular.
+    """
     upload = request.files.get('file')
     if upload is None or not upload.filename:
         return _render_import(error='Choose a file first.'), 400
@@ -508,9 +521,18 @@ def import_preview():
     spooled = _imports_dir() / f'{token}__{secure_filename(upload.filename) or "raw_data"}'
     try:
         upload.save(spooled)
-        summary = raw_dna.import_file(get_db(), spooled, _original_name(spooled), dry_run=True)
-        return _render_import(summary=summary, token=token)
-    except raw_dna.UnreadableRawData as e:
+        original = _original_name(spooled)
+        try:
+            summary = raw_dna.import_file(get_db(), spooled, original, dry_run=True)
+            return _render_import(summary=summary, token=token)
+        except raw_dna.UnreadableRawData as dna_error:
+            if spooled.suffix.lower() in DNA_ONLY_SUFFIXES:
+                raise
+            document = documents.import_file(get_db(), spooled, original, dry_run=True)
+            app_logger.info(f"Previewed document: {document.kind}, "
+                            f"{document.metric_count} readings")
+            return _render_import(document=document, token=token)
+    except (raw_dna.UnreadableRawData, documents.UnreadableDocument) as e:
         spooled.unlink(missing_ok=True)
         return _render_import(error=str(e)), 400
     except Exception as e:
@@ -534,6 +556,26 @@ def import_dna():
         return _render_import(error=str(e)), 400
     except Exception as e:
         app_logger.error(f"Error importing DNA raw data: {e}", exc_info=True)
+        return _render_import(error=f'The import failed: {e}'), 500
+    finally:
+        spooled.unlink(missing_ok=True)
+
+
+@app.route('/import/document', methods=['POST'])
+def import_document():
+    """Write the previewed document into the ledger."""
+    spooled = _spooled_upload(request.form.get('token', ''))
+    if spooled is None:
+        return _render_import(error='That file is no longer waiting to be imported. Choose it again.'), 400
+    try:
+        summary = documents.import_file(get_db(), spooled, _original_name(spooled))
+        app_logger.info(f"Imported document: {summary.kind}, {summary.metric_count} readings, "
+                        f"source {summary.source_id}")
+        return redirect(url_for('index', notice='document'))
+    except documents.UnreadableDocument as e:
+        return _render_import(error=str(e)), 400
+    except Exception as e:
+        app_logger.error(f"Error importing document: {e}", exc_info=True)
         return _render_import(error=f'The import failed: {e}'), 500
     finally:
         spooled.unlink(missing_ok=True)

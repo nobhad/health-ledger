@@ -113,16 +113,23 @@ def open_text(path: Path) -> TextIO:
     """The file's text, whether it is plain, gzipped or a zip with one file inside."""
     suffix = path.suffix.lower()
     if suffix == '.zip':
-        archive = zipfile.ZipFile(path)
-        members = [m for m in archive.namelist()
-                   if not m.endswith('/') and not m.startswith('__MACOSX')]
+        # A file named .zip that is not one is a mistaken upload, not a crash.
+        try:
+            archive = zipfile.ZipFile(path)
+            members = [m for m in archive.namelist()
+                       if not m.endswith('/') and not m.startswith('__MACOSX')]
+        except (zipfile.BadZipFile, OSError) as e:
+            raise UnreadableRawData(f'That zip file could not be opened: {e}')
         if len(members) != 1:
             raise UnreadableRawData(
                 'The zip file should hold one raw-data file; this one holds '
                 f'{len(members)}.')
         return io.TextIOWrapper(archive.open(members[0]), encoding='utf-8', errors='replace')
     if suffix == '.gz':
-        return io.TextIOWrapper(gzip.open(path), encoding='utf-8', errors='replace')
+        try:
+            return io.TextIOWrapper(gzip.open(path), encoding='utf-8', errors='replace')
+        except OSError as e:
+            raise UnreadableRawData(f'That compressed file could not be opened: {e}')
     return open(path, encoding='utf-8', errors='replace', newline='')
 
 
