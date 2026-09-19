@@ -61,7 +61,6 @@
      that flips to near-white in dark mode, and these backgrounds do not flip
      with it, so following the theme paints white on amber (1.26:1). Fixed dark
      is the only value that works on all of them. */
-  --color-text-on-vivid: var(--color-gray-900);
 
   /* Neutral Palette - Gray Scale */
   --color-gray-50: #fafafa;
@@ -106,10 +105,7 @@
      lighter than the light page (#e0e0e0) and glaring on the dark one
      (#171717). Following the background is what the portal already does. */
   --color-bg-readonly: var(--color-bg-primary);
-  --color-bg-inverse: var(--color-gray-900);
   
-  --color-surface-secondary: var(--color-gray-100);
-  --color-surface-tertiary: var(--color-gray-200);
   
 
   /* Text Colors - Dark on light */
@@ -146,14 +142,12 @@
         
   /* State Colors */
   --color-state-hover: rgba(0, 0, 0, 0.05);
-        --color-accent-10: rgba(var(--color-brand-primary-rgb), 0.1);
 
 /* Border color on hover */
 
   /* Shadow Colors */
   --color-shadow-sm: rgba(0, 0, 0, 0.05);
   --color-shadow-md: rgba(0, 0, 0, 0.1);
-  --color-shadow-lg: rgba(0, 0, 0, 0.15);
   --color-shadow-xl: rgba(0, 0, 0, 0.25);
   --color-shadow-2xl: rgba(0, 0, 0, 0.3);
   --color-shadow-3xl: rgba(0, 0, 0, 0.5);
@@ -206,10 +200,7 @@ html[data-theme="dark"] {
   --color-bg-primary: var(--color-gray-900);
   --color-bg-secondary: var(--color-gray-800);
   --color-bg-tertiary: var(--color-gray-700);
-  --color-bg-inverse: var(--color-gray-50);
 
-  --color-surface-secondary: var(--color-gray-800);
-  --color-surface-tertiary: var(--color-gray-700);
   
   /* Text Colors */
   --color-text-primary: var(--color-gray-50);
@@ -232,7 +223,6 @@ html[data-theme="dark"] {
   /* Shadow Colors */
   --color-shadow-sm: rgba(0, 0, 0, 0.3);
   --color-shadow-md: rgba(0, 0, 0, 0.5);
-  --color-shadow-lg: rgba(0, 0, 0, 0.7);
   --color-shadow-xl: rgba(0, 0, 0, 0.9);
 }
 
@@ -267,14 +257,12 @@ html[data-theme="dark"] {
 html[data-theme="light"] {
   /* Legacy neutral colors - Main site light scale (matched to live deploy) */
   --color-neutral-100: #fffdfc;
-  --color-neutral-200: var(--color-gray-200);
   --color-neutral-300: #e0e0e0;
   --color-neutral-400: var(--color-gray-400);
   --color-neutral-500: var(--color-gray-500);
   --color-neutral-600: var(--color-gray-600);
   --color-neutral-700: var(--color-gray-700);
   --color-neutral-800: var(--color-gray-800);
-  --color-neutral-900: var(--color-gray-900);
 
   /* Legacy semantic colors - Main site light theme (matched to live deploy) */
   --color-dark: #333333;
@@ -329,7 +317,6 @@ html[data-theme="light"] {
       --color-danger: var(--color-brand-accent); /* light mode: one red, see --status-cancelled */
   --color-danger-rgb: 220, 38, 38;
   --color-danger-dark: #ff4757;
-    --color-danger-hover: #b91c1c;
 
   /* Legacy color aliases for components */
   --color-purple: #c084fc;
@@ -375,23 +362,14 @@ html[data-theme="light"] {
   --status-on-hold: #f97316; /* Orange - On Hold/Blocked/High Priority */
     
   /* Legacy status dot/indicator colors - mapped to primary */
-  --color-status-new: var(--status-new);
-  --color-status-pending: var(--status-pending);
-  --color-status-read: var(--status-qualified);
-  --color-status-responded: var(--status-completed);
-  --color-status-completed: var(--status-completed);
-  --color-status-archived: var(--status-inactive);
-  --color-status-overdue: var(--status-cancelled);
 
     --color-status-pending-border: #f59e0b;
 
-  --color-status-progress-bg: #dbeafe;
   --color-status-progress-text: #1e40af;
   --color-status-progress-border: #3b82f6;
 
       --color-status-review-border: #8b5cf6;
 
-  --color-status-completed-bg: #d1fae5;
   --color-status-completed-text: #065f46;
   --color-status-completed-border: #10b981;
 
@@ -444,13 +422,11 @@ html[data-theme="light"] {
   /* RGB variants for rgba() usage */
   --color-error-rgb: 239, 68, 68;
   --color-success-rgb: 16, 185, 129;
-  --color-warning-rgb: 245, 158, 11;
 
   /* Legacy skeleton loading */
   --color-skeleton-base: #2a2a2a;
   --color-skeleton-highlight: #3a3a3a;
 
-  --color-svg-text-right: #222222;
 
   /* Legacy business card colors */
   --color-card-bg: var(--color-off-white);
@@ -460,8 +436,6 @@ html[data-theme="light"] {
     --color-admin-purple: #a855f7;
   
   /* Legacy form variables */
-  --form-input-border: #333333;
-  --form-input-placeholder: #666666;
       }
 
 /* Dark theme legacy aliases - Main site only */
@@ -472,10 +446,8 @@ html[data-theme="dark"] {
   --color-text-warning: var(--color-warning);
   --color-neutral-300: #333333;
   --color-neutral-100: #3a3a3a;
-  --color-neutral-200: #3a3a3a;
   --color-neutral-700: #d0d0d0;
   --color-neutral-800: #f0f0f0;
-  --color-neutral-900: #f5f5f5;
   --color-dark: #e0e0e0;
   --color-light: #1a1a1a;
   --color-secondary: var(--color-brand-secondary);
@@ -483,9 +455,6 @@ html[data-theme="dark"] {
      one here put a 2.77:1 red on near-black. */
   --color-accent: var(--color-brand-accent-dark);
   --color-shadow: rgba(0, 0, 0, 1);
-  --form-input-border: #e0e0e0;
-  --form-input-placeholder: #999999;
-          --color-svg-text-right: #9a9a9a;
 
   /* Business card - soft white */
   --color-card-bg: var(--color-gray-200);

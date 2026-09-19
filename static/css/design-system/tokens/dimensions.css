@@ -83,21 +83,12 @@
    * NAVIGATION SIZING (migrated from variables.css)
    * ============================================ */
   --menu-padding: clamp(0.5rem, 2vw, 1rem);
-  --nav-base-gap: clamp(0.5rem, 1.5vw, 0.8rem);
-  --menu-multiplier: 0.15;
-  --list-multiplier: 0.12;
   --menu-heading-size: clamp(2.5rem, 6vw, 4rem);
       --menu-width-desktop: 35rem;
   --menu-width-tablet: 32rem;
   --menu-width-mobile: 100vw;
   --menu-border-radius: 1.25rem;
       
-    --business-card-aspect-ratio: 1.784582;
-  --business-card-base-width: 35vw;
-    --business-card-large-width: 525px;
-    --business-card-medium-width: 420px;
-    --business-card-small-width: 350px;
-    --business-card-tiny-width: 280px;
   
   /* ============================================
    * CONTACT FORM DIMENSIONS (migrated from variables.css)
@@ -143,23 +134,18 @@
   --icon-btn-size-xl: 48px;
 
   /* Large icon / logo containers */
-  --icon-size-3xl: 64px;
   --icon-size-4xl: 96px; /* Sign-in marks — two steps above the 3xl icon */
 
   /* ============================================
    * TOOLTIP / POPOVER CONSTRAINTS
    * ============================================ */
-  --tooltip-max-width: 280px;
-  --tooltip-max-width-sm: 250px;
 
-    --chart-height-md: 200px;
     /* In-portal form sections (settings and the like). A label/value row stops
      being readable long before it stops fitting: past this the label and its
      value sit at opposite ends of the screen. */
   --form-section-max-width: 48rem;
   
   --divider-size: 2px;
-    --tooltip-arrow-size: 6px;
 
   /* ============================================
    * INDICATOR DOTS
@@ -193,7 +179,6 @@
    * Shared for the same reason as the carets: mobile/responsive-fixes.css is
    * in both bundles and sizes .pagination-btn from this. 44px is the WCAG
    * 2.5.5 touch target, which is not a portal-specific opinion. */
-  --table-pagination-btn-size-touch: calc(var(--space-base) * 5.5); /* 44px — WCAG touch target */
 }
 
 /* ============================================

@@ -1,6 +1,6 @@
 # Vendored design system
 
-Copied from no-bhad-codes at commit a543eea0 (2026-09-18 13:18:26 -0400) by `scripts/sync_design_system.sh`.
+Copied from no-bhad-codes at commit 6a33072d (2026-09-19 19:57:32 -0400) by `scripts/sync_design_system.sh`.
 Do not edit these files by hand. Re-run the script to update.
 
 Contents: `tokens/` (the 11 token files plus `portal-theme.css`), `index.css`,

@@ -12,7 +12,6 @@
    * BORDER WIDTHS
    * ============================================ */
 
-        --border-width-4: 4px;
   
   /* Semantic aliases (migrated from variables.css)
    * DISCOTHÈQUE uses 2px borders consistently */
@@ -41,7 +40,6 @@
   --border-radius-sm: 0;
   --border-radius-md: 0;
   --border-radius-lg: 0;
-  --border-radius-xl: 0;
       --border-radius-full: 9999px;
 
   /* ============================================
@@ -49,7 +47,6 @@
    * BRUTALIST DESIGN: All components use 0 radius
    * ============================================ */
 
-      --border-radius-card: 0;
       /* Keep circular for avatars */
 
   /* ============================================

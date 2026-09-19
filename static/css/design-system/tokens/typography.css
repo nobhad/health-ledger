@@ -121,8 +121,11 @@
    */
   --label-font-size: var(--font-size-sm);
   --label-font-weight: var(--font-weight-bold);
-  --label-text-transform: uppercase;
   --label-letter-spacing: var(--letter-spacing-label);
+  /* The fourth member of the label set. This repo's .label sets uppercase
+     directly; health-ledger's reads the token, and a set missing one member
+     is worse than a set nothing in this repo happens to call. */
+  --label-text-transform: uppercase;
 
   /* Gap between a label and the value it names. */
   --field-label-value-gap: calc(var(--space-px) * 2); /* 2px */

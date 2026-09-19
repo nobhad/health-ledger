@@ -19,8 +19,6 @@
 
   /* Component layers */
   --z-index-dropdown: 100;
-    --z-index-fixed: 300;
-  --z-index-modal-backdrop: 400;
   --z-index-modal: 500;
         --z-index-overlay: 900;
   --z-index-max: 999;
@@ -43,7 +41,6 @@
   --z-modal: var(--z-index-portal-modal); /* Alias → --z-index-portal-modal (9600) */
 
   --z-index-nav: 100;
-  --z-index-nav-dropdown: 110;
   --z-index-nav-overlay: 115; /* Blur overlay between header and nav menu */
   --z-index-nav-menu: 120; /* Nav menu above overlay */
   --z-index-nav-menu-content: 125; /* Menu content above overlay */
@@ -51,12 +48,9 @@
 
   /* Business card layers */
   --z-index-business-card: 50;
-  --z-index-business-card-overlay: 400;
-  --z-index-business-card-modal: 500;
 
   /* Loading and intro layers */
   --z-index-loading: 999;
-  --z-index-intro: 998;
 
       --z-index-portal-overlay: 9500;
   --z-index-portal-modal: 9600;
@@ -64,7 +58,6 @@
   --z-index-portal-toast: 9800;
   
   /* Performance dashboard */
-  --z-index-debug: 10000;
 }
 
 /* ============================================

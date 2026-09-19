@@ -51,7 +51,6 @@
   --portal-btn-border-color: var(--color-text-primary);
 
   --portal-btn-color: var(--color-text-primary);
-  --portal-btn-border: var(--color-text-primary);
 
   /* Button colors - hover (inverted: dark bg = light text, light bg = dark text) */
   --portal-btn-hover-bg: var(--color-text-primary);
@@ -106,7 +105,6 @@ html[data-theme="light"] [data-page="admin"] {
   --portal-btn-border-color: var(--color-gray-900);
 
   --portal-btn-color: var(--color-gray-900);
-  --portal-btn-border: var(--color-gray-900);
 
   /* Button colors - hover (dark bg, light text) */
   --portal-btn-hover-bg: var(--color-gray-900);

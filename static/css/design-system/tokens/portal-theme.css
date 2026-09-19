@@ -136,11 +136,12 @@ body[data-page="ledger"] {
    * Name is historical — these are always "foreground text at X opacity".
    * portal-alpha-black-* = true black overlays (shadows, scrims); never inverted.
    * ---------------------------------------- */
-  --portal-alpha-white-02: color-mix(in srgb, var(--color-text-primary), transparent 98%);
+  /* Health Ledger's `code` background. Kept although no stylesheet in THIS
+     repo reads it: the token layer is vendored into health-ledger, which is a
+     second consumer, and a usage scan that sees only one repo calls a live
+     token dead. */
   --portal-alpha-white-05: color-mix(in srgb, var(--color-text-primary), transparent 95%);
-  --portal-alpha-white-08: color-mix(in srgb, var(--color-text-primary), transparent 92%);
   --portal-alpha-white-10: color-mix(in srgb, var(--color-text-primary), transparent 90%);
-  --portal-alpha-white-15: color-mix(in srgb, var(--color-text-primary), transparent 85%);
   --portal-alpha-white-20: color-mix(in srgb, var(--color-text-primary), transparent 80%);
   --portal-alpha-white-30: color-mix(in srgb, var(--color-text-primary), transparent 70%);
   /* Portal-only, and the prefix means it. Three site sheets used to reach for
@@ -150,15 +151,10 @@ body[data-page="ledger"] {
      entries are how a sixth real one hides. The site sheets carry the `rgba()`
      directly now; if the site ever wants a shared alpha ramp it should get one
      in tokens/colors.css rather than borrow the portal's. */
-  --portal-alpha-black-05: color-mix(in srgb, black, transparent 95%);
-  --portal-alpha-black-10: color-mix(in srgb, black, transparent 90%);
   --portal-alpha-black-30: color-mix(in srgb, black, transparent 70%);
   --portal-alpha-black-50: color-mix(in srgb, black, transparent 50%);
-  --portal-alpha-black-60: color-mix(in srgb, black, transparent 40%);
-  --portal-alpha-black-80: color-mix(in srgb, black, transparent 20%);
 
   /* Semantic color alphas - for colored highlights/backgrounds */
-  --portal-alpha-primary-08: rgba(var(--color-accent-rgb), 0.08);
   --portal-alpha-primary-10: rgba(var(--color-accent-rgb), 0.1);
 
   /* ----------------------------------------
@@ -172,10 +168,8 @@ body[data-page="ledger"] {
   /* Thick 2px outline-based focus ring — for interactive controls (buttons, inputs) */
   /* Standard outline-offset for focus indicators */
   /* Inset outline-offset — draws focus ring inside element bounds (e.g. details cards) */
-  --focus-ring-offset-inset: -2px;
 
   /* 12px 24px — on 8px grid */
-  --portal-panel-padding-x: var(--space-3); /* 24px — on 8px grid */
 
   /* ----------------------------------------
    * LAYOUT TOKENS
@@ -291,7 +285,6 @@ body[data-page="ledger"] {
   --portal-header-height: calc(
     2 * var(--space-5) + var(--space-1) + 2 * var(--space-2)
   ); /* 2 rows (40px) + gap (8px) + branding row padding (32px) = 120px */
-  --portal-header-top: var(--space-2-5); /* 20px */
   --portal-header-height-line: var(--space-4); /* 32px */
   /* 18px */
   --portal-page-top: var(--space-3);
@@ -343,7 +336,6 @@ body[data-page="ledger"] {
   --table-header-letter-spacing: var(--letter-spacing-label);
   --table-header-color: var(--color-text-secondary);
   --table-cell-color: var(--color-text-primary);
-  --table-identity-max-width: calc(var(--space-base) * 27.5);
   --table-truncate-max-width: calc(var(--space-base) * 37.5);
   --table-checkbox-width: var(--space-5);
   --table-cell-max-width: calc(var(--space-base) * 25);
@@ -364,7 +356,6 @@ body[data-page="ledger"] {
 
      192px is roughly 22 characters of the portal's mono at --font-size-sm —
      past every value these columns actually carry, and still a ceiling. */
-  --table-compact-max-width: calc(var(--space-base) * 24);
   --table-icon-size: var(--icon-size-md);
   --table-sort-indicator-size: calc(var(--icon-size-xs) - var(--border-width));
   --table-pagination-btn-size: var(--space-3-5); /* 28px */
@@ -379,6 +370,7 @@ body[data-page="ledger"] {
    * ---------------------------------------- */
   --dropdown-padding-x: var(--space-1-5);
   --dropdown-padding-y: var(--space-1);
+  /* Read by health-ledger's dropdowns, not by anything here. */
   --dropdown-item-height: var(--space-4); /* 32px — fixed-height dropdown rows */
   /* Left padding on a checkbox or radio item, clearing the indicator that sits
      absolutely at the row's left edge. It was written as a fallback at both
@@ -418,7 +410,6 @@ body[data-page="ledger"] {
   /* Group: Progress Bar (portal overrides base 16px) */
   --progress-bar-height: 12px;
   --progress-bar-height-sm: 8px;
-  --progress-bar-height-lg: 16px;
 
   /* Group: Kanban (shared portal-kanban.css) */
   --kanban-board-min-height: 500px;
@@ -429,7 +420,6 @@ body[data-page="ledger"] {
 
   --kanban-skeleton-height: 256px;
   --tasks-textarea-min-height: 60px;
-  --tasks-progress-track-max-width: 200px;
 
   /* Group: Configuration */
   --config-overview-grid-min-width: 180px;
@@ -453,10 +443,6 @@ body[data-page="ledger"] {
   /* Group: Files */
   --files-folder-panel-width: 220px;
   --files-browser-min-height: 300px;
-  --files-filter-group-min-width: 140px;
-  --files-filter-date-min-width: 120px;
-  --files-action-btn-min-width: 90px;
-  --files-filter-select-max-width: 300px;
   /* The folder rail on the Files screen. 200 is the floor, for the narrowest
      width at which it is shown at all (--tablet, 768px); it steps up with the
      viewport rather than staying at a phone-adjacent number on a wide screen,
@@ -464,7 +450,6 @@ body[data-page="ledger"] {
      (Noelle, 2026-09-13). Folder names are the thing it has to fit, and they
      are the part that was truncating first. */
   --portal-files-sidebar-width: 200px;
-  --files-grid-item-min-width: 150px;
   --files-folder-tree-max-height: 150px;
 
   /* Group: Inline Edit */
@@ -477,7 +462,6 @@ body[data-page="ledger"] {
 
   /* Small action/pagination buttons */
   --icon-container-lg: var(--space-6); /* 48px — large icon/status containers */
-  --modal-input-height: var(--space-6); /* 48px — modal dropdown trigger height */
   --inline-pill-height: 18px; /* Inline badge/pill height */
 
   /* Group: Help Center */
@@ -517,14 +501,12 @@ body[data-page="ledger"] {
    * Portal inverts the neutral scale: 100 = near-bg, 900 = near-text.
    * ---------------------------------------- */
   --color-neutral-100: color-mix(in srgb, var(--color-bg-primary), var(--color-text-primary) 10%);
-  --color-neutral-200: color-mix(in srgb, var(--color-bg-primary), var(--color-text-primary) 4%);
   --color-neutral-300: var(--color-bg-primary);
   --color-neutral-400: color-mix(in srgb, var(--color-bg-primary), var(--color-text-primary) 47%);
   --color-neutral-500: color-mix(in srgb, var(--color-bg-primary), var(--color-text-primary) 63%);
   --color-neutral-600: color-mix(in srgb, var(--color-bg-primary), var(--color-text-primary) 75%);
   --color-neutral-700: color-mix(in srgb, var(--color-bg-primary), var(--color-text-primary) 88%);
   --color-neutral-800: color-mix(in srgb, var(--color-bg-primary), var(--color-text-primary) 96%);
-  --color-neutral-900: var(--color-text-primary);
   --color-dark: var(--color-text-primary);
   --color-light: var(--color-bg-primary);
   --color-nav-text: var(--color-text-primary);
@@ -532,18 +514,16 @@ body[data-page="ledger"] {
   --app-color-primary: var(--color-text-primary);
 
   /* Form variables — derived from primaries */
-  --form-input-border: var(--color-text-primary);
-  --form-input-placeholder: var(--color-neutral-400); /* ~47% between bg and text */
 
   /* ----------------------------------------
    * DROPDOWN COMPONENT DEFAULTS
    * Context variables — override per-component via selector scope.
    * Defaults provide safe fallback when no context is set.
    * ---------------------------------------- */
+  /* Read by health-ledger's dropdowns, not by anything here. */
   --dropdown-bg: var(--color-bg-secondary);
   --dropdown-border-color: var(--color-border-primary);
   --dropdown-border-width: var(--border-width);
-  --dropdown-radius: var(--border-radius-sm);
 
   /* ----------------------------------------
    * FILTER TOKENS — theme-aware native control filters
@@ -559,7 +539,6 @@ body[data-page="ledger"] {
    * ---------------------------------------- */
   --portal-bg: var(--color-bg-primary); /* background context alias */
   /* Tailwind ring utility alias */
-  --card-grid-gap: var(--space-4); /* configurable grid gap default */
   /* compact mobile table text */
 }
 
@@ -655,7 +634,6 @@ html[data-theme="light"]:has(body[data-page="ledger"]) {
   body[data-page="admin"],
   body[data-page="ledger"] {
     /* 8px 16px */
-    --portal-panel-padding-x: var(--space-2); /* 16px */
   }
 }
 

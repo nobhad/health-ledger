@@ -59,35 +59,13 @@
 @custom-media --ultra-wide (min-width: 1400px);
 @custom-media --ultra-wide-down (max-width: 1399px);
 
-:root {
-  /* ============================================
-   * BREAKPOINT TOKENS
-   * ============================================ */
-
-  /* Mobile-first breakpoints */
-  --breakpoint-xs: 475px;
-  --breakpoint-sm: 640px;
-  --breakpoint-md: 768px;
-  --breakpoint-lg: 1024px;
-  --breakpoint-xl: 1280px;
-  --breakpoint-2xl: 1536px;
-
-          
-  /* Content width constraints */
-  --container-xs: 100%;
-  --container-sm: 640px;
-  --container-md: 768px;
-  --container-lg: 1024px;
-  --container-xl: 1280px;
-  --container-2xl: 1536px;
-
-  
-          }
 
 /* The .container utility (a Bootstrap-style responsive container) used to
    live here at @layer tokens. It was dead: base/layout.css defines
    .container at @layer base and always won on the site (the only place
    the standalone class is used, the header partial); the portal uses
    only compound *-container names, never this one. Removed 2026-09-16.
-   The @custom-media and --container-* tokens above stay — those ARE
-   tokens. */
+   The @custom-media queries above stay — those ARE the tokens. The
+   numeric --breakpoint-* and --container-* scales that sat beside them
+   were removed 2026-09-19: nothing read them, and they restated the same
+   widths a second time, so the two could drift apart silently. */

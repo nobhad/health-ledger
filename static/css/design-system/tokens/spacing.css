@@ -34,7 +34,6 @@
   --space-8: calc(var(--space-base) * 8); /* 64px */
   --space-10: calc(var(--space-base) * 10); /* 80px */
   --space-12: calc(var(--space-base) * 12); /* 96px */
-  --space-16: calc(var(--space-base) * 16); /* 128px */
   --space-20: calc(var(--space-base) * 20); /* 160px */
 
   /* ============================================
@@ -43,11 +42,9 @@
    * Use for layout that scales with the viewport.
    * Fixed scale (--space-0, --space-1, ...) is above.
    */
-  --space-fluid-xs: clamp(0.25rem, 1vw, 0.5rem);
   --space-fluid-sm: clamp(0.5rem, 2vw, 1rem);
   --space-fluid-md: clamp(1rem, 3vw, 1.5rem);
   --space-fluid-lg: clamp(1.5rem, 4vw, 2rem);
-  --space-fluid-xl: clamp(2rem, 5vw, 3rem);
   
   /* ============================================
    * ICON-TEXT GAP - Single Source of Truth
@@ -62,7 +59,6 @@
   --icon-gap-xs: 8px; /* bumped from 6px */
   --icon-gap-sm: 10px; /* bumped from 8px */
   --icon-gap-md: 12px; /* bumped from 10px */
-  --icon-gap-lg: 16px; /* sidebar nav, loading states — unchanged */
   --icon-gap-xl: 20px; /* decorative/large contexts — unchanged */
 
   /* Default icon gap */
