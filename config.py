@@ -45,22 +45,73 @@ _load_dotenv(BASE_DIR / '.env')
 # commit can ever carry a record with it. HEALTH_LEDGER_DATA_DIR sets it (in
 # the environment or in ./.env); unset, it falls back to the project folder,
 # where those paths are git-ignored.
+ENV_PATH = BASE_DIR / '.env'
+DATA_DIR_IS_CONFIGURED = bool(os.environ.get('HEALTH_LEDGER_DATA_DIR'))
 DATA_ROOT = Path(os.environ.get('HEALTH_LEDGER_DATA_DIR') or BASE_DIR).expanduser().resolve()
 
-# Database configuration
-# HEALTH_LEDGER_DB_PATH overrides the database location (used by the tests).
-DB_PATH = Path(os.environ.get('HEALTH_LEDGER_DB_PATH') or DATA_ROOT / 'genetic_profile.db')
-DB_SCHEMA_PATH = BASE_DIR / 'genetic_profile_db_schema.sql'
+# The folder the setup screen proposes when nothing has been chosen yet: a
+# plainly named folder in the person's home, never the app's own folder.
+DEFAULT_DATA_DIR_NAME = 'Health Ledger'
 
-# Paths
-OUTPUT_DIR = DATA_ROOT / 'output'
+DB_SCHEMA_PATH = BASE_DIR / 'genetic_profile_db_schema.sql'
 DOCS_DIR = BASE_DIR / 'docs'
 SCRIPTS_DIR = BASE_DIR / 'scripts'
-DATA_DIR = DATA_ROOT / 'data'
-PRIMARY_SOURCES_DIR = DATA_ROOT / 'primary_sources'
-LOGS_DIR = DATA_ROOT / 'logs'
-BACKUPS_DIR = DATA_ROOT / 'backups'
-DOCTOR_DOCS_DIR = OUTPUT_DIR / 'doctor_docs'  # Default folder for doctor PDFs
+
+
+def default_data_root() -> Path:
+    return Path.home() / DEFAULT_DATA_DIR_NAME
+
+
+def set_data_root(path) -> Path:
+    """
+    Point every private path at `path` for the running process.
+
+    The setup screen calls this when the person chooses where their records
+    live. Everything derived from the data directory is recomputed here, so
+    a module must read these names from `config` at call time rather than
+    import them by value.
+    """
+    global DATA_ROOT, DB_PATH, OUTPUT_DIR, DATA_DIR, PRIMARY_SOURCES_DIR
+    global LOGS_DIR, BACKUPS_DIR, DOCTOR_DOCS_DIR
+    DATA_ROOT = Path(path).expanduser().resolve()
+    # HEALTH_LEDGER_DB_PATH overrides the database location (used by the tests).
+    DB_PATH = Path(os.environ.get('HEALTH_LEDGER_DB_PATH') or DATA_ROOT / 'genetic_profile.db')
+    OUTPUT_DIR = DATA_ROOT / 'output'
+    DATA_DIR = DATA_ROOT / 'data'
+    PRIMARY_SOURCES_DIR = DATA_ROOT / 'primary_sources'
+    LOGS_DIR = DATA_ROOT / 'logs'
+    BACKUPS_DIR = DATA_ROOT / 'backups'
+    DOCTOR_DOCS_DIR = OUTPUT_DIR / 'doctor_docs'  # Default folder for doctor PDFs
+    return DATA_ROOT
+
+
+def save_data_root(path) -> Path:
+    """
+    Record the chosen data directory in the git-ignored .env so the next
+    launch finds it. Other lines in the file are kept; an existing
+    HEALTH_LEDGER_DATA_DIR line is replaced.
+    """
+    global DATA_DIR_IS_CONFIGURED
+    value = str(Path(path).expanduser().resolve())
+    line = f'HEALTH_LEDGER_DATA_DIR={value}'
+    lines = ENV_PATH.read_text(encoding='utf-8').splitlines() if ENV_PATH.is_file() else []
+    replaced = False
+    for i, raw in enumerate(lines):
+        if raw.split('=', 1)[0].strip() == 'HEALTH_LEDGER_DATA_DIR' and not raw.lstrip().startswith('#'):
+            lines[i] = line
+            replaced = True
+    if not replaced:
+        if not lines:
+            lines = ['# Local settings for this machine. Git-ignored.',
+                     '# All private data (database, primary_sources, output, logs, backups) lives here:']
+        lines.append(line)
+    ENV_PATH.write_text('\n'.join(lines) + '\n', encoding='utf-8')
+    os.environ['HEALTH_LEDGER_DATA_DIR'] = value
+    DATA_DIR_IS_CONFIGURED = True
+    return ENV_PATH
+
+
+set_data_root(DATA_ROOT)
 
 # Patient information for PDF naming
 # Will be auto-detected from database primary_sources table

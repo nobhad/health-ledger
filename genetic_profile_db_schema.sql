@@ -1,6 +1,13 @@
 -- Genetic Profile Database Schema
 -- SQLite database for storing genetic profile data
 
+-- App settings: small key/value state that belongs with the database
+-- (for example when first-run setup was completed).
+CREATE TABLE IF NOT EXISTS app_settings (
+    key TEXT PRIMARY KEY,
+    value TEXT
+);
+
 -- Genes table
 CREATE TABLE IF NOT EXISTS genes (
     id INTEGER PRIMARY KEY AUTOINCREMENT,

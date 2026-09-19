@@ -7,6 +7,9 @@
 {% block page_description %}Everything here stays on this computer. This is what the ledger holds and where to go next.{% endblock %}
 
 {% block content %}
+{% if notice %}
+<div class="status-message is-success" role="status">{{ notice }}</div>
+{% endif %}
 <div class="stat-grid">
     <a class="stat-card" href="/profile">
         <span class="stat-label">Genes</span>
@@ -53,6 +56,15 @@
     <div class="card">
         <div class="card-header"><h3>Start here</h3></div>
         <div class="card-body">
+            {% if ledger_empty %}
+            <a class="action-link" href="/setup">
+                <i data-lucide="upload"></i>
+                <span class="action-link-text">
+                    <span class="action-link-title">Import or restore</span>
+                    <span class="action-link-hint">The ledger is empty. Bring in a database file or a backup</span>
+                </span>
+            </a>
+            {% endif %}
             <a class="action-link" href="/summary">
                 <i data-lucide="bar-chart-3"></i>
                 <span class="action-link-text">
@@ -88,6 +100,15 @@
                     <span class="action-link-hint">A timestamped copy of the database, yours to keep anywhere</span>
                 </span>
             </a>
+            {% if not ledger_empty %}
+            <a class="action-link" href="/setup">
+                <i data-lucide="upload"></i>
+                <span class="action-link-text">
+                    <span class="action-link-title">Import or restore</span>
+                    <span class="action-link-hint">Bring in a database file or go back to a backup</span>
+                </span>
+            </a>
+            {% endif %}
         </div>
     </div>
 
@@ -106,7 +127,7 @@
                 {% endfor %}
             </ul>
             {% else %}
-            <p class="no-data">No sources yet. Add records with <code>scripts/add_primary_sources.py</code>.</p>
+            <p class="no-data">No sources yet. Records are added with the extraction scripts in <code>scripts/</code> (see the README), or <a href="/setup">import a database</a>.</p>
             {% endif %}
         </div>
     </div>

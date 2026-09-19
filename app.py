@@ -18,21 +18,23 @@ Usage:
     Access at: http://localhost:5001
 """
 
-from flask import Flask, render_template, jsonify, request, send_file, after_this_request
+from flask import Flask, render_template, jsonify, request, send_file, after_this_request, redirect, url_for
 from werkzeug.utils import secure_filename
 from database_manager import GeneticProfileDB
 from pathlib import Path
 import os
+import sqlite3
 import tempfile
 import threading
 import traceback
 import config
-from config import setup_logging, get_logger, DEFAULT_PORT, HOST, DEBUG, LOGS_DIR, DOCTOR_DOCS_DIR
+from config import setup_logging, get_logger, DEFAULT_PORT, HOST, DEBUG, LOGS_DIR
 from validation import (
     validate_gene_symbol, validate_condition_name, validate_trait_name,
     validate_list_param, create_error_response
 )
 from profile_generator import generate_profile_html
+import ledger_setup
 from doctor_templates import get_available_specialties, DOCTOR_TEMPLATES
 
 # Set up logging
@@ -196,6 +198,10 @@ def index():
     app_logger.info("Rendering overview")
     try:
         db = get_db()
+        if ledger_setup.needs_setup(db.conn):
+            # Nothing in the ledger and nobody has chosen to begin: the first
+            # thing to see is the choice, not a page of zeros.
+            return redirect(url_for('setup'))
         cursor = db.conn.cursor()
 
         def count(sql: str) -> int:
@@ -234,15 +240,186 @@ def index():
         from scripts.backup_database import list_backups
         backups = list_backups()
 
+        notice = {
+            'fresh': f'Your ledger is ready. Your records will live in {config.DATA_ROOT}.',
+            'imported': f'Your database was imported. Your records live in {config.DATA_ROOT}.',
+            'restored': 'The backup was restored.',
+        }.get(request.args.get('notice', ''))
+
         return render_template('overview.html',
                                stats=stats,
                                recent_sources=recent_sources,
                                abnormal_metrics=abnormal_metrics,
                                last_backup=backups[0] if backups else None,
-                               backup_count=len(backups))
+                               backup_count=len(backups),
+                               ledger_empty=not ledger_setup.ledger_has_content(db.conn),
+                               notice=notice)
     except Exception as e:
         app_logger.error(f"Error rendering overview: {e}", exc_info=True)
         return f"Error loading page: {str(e)}", 500
+
+
+# First run: import a database or start fresh
+def _render_setup(error: str = None, status: int = 200):
+    """The setup screen, with what the ledger holds now and the backups on disk."""
+    from scripts.backup_database import list_backups
+    db = get_db()
+    # The folder field proposes what is configured, or a plainly named
+    # folder in the home directory when nothing has been chosen yet.
+    proposed = config.DATA_ROOT if config.DATA_DIR_IS_CONFIGURED else config.default_data_root()
+    return render_template('setup.html',
+                           current=ledger_setup.summarize(db.conn),
+                           backups=list_backups(),
+                           data_root=str(config.DATA_ROOT),
+                           db_path=str(config.DB_PATH),
+                           proposed_folder=request.form.get('data_folder') or str(proposed),
+                           error=error), status
+
+
+def _choose_data_folder(form) -> Path:
+    """
+    Apply the data folder named on the setup screen (blank means the
+    proposed default), for this process and for the next launch.
+
+    Raises ValueError with a sentence for the screen when the folder is
+    unusable.
+    """
+    raw = (form.get('data_folder') or '').strip()
+    folder = Path(raw).expanduser() if raw else config.default_data_root()
+    if not folder.is_absolute():
+        raise ValueError('Give the full path of the folder, starting from the top of the disk.')
+    folder = folder.resolve()
+    app_dir = Path(config.BASE_DIR).resolve()
+    if folder == app_dir or app_dir in folder.parents:
+        raise ValueError("Choose a folder outside the Health Ledger app folder, so your "
+                         "records never travel with the app's code.")
+    try:
+        folder.mkdir(parents=True, exist_ok=True)
+    except OSError as e:
+        raise ValueError(f'That folder cannot be created: {e.strerror or e}.') from e
+    if not os.access(folder, os.W_OK):
+        raise ValueError('That folder cannot be written to. Choose another.')
+    if folder != Path(config.DATA_ROOT).resolve() or not config.DATA_DIR_IS_CONFIGURED:
+        previous_db = Path(config.DB_PATH)
+        config.set_data_root(folder)
+        config.save_data_root(folder)
+        app_logger.info(f'Data folder set to {folder}')
+        _discard_placeholder_db(previous_db, Path(config.DB_PATH))
+    return folder
+
+
+def _discard_placeholder_db(previous_db: Path, current_db: Path) -> None:
+    """
+    Before a folder is chosen the app falls back to its own directory, so a
+    launch has already created an empty database there. Once the records
+    have a home, that placeholder is removed; a database holding anything
+    is never touched.
+    """
+    try:
+        if previous_db.resolve() == current_db.resolve() or not previous_db.is_file():
+            return
+        if Path(config.BASE_DIR).resolve() not in previous_db.resolve().parents:
+            return
+        conn = sqlite3.connect(f'file:{previous_db}?mode=ro', uri=True)
+        try:
+            empty = not ledger_setup.ledger_has_content(conn)
+        finally:
+            conn.close()
+        if not empty:
+            return
+        for suffix in ('', '-wal', '-shm'):
+            leftover = previous_db.with_name(previous_db.name + suffix)
+            if leftover.exists():
+                leftover.unlink()
+        app_logger.info(f'Removed the empty placeholder database at {previous_db}')
+    except Exception as e:
+        app_logger.warning(f'Could not remove the placeholder database {previous_db}: {e}')
+
+
+@app.route('/setup')
+def setup():
+    """
+    Getting started: import an existing Health Ledger database, restore a
+    backup, or start with an empty ledger. The overview sends an empty,
+    never-started ledger here; it stays reachable afterwards for restores.
+    """
+    try:
+        return _render_setup()
+    except Exception as e:
+        app_logger.error(f"Error rendering setup: {e}", exc_info=True)
+        return f"Error loading page: {str(e)}", 500
+
+
+@app.route('/setup/start', methods=['POST'])
+def setup_start():
+    """Start fresh: keep the empty database and stop showing the setup screen."""
+    try:
+        _choose_data_folder(request.form)
+        ledger_setup.ensure_data_directories()
+        db = get_db()
+        ledger_setup.mark_setup_completed(db.conn)
+        app_logger.info("Setup: started with an empty ledger")
+        return redirect(url_for('index', notice='fresh'))
+    except ValueError as e:
+        return _render_setup(error=str(e), status=400)
+    except Exception as e:
+        app_logger.error(f"Error starting fresh: {e}", exc_info=True)
+        return _render_setup(error=f'Could not start the ledger: {e}', status=500)
+
+
+@app.route('/setup/import', methods=['POST'])
+def setup_import():
+    """Import an uploaded .db file. It is checked before it replaces anything."""
+    upload = request.files.get('database')
+    if upload is None or not upload.filename:
+        return _render_setup(error='Choose a database file first.', status=400)
+
+    tmp_path = None
+    try:
+        # A first-run import also settles where the records live. Once the
+        # ledger has content the folder is already chosen and the field is
+        # not shown.
+        if 'data_folder' in request.form:
+            _choose_data_folder(request.form)
+        ledger_setup.ensure_data_directories()
+        # The upload lands inside the data directory, never in the system
+        # temp folder, and is removed whether or not the import succeeds.
+        fd, tmp_path = tempfile.mkstemp(prefix='import_', suffix='.db', dir=str(config.DATA_ROOT))
+        os.close(fd)
+        upload.save(tmp_path)
+        summary = ledger_setup.import_database(Path(tmp_path))
+        app_logger.info(f"Setup: imported {secure_filename(upload.filename)}: {summary}")
+        return redirect(url_for('index', notice='imported'))
+    except (ledger_setup.InvalidDatabase, ValueError) as e:
+        return _render_setup(error=str(e), status=400)
+    except Exception as e:
+        app_logger.error(f"Error importing database: {e}", exc_info=True)
+        return _render_setup(error=f'The import failed: {e}', status=500)
+    finally:
+        if tmp_path and os.path.exists(tmp_path):
+            os.unlink(tmp_path)
+
+
+@app.route('/setup/restore', methods=['POST'])
+def setup_restore():
+    """Restore one of the backups in the backups folder, by file name."""
+    filename = secure_filename(request.form.get('filename', ''))
+    # Look the backup up where backups are now, before a first-run folder
+    # choice moves the data directory.
+    backup_path = ledger_setup.find_backup(filename) if filename else None
+    if backup_path is None:
+        return _render_setup(error='That backup is no longer on disk.', status=404)
+    try:
+        if 'data_folder' in request.form:
+            _choose_data_folder(request.form)
+        summary = ledger_setup.import_database(backup_path)
+        app_logger.info(f"Setup: restored {filename}: {summary}")
+        return redirect(url_for('index', notice='restored'))
+    except (ledger_setup.InvalidDatabase, ValueError) as e:
+        return _render_setup(error=str(e), status=400)
+    except Exception as e:
+        app_logger.error(f"Error restoring backup: {e}", exc_info=True)
+        return _render_setup(error=f'The restore failed: {e}', status=500)
 
 
 @app.route('/query')
@@ -1049,8 +1226,8 @@ def api_pdf_doctor(specialty):
             final_path = save_dir / filename
         else:
             # Default folder
-            DOCTOR_DOCS_DIR.mkdir(parents=True, exist_ok=True)
-            final_path = DOCTOR_DOCS_DIR / filename
+            config.DOCTOR_DOCS_DIR.mkdir(parents=True, exist_ok=True)
+            final_path = config.DOCTOR_DOCS_DIR / filename
         
         # Generate PDF with options
         if generate_doctor_pdf(db, specialty, str(final_path), 

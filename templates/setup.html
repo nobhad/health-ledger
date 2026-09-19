@@ -1,0 +1,116 @@
+{% extends "base.html" %}
+
+{% set first_run = current.is_empty %}
+
+{% block title %}{{ 'Get started' if first_run else 'Import or restore' }} - Health Ledger{% endblock %}
+{% block page_body_class %} page-body--flush{% endblock %}
+
+{% block page_title %}{{ 'Get started' if first_run else 'Import or restore a database' }}{% endblock %}
+{% block page_description %}{% if first_run %}Begin with an empty ledger, or bring in a database you already have. Everything stays on this computer.{% else %}Replace what the ledger holds with a database file or one of your backups. The current database is backed up first.{% endif %}{% endblock %}
+
+{% block content %}
+{% if error %}
+<div class="alert alert-error" role="alert">{{ error }}</div>
+{% endif %}
+
+{% if first_run %}
+    {# One form around both panels: the data folder chosen in the first
+       applies to whichever button is pressed. #}
+    <form class="grid grid-2 grid--fill" method="post" enctype="multipart/form-data">
+    <div class="card">
+        <div class="card-header"><h3>Start fresh</h3></div>
+        <div class="card-body">
+            <p>Begin with an empty ledger. Records are added afterwards, and you can import a database at any time from the Backup page.</p>
+            <h4>Where your records will live</h4>
+            <p class="note">Everything private stays in this one folder on your computer: the database, your source documents, generated PDFs and backups. Keep the suggestion or type another folder.</p>
+            <div class="form-row">
+                <label for="dataFolder" class="field-label">Data folder</label>
+                <input type="text" id="dataFolder" name="data_folder" value="{{ proposed_folder }}" autocomplete="off" spellcheck="false" class="form-input">
+            </div>
+            <div class="form-group">
+                <button type="submit" formaction="/setup/start" class="btn btn-primary">
+                    <i data-lucide="sparkles"></i>
+                    Start with an empty ledger
+                </button>
+            </div>
+        </div>
+    </div>
+    <div class="card">
+        <div class="card-header"><h3>Import a database</h3></div>
+        <div class="card-body">
+            <p>Choose the <code>.db</code> file Health Ledger made for you: a backup, an export, or a copy from another computer. It is checked before it replaces anything, and it goes into the data folder chosen on the left.</p>
+            <div class="form-group">
+                <label for="databaseFile" class="field-label">Database file</label>
+                <input type="file" id="databaseFile" name="database" accept=".db,.sqlite,.sqlite3,application/vnd.sqlite3,application/x-sqlite3" class="form-input">
+            </div>
+            <div class="form-group">
+                <button type="submit" formaction="/setup/import" class="btn btn-primary">
+                    <i data-lucide="upload"></i>
+                    Import this database
+                </button>
+            </div>
+
+            {% if backups %}
+            <h4>Or restore a backup</h4>
+            <ul class="list">
+                {% for backup in backups %}
+                <li>
+                    <div class="list-item">
+                        <span class="list-item-title">{{ backup.created[:10] }} at {{ backup.created[11:16] }}</span>
+                        <span class="list-item-meta">{{ backup.filename }} &middot; {{ (backup.size / 1024) | round(1) }} KB</span>
+                        <div>
+                            <button type="submit" formaction="/setup/restore" name="filename" value="{{ backup.filename }}" class="btn btn-secondary">Restore</button>
+                        </div>
+                    </div>
+                </li>
+                {% endfor %}
+            </ul>
+            {% endif %}
+        </div>
+    </div>
+    </form>
+    {% else %}
+    <div class="grid grid-2 grid--fill">
+    <div class="card">
+        <div class="card-header"><h3>Import a database</h3></div>
+        <div class="card-body">
+            <p>Choose the <code>.db</code> file Health Ledger made for you: a backup, an export, or a copy from another computer. It is checked before it replaces anything.</p>
+            {% if not first_run %}
+            <p class="note">The ledger now holds {{ current.genes }} gene{{ '' if current.genes == 1 else 's' }}, {{ current.sources }} source{{ '' if current.sources == 1 else 's' }} and {{ current.metrics }} metric{{ '' if current.metrics == 1 else 's' }}. A timestamped backup is written to <code>backups/</code> before the import.</p>
+            {% endif %}
+            <form method="post" action="/setup/import" enctype="multipart/form-data">
+                <div class="form-group">
+                    <label for="databaseFile" class="field-label">Database file</label>
+                    <input type="file" id="databaseFile" name="database" accept=".db,.sqlite,.sqlite3,application/vnd.sqlite3,application/x-sqlite3" required class="form-input">
+                </div>
+                <div class="form-group">
+                    <button type="submit" class="btn btn-primary">
+                        <i data-lucide="upload"></i>
+                        Import this database
+                    </button>
+                </div>
+            </form>
+
+            {% if backups %}
+            <h4>Or restore a backup</h4>
+            <ul class="list">
+                {% for backup in backups %}
+                <li>
+                    <form method="post" action="/setup/restore" class="list-item">
+                        <input type="hidden" name="filename" value="{{ backup.filename }}">
+                        <span class="list-item-title">{{ backup.created[:10] }} at {{ backup.created[11:16] }}</span>
+                        <span class="list-item-meta">{{ backup.filename }} &middot; {{ (backup.size / 1024) | round(1) }} KB</span>
+                        <div>
+                            <button type="submit" class="btn btn-secondary">Restore</button>
+                        </div>
+                    </form>
+                </li>
+                {% endfor %}
+            </ul>
+            {% endif %}
+        </div>
+    </div>
+
+    </div>
+    {% endif %}
+{% endblock %}
