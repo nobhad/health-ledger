@@ -352,6 +352,23 @@ def setup():
         return f"Error loading page: {str(e)}", 500
 
 
+@app.route('/setup/browse', methods=['POST'])
+def setup_browse():
+    """
+    Open this computer's folder picker for the setup screen and return the
+    folder chosen. The server runs on the user's own machine, so the dialog
+    appears in front of them; nothing is chosen on their behalf.
+    """
+    try:
+        payload = request.get_json(silent=True) or {}
+        initial = payload.get('current') or str(config.DATA_ROOT)
+        chosen = ledger_setup.choose_folder(Path(initial))
+        return jsonify({'folder': str(chosen) if chosen else None})
+    except Exception as e:
+        app_logger.warning(f"Folder picker unavailable: {e}")
+        return jsonify({'error': str(e)}), 501
+
+
 @app.route('/setup/start', methods=['POST'])
 def setup_start():
     """Start fresh: keep the empty database and stop showing the setup screen."""

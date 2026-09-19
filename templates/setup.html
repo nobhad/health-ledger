@@ -22,7 +22,14 @@
         <p class="note">Everything private stays in this one folder on your computer: the database, your source documents, generated PDFs and backups. Keep the suggestion or type another folder.</p>
         <div class="form-group">
             <label for="dataFolder" class="field-label">Data folder</label>
-            <input type="text" id="dataFolder" name="data_folder" value="{{ proposed_folder }}" autocomplete="off" spellcheck="false" class="form-input">
+            <div class="input-group">
+                <input type="text" id="dataFolder" name="data_folder" value="{{ proposed_folder }}" autocomplete="off" spellcheck="false" class="form-input">
+                <button type="button" class="btn btn-secondary" id="browseFolder">
+                    <i data-lucide="folder-open"></i>
+                    Choose a folder
+                </button>
+            </div>
+            <small class="helper-text" id="browseStatus"></small>
         </div>
     </div>
     <div class="grid grid-2 grid--fill">
@@ -117,4 +124,8 @@
 
     </div>
     {% endif %}
+{% endblock %}
+
+{% block scripts %}
+<script src="{{ url_for('static', filename='js/setup.js') }}"></script>
 {% endblock %}

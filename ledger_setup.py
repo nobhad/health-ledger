@@ -196,3 +196,62 @@ def find_backup(filename: str) -> Optional[Path]:
         if backup['filename'] == filename:
             return Path(backup['path'])
     return None
+
+
+def choose_folder(initial: Optional[Path] = None) -> Optional[Path]:
+    """
+    Open this computer's own folder picker and return the folder chosen,
+    or None if the picker was cancelled.
+
+    The server only ever runs on the user's machine (it binds to
+    127.0.0.1), so the dialog opens in front of the person clicking. macOS
+    uses the system chooser through osascript, Windows the
+    FolderBrowserDialog through PowerShell, Linux zenity or kdialog when one
+    is installed. Raises RuntimeError when no picker is available, so the
+    screen can say to type the path instead.
+    """
+    import shutil
+    import subprocess
+    import sys
+
+    prompt = 'Choose where Health Ledger keeps your records'
+    start = Path(initial).expanduser() if initial else Path.home()
+    if not start.is_dir():
+        start = Path.home()
+
+    if sys.platform == 'darwin':
+        location = str(start).replace('\\', '\\\\').replace('"', '\\"')
+        script = (f'POSIX path of (choose folder with prompt "{prompt}" '
+                  f'default location POSIX file "{location}")')
+        result = subprocess.run(['osascript', '-e', script],
+                                capture_output=True, text=True, timeout=600)
+        if result.returncode != 0:
+            if 'User canceled' in result.stderr or '-128' in result.stderr:
+                return None
+            raise RuntimeError(result.stderr.strip() or 'The folder picker could not open.')
+        chosen = result.stdout.strip()
+        return Path(chosen) if chosen else None
+
+    if sys.platform.startswith('win'):
+        location = str(start).replace("'", "''")
+        script = ('Add-Type -AssemblyName System.Windows.Forms; '
+                  '$d = New-Object System.Windows.Forms.FolderBrowserDialog; '
+                  f"$d.Description = '{prompt}'; "
+                  f"$d.SelectedPath = '{location}'; "
+                  'if ($d.ShowDialog() -eq [System.Windows.Forms.DialogResult]::OK) '
+                  '{ Write-Output $d.SelectedPath }')
+        result = subprocess.run(['powershell', '-NoProfile', '-STA', '-Command', script],
+                                capture_output=True, text=True, timeout=600)
+        chosen = result.stdout.strip()
+        return Path(chosen) if chosen else None
+
+    for command in (
+        ['zenity', '--file-selection', '--directory', f'--title={prompt}', f'--filename={start}/'],
+        ['kdialog', '--getexistingdirectory', str(start), '--title', prompt],
+    ):
+        if shutil.which(command[0]):
+            result = subprocess.run(command, capture_output=True, text=True, timeout=600)
+            chosen = result.stdout.strip()
+            return Path(chosen) if result.returncode == 0 and chosen else None
+
+    raise RuntimeError('No folder picker is available on this system. Type the folder path instead.')

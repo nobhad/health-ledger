@@ -232,7 +232,7 @@ class TestDataFolder(SetupTestCase):
         self.assertEqual(config.DATA_ROOT, chosen.resolve())
         self.assertIn(f'HEALTH_LEDGER_DATA_DIR={chosen.resolve()}', self.env_text())
         html = self.client.get('/?notice=fresh').get_data(as_text=True)
-        self.assertIn(f'Your records will live in {chosen.resolve()}', html)
+        self.assertIn('Your ledger is ready.', html)
 
     def test_blank_folder_means_the_default(self):
         response = self.client.post('/setup/start', data={'data_folder': '   '})

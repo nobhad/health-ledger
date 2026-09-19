@@ -303,6 +303,18 @@ select.form-input {
   cursor: pointer;
 }
 
+/* A control with a button beside it: the control takes the width, the
+   button keeps its own. */
+.input-group {
+  display: flex;
+  gap: var(--space-1);
+}
+
+.input-group > .form-input {
+  flex: 1 1 auto;
+  min-width: 0;
+}
+
 /* File input: the field is the same box as any other control; the browser's
    "Choose File" chip becomes a filled portal button flush to the field's
    left edge, with the chosen name beside it. */
