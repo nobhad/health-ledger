@@ -9,20 +9,28 @@ pharmacogenomic or wellness report is likely to mention, not a catalogue.
 
 Each entry: rs number -> (gene symbol, short description).
 
-How far this has been checked:
+How far this has been checked (2026-09-19):
 
-- The GENE SYMBOLS were verified against NCBI dbSNP on 2026-09-19; every rs
-  number below resolves to the gene it is paired with. Four entries were
-  corrected or dropped in that pass.
-- The DESCRIPTIONS (star alleles such as "*2, no function", and the
-  functional notes) are from general published knowledge and have NOT been
-  checked against PharmVar, CPIC or PharmGKB, whose APIs were not reachable.
-  Treat them as labels for orientation, not as clinical interpretation, and
-  confirm against CPIC or PharmGKB before anyone acts on them.
+- GENE SYMBOLS, against NCBI dbSNP. Every rs number here resolves to the gene
+  it is paired with. That pass corrected two entries and dropped two.
+- STAR ALLELES AND THEIR FUNCTION, against CPIC, which curates 21 of these
+  variants. All 17 star-allele claims name an allele CPIC defines at that
+  position, and each stated function matches CPIC's clinical function. That
+  pass corrected SLCO1B1*5 from "decreased function" to "no function".
+- EVERYTHING ELSE, compared by eye against Ensembl's amino-acid changes. The
+  protein change each description names appears among Ensembl's transcripts,
+  and the descriptions that name a nucleotide or regulatory variant (VKORC1
+  -1639G>A, F2 G20210A, VDR BsmI, GNB3 C825T, CYP1A2 *1F, MCM6 lactase
+  persistence) correctly report no coding change.
 
-Re-run the dbSNP check after editing this table:
+Naming being right is not the same as being safe to act on. These stay short
+labels for orientation; clinical interpretation belongs with a clinician.
+
+Re-run the checks after editing this table (the first two are gates, the
+third prints a worksheet):
 
     python3 scripts/check_variant_reference.py
+    python3 scripts/check_variant_reference.py --review
 """
 
 KNOWN_VARIANTS = {
@@ -40,7 +48,7 @@ KNOWN_VARIANTS = {
     'rs776746': ('CYP3A5', '*3, no function'),
     'rs3745274': ('CYP2B6', '*6, decreased function'),
     'rs9923231': ('VKORC1', '-1639G>A, warfarin sensitivity'),
-    'rs4149056': ('SLCO1B1', '*5, decreased function (statins)'),
+    'rs4149056': ('SLCO1B1', '*5, no function (statins)'),
     'rs1800460': ('TPMT', '*3B'),
     'rs1142345': ('TPMT', '*3C'),
     'rs116855232': ('NUDT15', '*3'),
