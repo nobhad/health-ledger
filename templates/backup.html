@@ -13,8 +13,10 @@
     </div>
     <div class="card-body">
         <p>Create a timestamped backup of your database. Backups are saved in the <code>backups/</code> directory.</p>
-        <button type="button" class="btn btn-primary" id="createBackupBtn">Create Backup</button>
-        <div id="backupStatus" class="status-message"></div>
+        <div class="card-actions">
+            <button type="button" class="btn btn-primary" id="createBackupBtn">Create Backup</button>
+            <div id="backupStatus" class="status-message"></div>
+        </div>
     </div>
 </div>
 <div class="card">
@@ -23,9 +25,11 @@
     </div>
     <div class="card-body">
         <p>To go back to one of these, or to bring in a database from another computer, <a href="/setup">import or restore a database</a>.</p>
-        <button type="button" class="btn btn-secondary" id="refreshBackupsBtn">Refresh List</button>
-        <div id="backupsList" class="mt-2">
+        <div id="backupsList">
             <p>Loading backups...</p>
+        </div>
+        <div class="card-actions">
+            <button type="button" class="btn btn-secondary" id="refreshBackupsBtn">Refresh List</button>
         </div>
     </div>
 </div>
@@ -52,8 +56,10 @@
                 </button>
             </div>
         </div>
-        <button type="button" class="btn btn-primary" id="exportBtn">Export</button>
-        <div id="exportStatus" class="status-message"></div>
+        <div class="card-actions">
+            <button type="button" class="btn btn-primary" id="exportBtn">Export</button>
+            <div id="exportStatus" class="status-message"></div>
+        </div>
     </div>
 </div>
 <div class="card">

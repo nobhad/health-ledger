@@ -10,6 +10,14 @@ from pathlib import Path
 
 # Application configuration
 APP_NAME = "Health Ledger"
+
+# Printed at the foot of every generated document (doctor documents, summary,
+# profile, single-source PDFs and the printable web version). Kept identical to
+# the note in templates/footer.html so a printed copy carries what the screen
+# already says.
+DOCUMENT_DISCLAIMER = (
+    "For personal record-keeping. Not a substitute for professional medical advice."
+)
 APP_VERSION = "1.0.0"
 DEBUG = True
 LOG_LEVEL = logging.DEBUG if DEBUG else logging.INFO

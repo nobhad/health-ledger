@@ -246,6 +246,75 @@ class GeneticProfileDB:
         self.conn.commit()
         return cursor.lastrowid
     
+    def ensure_snp(self, rs_number: str, gene_id: int) -> int:
+        """The snps row for this rs number, created if missing; returns its id."""
+        cursor = self.conn.cursor()
+        cursor.execute("SELECT id FROM snps WHERE rs_number = ?", (rs_number,))
+        row = cursor.fetchone()
+        if row:
+            return row[0]
+        return self.add_snp(rs_number, gene_id)
+
+    # --- consumer DNA raw data (see raw_dna.py) ---
+
+    def add_dna_import(self, file_name: str, provider: Optional[str], build: Optional[str],
+                       variant_count: int, no_call_count: int, matched_count: int,
+                       primary_source_id: Optional[int] = None) -> int:
+        cursor = self.conn.cursor()
+        cursor.execute("""
+            INSERT INTO dna_imports (file_name, provider, reference_build, variant_count,
+                                     no_call_count, matched_count, primary_source_id)
+            VALUES (?, ?, ?, ?, ?, ?, ?)
+        """, (file_name, provider, build, variant_count, no_call_count, matched_count,
+              primary_source_id))
+        self.conn.commit()
+        return cursor.lastrowid
+
+    def replace_snp_genotypes(self, import_id: int, rows) -> int:
+        """
+        Store (rsid, chromosome, position, genotype) rows for an import.
+        An rs number already on file is replaced. Returns the number written.
+        """
+        cursor = self.conn.cursor()
+        written = 0
+        batch = []
+        for rsid, chromosome, position, genotype in rows:
+            batch.append((rsid, chromosome, position, genotype, import_id))
+            if len(batch) >= 5000:
+                cursor.executemany("INSERT OR REPLACE INTO snp_genotypes VALUES (?, ?, ?, ?, ?)", batch)
+                written += len(batch)
+                batch = []
+        if batch:
+            cursor.executemany("INSERT OR REPLACE INTO snp_genotypes VALUES (?, ?, ?, ?, ?)", batch)
+            written += len(batch)
+        self.conn.commit()
+        return written
+
+    def get_dna_imports(self) -> List[Dict]:
+        cursor = self.conn.cursor()
+        cursor.execute("SELECT * FROM dna_imports ORDER BY imported_at DESC, id DESC")
+        return [dict(row) for row in cursor.fetchall()]
+
+    def count_snp_genotypes(self) -> int:
+        cursor = self.conn.cursor()
+        cursor.execute("SELECT COUNT(*) FROM snp_genotypes")
+        return cursor.fetchone()[0]
+
+    def get_snp_genotypes(self, rsids: List[str]) -> Dict[str, str]:
+        """{rsid: genotype} for the rs numbers on file among those asked for."""
+        if not rsids:
+            return {}
+        cursor = self.conn.cursor()
+        found = {}
+        rsids = list(rsids)
+        for start in range(0, len(rsids), 500):
+            chunk = rsids[start:start + 500]
+            cursor.execute(
+                f"SELECT rsid, genotype FROM snp_genotypes WHERE rsid IN ({','.join('?' * len(chunk))})",
+                chunk)
+            found.update({row[0]: row[1] for row in cursor.fetchall()})
+        return found
+
     def add_genotype(self, gene_id: int, genotype: str, phenotype: Optional[str] = None) -> int:
         """Add a genotype"""
         cursor = self.conn.cursor()
@@ -911,6 +980,48 @@ class GeneticProfileDB:
         row = cursor.fetchone()
         return row['extracted_text'] if row else None
     
+    # The person's details, printed at the top of every document they share
+    # with a doctor. Stored in app_settings under patient.<field>.
+    PATIENT_DETAIL_FIELDS = (
+        'full_name', 'date_of_birth', 'address', 'phone',
+        'insurance_provider', 'insurance_member_id', 'insurance_group_number',
+    )
+    PATIENT_DETAIL_MAX_LENGTH = 500
+
+    def get_patient_details(self) -> Dict[str, str]:
+        """The saved patient details, one entry per filled field."""
+        cursor = self.conn.cursor()
+        try:
+            cursor.execute("SELECT key, value FROM app_settings WHERE key LIKE 'patient.%'")
+        except sqlite3.OperationalError:
+            return {}
+        details = {}
+        for key, value in cursor.fetchall():
+            field = key[len('patient.'):]
+            if field in self.PATIENT_DETAIL_FIELDS and value:
+                details[field] = value
+        return details
+
+    def save_patient_details(self, details: Dict[str, str]) -> Dict[str, str]:
+        """
+        Replace the saved patient details with these.
+
+        Unknown fields are ignored, values are trimmed and capped, and a
+        blank value clears the field. Returns what is now saved.
+        """
+        cursor = self.conn.cursor()
+        cursor.execute('CREATE TABLE IF NOT EXISTS app_settings (key TEXT PRIMARY KEY, value TEXT)')
+        for field in self.PATIENT_DETAIL_FIELDS:
+            value = (details.get(field) or '').strip()[:self.PATIENT_DETAIL_MAX_LENGTH]
+            key = f'patient.{field}'
+            if value:
+                cursor.execute('INSERT OR REPLACE INTO app_settings (key, value) VALUES (?, ?)',
+                               (key, value))
+            else:
+                cursor.execute('DELETE FROM app_settings WHERE key = ?', (key,))
+        self.conn.commit()
+        return self.get_patient_details()
+
     def get_patient_name(self) -> Optional[str]:
         """
         Get the patient name from primary sources.

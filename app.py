@@ -22,7 +22,10 @@ from flask import Flask, render_template, jsonify, request, send_file, after_thi
 from werkzeug.utils import secure_filename
 from database_manager import GeneticProfileDB
 from pathlib import Path
+from typing import Optional
 import os
+import re
+import secrets
 import sqlite3
 import tempfile
 import threading
@@ -35,6 +38,8 @@ from validation import (
 )
 from profile_generator import generate_profile_html
 import ledger_setup
+import pdf_generator
+import raw_dna
 from doctor_templates import get_available_specialties, DOCTOR_TEMPLATES
 
 # Set up logging
@@ -246,6 +251,7 @@ def index():
             'fresh': 'Your ledger is ready.',
             'imported': 'Your database was imported.',
             'restored': 'The backup was restored.',
+            'dna': 'Your DNA raw data was added.',
         }.get(request.args.get('notice', ''))
 
         return render_template('overview.html',
@@ -449,6 +455,95 @@ def setup_restore():
     except Exception as e:
         app_logger.error(f"Error restoring backup: {e}", exc_info=True)
         return _render_setup(error=f'The restore failed: {e}', status=500)
+
+
+# --- Import page: files brought in through the app, previewed before written ---
+
+IMPORT_TOKEN_RE = re.compile(r'^[0-9a-f]{32}$')
+
+
+def _imports_dir() -> Path:
+    """Where uploads wait between preview and confirmation, inside the data folder."""
+    folder = Path(config.DATA_ROOT) / 'imports'
+    folder.mkdir(parents=True, exist_ok=True)
+    return folder
+
+
+def _spooled_upload(token: str) -> Optional[Path]:
+    """The waiting upload for a token, or None. Tokens are hex only, so no path tricks."""
+    if not token or not IMPORT_TOKEN_RE.match(token):
+        return None
+    matches = list(_imports_dir().glob(f'{token}__*'))
+    return matches[0] if matches else None
+
+
+def _original_name(spooled: Path) -> str:
+    return spooled.name.split('__', 1)[1]
+
+
+def _render_import(**context):
+    db = get_db()
+    return render_template('import.html', imports=db.get_dna_imports(), **context)
+
+
+@app.route('/import')
+def import_page():
+    """Choose a file to bring into the ledger."""
+    try:
+        return _render_import()
+    except Exception as e:
+        app_logger.error(f"Error rendering import page: {e}", exc_info=True)
+        return f"Error loading page: {str(e)}", 500
+
+
+@app.route('/import/preview', methods=['POST'])
+def import_preview():
+    """Read an uploaded raw-data file and show what it holds. Nothing is written."""
+    upload = request.files.get('file')
+    if upload is None or not upload.filename:
+        return _render_import(error='Choose a file first.'), 400
+    token = secrets.token_hex(16)
+    spooled = _imports_dir() / f'{token}__{secure_filename(upload.filename) or "raw_data"}'
+    try:
+        upload.save(spooled)
+        summary = raw_dna.import_file(get_db(), spooled, _original_name(spooled), dry_run=True)
+        return _render_import(summary=summary, token=token)
+    except raw_dna.UnreadableRawData as e:
+        spooled.unlink(missing_ok=True)
+        return _render_import(error=str(e)), 400
+    except Exception as e:
+        spooled.unlink(missing_ok=True)
+        app_logger.error(f"Error reading upload: {e}", exc_info=True)
+        return _render_import(error=f'The file could not be read: {e}'), 500
+
+
+@app.route('/import/dna', methods=['POST'])
+def import_dna():
+    """Write the previewed raw-data file into the ledger."""
+    spooled = _spooled_upload(request.form.get('token', ''))
+    if spooled is None:
+        return _render_import(error='That file is no longer waiting to be imported. Choose it again.'), 400
+    try:
+        summary = raw_dna.import_file(get_db(), spooled, _original_name(spooled))
+        app_logger.info(f"Imported DNA raw data: {summary.provider_name}, "
+                        f"{summary.variant_count} variants, {len(summary.in_ledger)} in tracked genes")
+        return redirect(url_for('index', notice='dna'))
+    except raw_dna.UnreadableRawData as e:
+        return _render_import(error=str(e)), 400
+    except Exception as e:
+        app_logger.error(f"Error importing DNA raw data: {e}", exc_info=True)
+        return _render_import(error=f'The import failed: {e}'), 500
+    finally:
+        spooled.unlink(missing_ok=True)
+
+
+@app.route('/import/cancel', methods=['POST'])
+def import_cancel():
+    """Forget a previewed upload."""
+    spooled = _spooled_upload(request.form.get('token', ''))
+    if spooled is not None:
+        spooled.unlink(missing_ok=True)
+    return redirect(url_for('import_page'))
 
 
 @app.route('/query')
@@ -1096,6 +1191,24 @@ def api_source_text(source_id):
         }), 500
 
 
+PDF_UNAVAILABLE_MESSAGE = (
+    "This computer cannot make PDF files yet: the PDF library's helper programs "
+    "are not installed. Open the printable version and choose Save as PDF in the "
+    "print window instead."
+)
+
+
+def _pdf_unavailable(print_url: str = ''):
+    """A 503 JSON response when WeasyPrint cannot load on this computer, else None."""
+    reason = pdf_generator.pdf_unavailable_reason()
+    if reason is None:
+        return None
+    payload = {'success': False, 'message': PDF_UNAVAILABLE_MESSAGE, 'reason': reason}
+    if print_url:
+        payload['print_url'] = print_url
+    return jsonify(payload), 503
+
+
 def _new_temp_pdf_path() -> str:
     """Reserve a temporary .pdf path for a generated download."""
     with tempfile.NamedTemporaryFile(delete=False, suffix='.pdf') as tmp:
@@ -1128,6 +1241,9 @@ def api_pdf_summary():
     try:
         from pdf_generator import generate_summary_pdf
         
+        unavailable = _pdf_unavailable()
+        if unavailable:
+            return unavailable
         db = get_db()
         tmp_path = _new_temp_pdf_path()
         
@@ -1152,6 +1268,9 @@ def api_pdf_profile():
     try:
         from pdf_generator import generate_profile_pdf
         
+        unavailable = _pdf_unavailable()
+        if unavailable:
+            return unavailable
         db = get_db()
         tmp_path = _new_temp_pdf_path()
         
@@ -1176,6 +1295,9 @@ def api_pdf_source(source_id):
     try:
         from pdf_generator import generate_source_pdf
         
+        unavailable = _pdf_unavailable()
+        if unavailable:
+            return unavailable
         db = get_db()
         source = db.get_primary_source_with_findings(source_id)
         if not source:
@@ -1220,8 +1342,10 @@ def api_pdf_doctor(specialty):
         
         db = get_db()
         
-        # Get patient name from database
-        patient_name = db.get_patient_name()
+        # The saved name first, then the name found in the records
+        patient_name = db.get_patient_details().get('full_name') or db.get_patient_name()
+        if patient_name:
+            patient_name = secure_filename(patient_name) or None
         if not patient_name:
             # Fallback if no patient name found in database
             patient_name = "Patient"
@@ -1235,12 +1359,22 @@ def api_pdf_doctor(specialty):
             include_medications = data.get('include_medications', True)
             include_stats = data.get('include_stats', True)
             include_pharmacogenomics = data.get('include_pharmacogenomics', True)
+            include_details = data.get('include_details', True)
         else:
             save_path = None
             include_original = True
             include_medications = True
             include_stats = True
             include_pharmacogenomics = True
+            include_details = True
+        
+        unavailable = _pdf_unavailable(url_for(
+            'doctor_document_print', specialty=specialty,
+            medications=int(bool(include_medications)), stats=int(bool(include_stats)),
+            pharmacogenomics=int(bool(include_pharmacogenomics)),
+            details=int(bool(include_details))))
+        if unavailable:
+            return unavailable
         
         # Generate filename: LastFirst_Specialty_YYYY-MM-DD.pdf
         today = datetime.now().strftime('%Y-%m-%d')
@@ -1265,7 +1399,8 @@ def api_pdf_doctor(specialty):
                                include_original=include_original,
                                include_medications=include_medications,
                                include_stats=include_stats,
-                               include_pharmacogenomics=include_pharmacogenomics):
+                               include_pharmacogenomics=include_pharmacogenomics,
+                               include_details=include_details):
             app_logger.info(f"PDF saved to: {final_path}")
             
             # Return file for download
@@ -1313,10 +1448,60 @@ def api_doctor_specialties():
 def doctor_docs():
     """Doctor document generation interface"""
     try:
-        return render_template('doctor_docs.html', specialties=describe_specialties())
+        return render_template('doctor_docs.html', specialties=describe_specialties(),
+                               pdf_reason=pdf_generator.pdf_unavailable_reason(),
+                               details=get_db().get_patient_details(),
+                               details_saved=request.args.get('saved') == '1')
     except Exception as e:
         app_logger.error(f"Error rendering doctor docs page: {e}", exc_info=True)
         return f"Error loading doctor docs page: {str(e)}", 500
+
+
+@app.route('/doctor-docs/details', methods=['POST'])
+def save_doctor_details():
+    """Save the patient details printed at the top of doctor documents."""
+    try:
+        db = get_db()
+        db.save_patient_details({field: request.form.get(field, '')
+                                 for field in db.PATIENT_DETAIL_FIELDS})
+        return redirect(url_for('doctor_docs', saved=1))
+    except Exception as e:
+        app_logger.error(f"Error saving patient details: {e}", exc_info=True)
+        return f"Error saving your details: {str(e)}", 500
+
+
+@app.route('/doctor-docs/<specialty>/print')
+def doctor_document_print(specialty):
+    """
+    The doctor document as a web page for the browser's print dialog.
+
+    Works on every computer, WeasyPrint or not: the print dialog's own
+    "Save as PDF" makes the file. The original test report is not appended
+    here (that needs WeasyPrint); the toolbar says so. Query flags
+    medications, stats and pharmacogenomics take 0 to leave a section out.
+    """
+    specialty = specialty.lower()
+    if specialty not in get_available_specialties():
+        return f"Unknown specialty '{specialty}'.", 404
+    try:
+        from scripts.generate_doctor_document import generate_doctor_document_html
+        
+        def wanted(flag: str) -> bool:
+            return request.args.get(flag, '1') != '0'
+        
+        toolbar = render_template(
+            'print_toolbar.html', back_url=url_for('doctor_docs'),
+            note='The original test report is not attached here; print it separately.')
+        return generate_doctor_document_html(
+            get_db(), specialty,
+            include_medications=wanted('medications'),
+            include_stats=wanted('stats'),
+            include_pharmacogenomics=wanted('pharmacogenomics'),
+            include_details=wanted('details'),
+            asset_base='/', body_prefix_html=toolbar)
+    except Exception as e:
+        app_logger.error(f"Error rendering printable doctor document: {e}", exc_info=True)
+        return f"Error rendering the document: {str(e)}", 500
 
 
 @app.route('/backup')

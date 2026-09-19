@@ -387,3 +387,35 @@ FROM v_health_metrics_routine_only
 WHERE metric_value IS NOT NULL
 GROUP BY metric_type, metric_name, unit;
 
+
+-- ============================================================
+-- Consumer DNA raw data (23andMe, AncestryDNA, MyHeritage, ...)
+-- ============================================================
+
+-- One row per imported file
+CREATE TABLE IF NOT EXISTS dna_imports (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    file_name TEXT NOT NULL,
+    provider TEXT,
+    reference_build TEXT,
+    variant_count INTEGER NOT NULL DEFAULT 0,
+    no_call_count INTEGER NOT NULL DEFAULT 0,
+    matched_count INTEGER NOT NULL DEFAULT 0, -- variants in genes the ledger tracks
+    primary_source_id INTEGER,
+    imported_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    FOREIGN KEY (primary_source_id) REFERENCES primary_sources(id)
+);
+
+-- The person's genotype at each variant. Keyed by rs number, not by snps.id:
+-- raw data lists hundreds of thousands of variants and only a few are in
+-- `snps`. `genotypes` (one phenotype per gene) is untouched by this.
+CREATE TABLE IF NOT EXISTS snp_genotypes (
+    rsid TEXT PRIMARY KEY,
+    chromosome TEXT,
+    position TEXT,
+    genotype TEXT NOT NULL,
+    import_id INTEGER NOT NULL,
+    FOREIGN KEY (import_id) REFERENCES dna_imports(id)
+);
+
+CREATE INDEX IF NOT EXISTS idx_snp_genotypes_import ON snp_genotypes(import_id);

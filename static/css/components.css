@@ -461,8 +461,16 @@ input[type="date"]::-webkit-calendar-picker-indicator {
 }
 
 /* A card's action sits on its bottom edge, so the buttons of cards in one
-   row line up whatever their text runs to. */
-.card-body > .card-actions {
+   row line up whatever their text runs to. A form that fills a card body
+   stretches the same way so its own actions reach that edge. */
+.card-body > form {
+  display: flex;
+  flex: 1 1 auto;
+  flex-direction: column;
+}
+
+.card-body > .card-actions,
+.card-body > form > .card-actions {
   margin-top: auto;
   /* A step of air above and below: the button sits on the card's bottom
      region, not against its edge. */

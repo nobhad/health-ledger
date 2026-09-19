@@ -4,14 +4,16 @@ Generate doctor-specific documents
 Filters data based on doctor template and generates focused documents
 """
 
+import html
 import sys
+from datetime import datetime
 from pathlib import Path
 from typing import Dict, List, Optional
 
 sys.path.insert(0, str(Path(__file__).parent.parent))
 from database_manager import GeneticProfileDB
 from doctor_templates import get_doctor_template
-from config import get_logger, OUTPUT_DIR
+from config import get_logger, OUTPUT_DIR, DOCUMENT_DISCLAIMER
 
 logger = get_logger('doctor_document')
 
@@ -19,13 +21,21 @@ logger = get_logger('doctor_document')
 def generate_doctor_document_html(db: GeneticProfileDB, specialty: str,
                                   include_medications: bool = True,
                                   include_stats: bool = True,
-                                  include_pharmacogenomics: bool = True) -> str:
+                                  include_pharmacogenomics: bool = True,
+                                  include_details: bool = True,
+                                  asset_base: str = '',
+                                  body_prefix_html: str = '') -> str:
     """
     Generate HTML document for a specific doctor specialty.
     
     Args:
         db: Database connection
         specialty: Doctor specialty
+        asset_base: prefix for the stylesheet links. Empty for WeasyPrint,
+            which resolves them against the project root; '/' when the
+            document is served to a browser.
+        body_prefix_html: markup placed at the top of the body (the print
+            toolbar of the browser version).
         
     Returns:
         HTML string
@@ -37,16 +47,15 @@ def generate_doctor_document_html(db: GeneticProfileDB, specialty: str,
     html_parts.append('<html><head><meta charset="UTF-8">')
     html_parts.append(f'<title>{template["title"]}</title>')
     # Same stylesheets as templates/pdf_base.html; style.css no longer exists.
-    html_parts.append('<link rel="stylesheet" href="static/css/pdf.css">')
-    html_parts.append('<link rel="stylesheet" href="static/css/print.css">')
+    html_parts.append(f'<link rel="stylesheet" href="{asset_base}static/css/pdf.css">')
+    html_parts.append(f'<link rel="stylesheet" href="{asset_base}static/css/print.css">')
     html_parts.append('</head><body>')
+    if body_prefix_html:
+        html_parts.append(body_prefix_html)
     
     html_parts.append(f'<h1>{template["title"]}</h1>')
     
-    # Get patient name
-    patient_name = db.get_patient_name()
-    if patient_name:
-        html_parts.append(f'<p><strong>Patient:</strong> {patient_name}</p>')
+    html_parts.extend(patient_details_html(db, include_details))
     
     # Get genetic test information
     test_info = db.get_genetic_test_info()
@@ -181,6 +190,7 @@ def generate_doctor_document_html(db: GeneticProfileDB, specialty: str,
                                 f'({metric.get("collection_date")})</li>')
             html_parts.append('</ul>')
     
+    html_parts.append(f'<p class="footer-disclaimer">{html.escape(DOCUMENT_DISCLAIMER)}</p>')
     html_parts.append('</body></html>')
     
     return '\n'.join(html_parts)
@@ -191,6 +201,44 @@ CATEGORY_HEADINGS = [
     ('moderate', 'Moderate gene-drug interaction'),
     ('use_as_directed', 'Use as directed'),
 ]
+
+
+def format_date_of_birth(value: str) -> str:
+    """An ISO date as people read it ("May 14, 1980"); other text as typed."""
+    try:
+        d = datetime.strptime(value.strip(), '%Y-%m-%d')
+    except ValueError:
+        return value
+    return f"{d:%B} {d.day}, {d.year}"
+
+
+def patient_details_html(db: GeneticProfileDB, include_details: bool = True) -> List[str]:
+    """
+    The block at the top of a doctor document that says whose it is:
+    name, date of birth, address, phone, insurance. Only filled fields print.
+    Without saved details, the patient name found in the records is used.
+    """
+    details = db.get_patient_details() if include_details else {}
+    name = details.get('full_name') or db.get_patient_name()
+    rows = [('Patient', name)]
+    if include_details:
+        insurance = ' &middot; '.join(
+            html.escape(details[field]) for field in
+            ('insurance_provider', 'insurance_member_id', 'insurance_group_number')
+            if details.get(field))
+        rows += [
+            ('Date of birth', details.get('date_of_birth') and format_date_of_birth(details['date_of_birth'])),
+            ('Address', details.get('address')),
+            ('Phone', details.get('phone')),
+        ]
+    parts = ['<table class="patient-details">']
+    for label, value in rows:
+        if value:
+            parts.append(f'<tr><th>{label}</th><td>{html.escape(value)}</td></tr>')
+    if include_details and insurance:
+        parts.append(f'<tr><th>Insurance</th><td>{insurance}</td></tr>')
+    parts.append('</table>')
+    return parts if len(parts) > 2 else []
 
 
 def medication_guidance_html(db: GeneticProfileDB) -> List[str]:

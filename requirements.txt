@@ -1,3 +1,6 @@
+# What Health Ledger needs to run. Installed by start.sh / start.bat.
+# Optional tools (OCR, DICOM, PubMed lookups) are in requirements-extras.txt;
+# test tooling is in requirements-dev.txt.
 Flask>=2.0.0
 pdfplumber>=0.9.0
 PyPDF2>=3.0.0
@@ -5,15 +8,5 @@ markdown>=3.4.0
 WeasyPrint>=60.0
 requests>=2.31.0
 beautifulsoup4>=4.12.0
-pytesseract>=0.3.10
-pdf2image>=1.16.3
 pdfminer.six>=20221105
 Pillow>=10.0.0
-biopython>=1.81
-pydicom>=2.4.0
-opencv-python>=4.8.0
-
-# Testing (optional, for development)
-pytest>=7.0.0
-pytest-cov>=4.0.0
-

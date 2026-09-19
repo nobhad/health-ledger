@@ -1,0 +1,17 @@
+# Optional extras. Nothing in the web app needs these; only a few scripts do,
+# and each of them explains what is missing when run without its extra.
+#
+#   venv/bin/pip install -r requirements-extras.txt      (Mac/Linux)
+#   venv\Scripts\pip install -r requirements-extras.txt  (Windows)
+#
+# Scanned PDFs and image files (scripts/extract_pdf_text.py, scripts/extract_images.py).
+# Also needs the Tesseract and Poppler programs: `brew install tesseract poppler`
+# on a Mac, or the Windows installers linked from each project's site.
+pytesseract>=0.3.10
+pdf2image>=1.16.3
+
+# DICOM medical images (scripts/extract_dicom.py)
+pydicom>=2.4.0
+
+# PubMed lookups (scripts/fetch_from_pubmed.py, scripts/enrich_database_from_sources.py)
+biopython>=1.81

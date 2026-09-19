@@ -10,17 +10,17 @@
 <div class="grid grid-3">
     {% call card("Find Genes by Health Condition", "query-card") %}
         {{ multiselect("condition", "Health Condition(s)", "Search conditions", "condition") }}
-        {{ button("Search", "queryByCondition()", class="btn-primary btn-block") }}
+        <div class="card-actions">{{ button("Search", "queryByCondition()", class="btn-primary btn-block") }}</div>
     {% endcall %}
 
     {% call card("Find Genes by Trait", "query-card") %}
         {{ multiselect("trait", "Trait(s)", "Search traits", "trait") }}
-        {{ button("Search", "queryByTrait()", class="btn-primary btn-block") }}
+        <div class="card-actions">{{ button("Search", "queryByTrait()", class="btn-primary btn-block") }}</div>
     {% endcall %}
 
     {% call card("Get Gene Information", "query-card") %}
         {{ multiselect("gene", "Gene(s)", "Search genes", "gene") }}
-        {{ button("Get Gene Info", "queryByGene()", class="btn-primary btn-block") }}
+        <div class="card-actions">{{ button("Get Gene Info", "queryByGene()", class="btn-primary btn-block") }}</div>
     {% endcall %}
 </div>
 

@@ -3,9 +3,10 @@
 #
 #   ./start.sh          (or double-click "Health Ledger.command" on a Mac)
 #
-# First run: creates ./venv and installs requirements. Every run: starts the
+# First run: creates ./venv and installs requirements.txt. Every run: starts the
 # local server on http://127.0.0.1:5001 and opens it in your browser.
 # The server only listens on this machine. Ctrl+C stops it.
+# Optional script extras (OCR, DICOM, PubMed): venv/bin/pip install -r requirements-extras.txt
 set -euo pipefail
 cd "$(dirname "$0")"
 

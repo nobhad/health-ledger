@@ -86,6 +86,13 @@
                     <span class="action-link-hint">A PDF tailored to a specialty, with your current numbers</span>
                 </span>
             </a>
+            <a class="action-link" href="/import">
+                <i data-lucide="upload"></i>
+                <span class="action-link-text">
+                    <span class="action-link-title">Add a record</span>
+                    <span class="action-link-hint">Your DNA raw-data file from 23andMe, AncestryDNA or MyHeritage</span>
+                </span>
+            </a>
             <a class="action-link" href="/sources">
                 <i data-lucide="folder-open"></i>
                 <span class="action-link-text">
@@ -127,7 +134,7 @@
                 {% endfor %}
             </ul>
             {% else %}
-            <p class="no-data">No sources yet. Records are added with the extraction scripts in <code>scripts/</code> (see the README), or <a href="/setup">import a database</a>.</p>
+            <p class="no-data">No records yet. <a href="/import">Add a DNA raw-data file</a>, <a href="/setup">import a database</a>, or add documents with the extraction scripts in <code>scripts/</code> (see the README).</p>
             {% endif %}
         </div>
     </div>

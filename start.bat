@@ -2,7 +2,8 @@
 REM Health Ledger launcher for Windows. Double-click this file.
 REM First run: creates .\venv and installs requirements. Every run: starts the
 REM local server on http://127.0.0.1:5001 and opens it in your browser.
-REM PDF generation (WeasyPrint) additionally needs GTK: see README.md.
+REM PDF files need GTK (see README.md); without it, Doctor Docs offers a printable version.
+REM Optional script extras (OCR, DICOM, PubMed): venv\Scripts\pip install -r requirements-extras.txt
 cd /d "%~dp0"
 
 where python >nul 2>nul

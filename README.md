@@ -113,7 +113,9 @@ patient narrative in tracked files.
 ### Running by hand
 
 ```bash
-pip3 install -r requirements.txt
+pip3 install -r requirements.txt          # what the app needs
+pip3 install -r requirements-extras.txt   # optional: OCR, DICOM, PubMed scripts
+pip3 install -r requirements-dev.txt      # optional: the test suite
 python3 app.py            # http://localhost:5001
 ```
 
@@ -133,7 +135,25 @@ python3 scripts/import_pharmacogenomics.py --set VKORC1="Increased Sensitivity"
 ```
 
 On the Doctor Docs page, "Include drug-metabolism findings" adds these to
-a specialty PDF; untick it for a document without them.
+a specialty PDF; untick it for a document without them. The same page has
+"Your details" (name, date of birth, address, phone, insurance), printed at
+the top of every document you share with a doctor; untick "Include my
+details" for a copy without them.
+
+### DNA raw data
+
+The Import page (`/import`) reads the raw-data download from 23andMe,
+AncestryDNA, MyHeritage, FamilyTreeDNA or Living DNA, zipped or not. It shows
+what the file holds and which of your variants fall in genes the ledger
+tracks before anything is written. From the terminal:
+
+```bash
+python3 scripts/import_raw_dna.py ~/Downloads/genome.zip --dry-run
+python3 scripts/import_raw_dna.py ~/Downloads/genome.zip
+```
+
+Every called variant is kept in `snp_genotypes`; a later file replaces the
+same variants. VCF files from clinical labs are not read yet.
 
 ### Running Tests
 
@@ -258,8 +278,16 @@ npm run dev           # same as ./start.sh
 
 The first run creates `./venv` and installs `requirements.txt`; every run starts the
 server on http://127.0.0.1:5001 and opens it in your browser. The server only listens on
-this machine. On Windows, PDF generation (WeasyPrint) also needs GTK; see
-<https://doc.courtbouillon.org/weasyprint/stable/first_steps.html#windows>.
+this machine.
+
+PDF files are made by WeasyPrint, which needs a helper library the Python install
+does not bring: Pango from Homebrew on a Mac (`brew install pango`), GTK on Windows
+(<https://doc.courtbouillon.org/weasyprint/stable/first_steps.html#windows>). Without
+it the app still works: Doctor Docs offers "Open printable version" instead, and the
+browser's print window has its own Save as PDF.
+
+The optional scripts for scanned documents (OCR), DICOM images and PubMed lookups need
+`requirements-extras.txt`; the file says which programs each one also needs.
 
 
 ## Styling

@@ -41,13 +41,41 @@ if sys.platform == 'darwin':  # macOS
             # If preloading fails, continue anyway - WeasyPrint might still work
             pass
 
-from weasyprint import HTML, CSS
-from weasyprint.text.fonts import FontConfiguration
-
 sys.path.insert(0, str(Path(__file__).parent))
-from config import get_logger, BASE_DIR
+from config import get_logger, BASE_DIR, DOCUMENT_DISCLAIMER
 
 logger = get_logger('pdf_generator')
+
+# WeasyPrint is imported on first use, not here. Its Python package installs
+# anywhere, but importing it needs the Pango/GObject libraries (Homebrew on a
+# Mac, GTK on Windows). When they are missing the import raises OSError, and
+# the app falls back to the browser's own print dialog instead of failing.
+_weasyprint = None
+_weasyprint_error: Optional[str] = None
+
+
+def _load_weasyprint():
+    """Import WeasyPrint once; remember why it could not be imported."""
+    global _weasyprint, _weasyprint_error
+    if _weasyprint is None and _weasyprint_error is None:
+        try:
+            from weasyprint import HTML
+            from weasyprint.text.fonts import FontConfiguration
+            _weasyprint = (HTML, FontConfiguration)
+        except (ImportError, OSError) as e:
+            _weasyprint_error = str(e)
+            logger.warning(f"PDF generation unavailable: {e}")
+    return _weasyprint
+
+
+def pdf_unavailable_reason() -> Optional[str]:
+    """None when PDFs can be generated here, otherwise the import error."""
+    _load_weasyprint()
+    return _weasyprint_error
+
+
+class PdfUnavailable(RuntimeError):
+    """Raised when a PDF is requested and WeasyPrint cannot be loaded."""
 
 # Relative stylesheet links in generated documents resolve against the
 # project root, not the current working directory.
@@ -72,6 +100,7 @@ def wrap_pdf_document(title: str, body_html: str) -> str:
 <body>
     <div class="pdf-content">
 {body_html}
+        <p class="footer-disclaimer">{html.escape(DOCUMENT_DISCLAIMER)}</p>
     </div>
 </body>
 </html>
@@ -92,6 +121,11 @@ def generate_pdf_from_html(html_content: str, output_path: str,
         bool: True if successful, False otherwise
     """
     try:
+        loaded = _load_weasyprint()
+        if loaded is None:
+            raise PdfUnavailable(_weasyprint_error)
+        HTML, FontConfiguration = loaded
+        
         output = Path(output_path)
         output.parent.mkdir(parents=True, exist_ok=True)
         
@@ -204,7 +238,8 @@ def generate_doctor_pdf(db, doctor_type: str, output_path: str,
                        include_original: bool = True,
                        include_medications: bool = True,
                        include_stats: bool = True,
-                       include_pharmacogenomics: bool = True) -> bool:
+                       include_pharmacogenomics: bool = True,
+                       include_details: bool = True) -> bool:
     """
     Generate PDF for a specific doctor specialty.
     Includes original genetic test report at the end if available.
@@ -226,7 +261,8 @@ def generate_doctor_pdf(db, doctor_type: str, output_path: str,
         html_content = generate_doctor_document_html(db, doctor_type,
                                                      include_medications=include_medications,
                                                      include_stats=include_stats,
-                                                     include_pharmacogenomics=include_pharmacogenomics)
+                                                     include_pharmacogenomics=include_pharmacogenomics,
+                                                     include_details=include_details)
         
         # Create temporary file for main document
         with tempfile.NamedTemporaryFile(delete=False, suffix='.pdf') as tmp:
@@ -268,7 +304,7 @@ def generate_doctor_pdf(db, doctor_type: str, output_path: str,
                         """
                         with tempfile.NamedTemporaryFile(delete=False, suffix='.pdf') as sep_tmp:
                             separator_path = sep_tmp.name
-                        HTML(string=separator_html).write_pdf(separator_path)
+                        _load_weasyprint()[0](string=separator_html).write_pdf(separator_path)
                         separator_pdf = PdfReader(separator_path)
                         for page in separator_pdf.pages:
                             writer.add_page(page)
