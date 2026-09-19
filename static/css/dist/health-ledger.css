@@ -3131,7 +3131,10 @@ input[type="date"]::-webkit-calendar-picker-indicator {
    row line up whatever their text runs to. */
 .card-body > .card-actions {
   margin-top: auto;
-  padding-top: var(--space-2);
+  /* A step of air above and below: the button sits on the card's bottom
+     region, not against its edge. */
+  padding-top: var(--space-3);
+  padding-bottom: var(--space-3);
 }
 
 .card-body > * + * {
