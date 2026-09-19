@@ -1280,7 +1280,7 @@ def describe_specialties() -> list:
         sections = template['sections']
         described.append({
             'id': specialty_id,
-            'label': specialty_id.replace('_', ' ').title(),
+            'label': template.get('label') or specialty_id.replace('_', ' ').title(),
             'title': template['title'],
             'genes': 'All genes' if genes == 'all' else ', '.join(genes),
             'sections': 'All sections' if sections == 'all'
