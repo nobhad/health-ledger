@@ -3429,6 +3429,8 @@ input[type="date"]::-webkit-calendar-picker-indicator {
 .multiselect-wrapper:has(.multiselect-dropdown.show) .multiselect-input {
   border-color: var(--dropdown-border-color);
   border-bottom-color: transparent;
+  box-shadow: none; /* no focus ring: the open list is the focus state */
+  outline: none;
   transition: none;
 }
 
@@ -3766,9 +3768,16 @@ input[type="date"]::-webkit-calendar-picker-indicator {
   transition: border-color var(--transition-fast);
 }
 
+/* Keyboard focus on a closed trigger reads as the hover ground, not a
+   ring; open, the list itself is the focus state. */
 .dropdown-trigger:focus-visible {
-  border-color: var(--color-accent);
+  background: var(--color-bg-hover);
   box-shadow: none;
+  outline: none;
+}
+
+.dropdown-trigger[data-state="open"]:focus-visible {
+  background: var(--dropdown-bg);
 }
 
 .dropdown-trigger[data-state="open"] {
