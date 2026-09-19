@@ -255,3 +255,58 @@ def choose_folder(initial: Optional[Path] = None) -> Optional[Path]:
             return Path(chosen) if result.returncode == 0 and chosen else None
 
     raise RuntimeError('No folder picker is available on this system. Type the folder path instead.')
+
+
+def choose_save_path(initial: Optional[Path] = None, default_name: str = 'export.db') -> Optional[Path]:
+    """
+    Open this computer's own "save as" dialog and return the path chosen,
+    or None if cancelled. Same platform mechanics as choose_folder().
+    """
+    import shutil
+    import subprocess
+    import sys
+
+    prompt = 'Choose where to save the export'
+    start = Path(initial).expanduser() if initial else Path.home()
+    if not start.is_dir():
+        start = Path.home()
+
+    if sys.platform == 'darwin':
+        location = str(start).replace('\\', '\\\\').replace('"', '\\"')
+        name = default_name.replace('"', '\\"')
+        script = (f'POSIX path of (choose file name with prompt "{prompt}" '
+                  f'default name "{name}" default location POSIX file "{location}")')
+        result = subprocess.run(['osascript', '-e', script],
+                                capture_output=True, text=True, timeout=600)
+        if result.returncode != 0:
+            if 'User canceled' in result.stderr or '-128' in result.stderr:
+                return None
+            raise RuntimeError(result.stderr.strip() or 'The save dialog could not open.')
+        chosen = result.stdout.strip()
+        return Path(chosen) if chosen else None
+
+    if sys.platform.startswith('win'):
+        location = str(start).replace("'", "''")
+        name = default_name.replace("'", "''")
+        script = ('Add-Type -AssemblyName System.Windows.Forms; '
+                  '$d = New-Object System.Windows.Forms.SaveFileDialog; '
+                  f"$d.Title = '{prompt}'; $d.FileName = '{name}'; "
+                  f"$d.InitialDirectory = '{location}'; "
+                  'if ($d.ShowDialog() -eq [System.Windows.Forms.DialogResult]::OK) '
+                  '{ Write-Output $d.FileName }')
+        result = subprocess.run(['powershell', '-NoProfile', '-STA', '-Command', script],
+                                capture_output=True, text=True, timeout=600)
+        chosen = result.stdout.strip()
+        return Path(chosen) if chosen else None
+
+    for command in (
+        ['zenity', '--file-selection', '--save', '--confirm-overwrite',
+         f'--title={prompt}', f'--filename={start / default_name}'],
+        ['kdialog', '--getsavefilename', str(start / default_name), '--title', prompt],
+    ):
+        if shutil.which(command[0]):
+            result = subprocess.run(command, capture_output=True, text=True, timeout=600)
+            chosen = result.stdout.strip()
+            return Path(chosen) if result.returncode == 0 and chosen else None
+
+    raise RuntimeError('No save dialog is available on this system. Type the path instead.')

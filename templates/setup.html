@@ -24,7 +24,7 @@
             <label for="dataFolder" class="field-label">Data folder</label>
             <div class="input-group">
                 <input type="text" id="dataFolder" name="data_folder" value="{{ proposed_folder }}" autocomplete="off" spellcheck="false" class="form-input">
-                <button type="button" class="btn btn-secondary" id="browseFolder">
+                <button type="button" class="btn btn-secondary" data-browse="folder" data-target="dataFolder" data-status="browseStatus">
                     <i data-lucide="folder-open"></i>
                     Choose a folder
                 </button>
@@ -124,8 +124,4 @@
 
     </div>
     {% endif %}
-{% endblock %}
-
-{% block scripts %}
-<script src="{{ url_for('static', filename='js/setup.js') }}"></script>
 {% endblock %}

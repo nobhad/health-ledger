@@ -44,7 +44,13 @@
         </div>
         <div class="form-row">
             <label for="exportPath" class="field-label">Output Path:</label>
-            <input type="text" id="exportPath" name="exportPath" autocomplete="off" placeholder="backups/export.db" class="form-input">
+            <div class="input-group">
+                <input type="text" id="exportPath" name="exportPath" autocomplete="off" placeholder="backups/export.db" class="form-input">
+                <button type="button" class="btn btn-secondary" data-browse="save" data-target="exportPath" data-status="exportStatus" data-filename-from="exportFormat">
+                    <i data-lucide="folder-open"></i>
+                    Choose where to save
+                </button>
+            </div>
         </div>
         <button type="button" class="btn btn-primary" id="exportBtn">Export</button>
         <div id="exportStatus" class="status-message"></div>

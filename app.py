@@ -352,20 +352,30 @@ def setup():
         return f"Error loading page: {str(e)}", 500
 
 
-@app.route('/setup/browse', methods=['POST'])
-def setup_browse():
+@app.route('/api/browse', methods=['POST'])
+def api_browse():
     """
-    Open this computer's folder picker for the setup screen and return the
-    folder chosen. The server runs on the user's own machine, so the dialog
-    appears in front of them; nothing is chosen on their behalf.
+    Open this computer's folder or "save as" dialog and return the choice.
+    The server runs on the user's own machine (127.0.0.1 only), so the
+    dialog appears in front of them; nothing is chosen on their behalf.
+
+    JSON body: kind ("folder" or "save"), current (a path to start from),
+    filename (the proposed name, for "save").
     """
     try:
         payload = request.get_json(silent=True) or {}
-        initial = payload.get('current') or str(config.DATA_ROOT)
-        chosen = ledger_setup.choose_folder(Path(initial))
-        return jsonify({'folder': str(chosen) if chosen else None})
+        kind = payload.get('kind', 'folder')
+        current = payload.get('current') or str(config.DATA_ROOT)
+        start = Path(current).expanduser()
+        if kind == 'save':
+            filename = payload.get('filename') or 'export.db'
+            start_dir = start if start.is_dir() else start.parent
+            chosen = ledger_setup.choose_save_path(start_dir, filename)
+        else:
+            chosen = ledger_setup.choose_folder(start)
+        return jsonify({'path': str(chosen) if chosen else None})
     except Exception as e:
-        app_logger.warning(f"Folder picker unavailable: {e}")
+        app_logger.warning(f"System dialog unavailable: {e}")
         return jsonify({'error': str(e)}), 501
 
 

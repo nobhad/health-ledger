@@ -540,7 +540,7 @@ html[data-theme="dark"] .theme-toggle-icon--dark {
   margin-bottom: 0;
 }
 
-.form-row :is(.form-input, .dropdown) {
+.form-row :is(.form-input, .dropdown, .input-group) {
   width: 100%;
 }
 
