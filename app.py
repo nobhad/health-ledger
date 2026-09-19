@@ -240,9 +240,11 @@ def index():
         from scripts.backup_database import list_backups
         backups = list_backups()
 
+        # The setup page has already shown where the records live; the
+        # notice only confirms the step that was taken.
         notice = {
-            'fresh': f'Your ledger is ready. Your records will live in {config.DATA_ROOT}.',
-            'imported': f'Your database was imported. Your records live in {config.DATA_ROOT}.',
+            'fresh': 'Your ledger is ready.',
+            'imported': 'Your database was imported.',
             'restored': 'The backup was restored.',
         }.get(request.args.get('notice', ''))
 

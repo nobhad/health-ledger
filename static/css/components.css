@@ -592,14 +592,24 @@ input[type="date"]::-webkit-calendar-picker-indicator {
 
 /* ============================================
  * ALERTS + STATUS MESSAGES
+ * An alert is a strip in the tile system: full width, its own padding, a
+ * rule beneath it, plain text. No coloured edge; a warning or an error
+ * says so in its text colour. A status message is the same voice inline,
+ * under the control it reports on.
  * ============================================ */
-.alert,
+.alert {
+  flex-shrink: 0;
+  padding: var(--space-2) var(--portal-content-padding);
+  border-bottom: var(--portal-border);
+  font-size: var(--font-size-sm);
+  color: var(--color-text-primary);
+}
+
 .error,
 .success,
 .status-message {
-  padding: var(--space-1) var(--space-2);
-  border-left: var(--border-width-thick) solid var(--color-text-secondary);
   font-size: var(--font-size-sm);
+  color: var(--color-text-primary);
 }
 
 .status-message {
@@ -614,23 +624,10 @@ input[type="date"]::-webkit-calendar-picker-indicator {
 .alert-error,
 .alert-danger,
 .status-message.is-error {
-  border-left-color: var(--color-danger);
   color: var(--color-danger);
 }
 
-.success,
-.alert-success,
-.status-message.is-success {
-  border-left-color: var(--status-completed);
-  color: var(--status-completed);
-}
-
-.alert-info {
-  border-left-color: var(--color-info);
-}
-
 .alert-warning {
-  border-left-color: var(--color-text-warning);
   color: var(--color-text-warning);
 }
 
