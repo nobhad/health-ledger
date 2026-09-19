@@ -471,6 +471,12 @@ function showResults(data: QueryResultItem[] | { error: string }, title: string)
         if (value === null || value === undefined) {
             value = '';
         }
+        // A gene's own variants read as a list, not as JSON in a cell.
+        if (key === 'variants' && isVariantList(value)) {
+            html += '<td data-search="' + escapeHtml(variantSearchText(value)) + '">'
+                + variantListHtml(value) + '</td>';
+            return;
+        }
         if (typeof value === 'object' && value !== null) {
             if (Array.isArray(value)) {
                 value = value.join(', ');
@@ -496,6 +502,28 @@ function showResults(data: QueryResultItem[] | { error: string }, title: string)
     
     const duration = performance.now() - startTime;
     window.debugLog(`showResults() completed in ${duration.toFixed(2)}ms`);
+}
+
+interface VariantRow {
+    rsid: string;
+    genotype: string;
+    description: string;
+}
+
+function isVariantList(value: unknown): value is VariantRow[] {
+    return Array.isArray(value) && value.length > 0
+        && value.every(row => typeof row === 'object' && row !== null && 'rsid' in row);
+}
+
+function variantListHtml(variants: VariantRow[]): string {
+    const items = variants.map(v =>
+        '<li><strong>' + escapeHtml(v.rsid) + '</strong> ' + escapeHtml(v.genotype)
+        + (v.description ? ' &middot; ' + escapeHtml(v.description) : '') + '</li>').join('');
+    return '<ul class="cell-list">' + items + '</ul>';
+}
+
+function variantSearchText(variants: VariantRow[]): string {
+    return variants.map(v => v.rsid + ' ' + v.genotype + ' ' + v.description).join(' ').toLowerCase();
 }
 
 function escapeHtml(text: string | null | undefined): string {

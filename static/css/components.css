@@ -567,6 +567,19 @@ input[type="date"]::-webkit-calendar-picker-indicator {
   display: none !important;
 }
 
+/* A list inside a table cell: a gene's variants, one per line. */
+.cell-list {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+  display: grid;
+  gap: var(--space-1);
+}
+
+.cell-list li {
+  white-space: nowrap;
+}
+
 .table-note,
 .no-data {
   margin: var(--space-2) 0 0;

@@ -94,6 +94,10 @@
                     Include drug-metabolism findings (genes, affected medications, the report's medication guidance)
                 </label>
                 <label class="check-label">
+                    <input type="checkbox" id="includeVariants" checked>
+                    Include variants from my DNA file (rs number, genotype, what each is commonly called)
+                </label>
+                <label class="check-label">
                     <input type="checkbox" id="includeMedications" checked>
                     Include current medications
                 </label>
@@ -195,6 +199,7 @@ document.addEventListener('DOMContentLoaded', function() {
     const includeMedicationsCheckbox = document.getElementById('includeMedications');
     const includeStatsCheckbox = document.getElementById('includeStats');
     const includePharmacogenomicsCheckbox = document.getElementById('includePharmacogenomics');
+    const includeVariantsCheckbox = document.getElementById('includeVariants');
     const includeDetailsCheckbox = document.getElementById('includeDetails');
     
     // The document as a web page: the browser's print dialog makes the PDF,
@@ -204,6 +209,7 @@ document.addEventListener('DOMContentLoaded', function() {
             medications: includeMedicationsCheckbox.checked ? '1' : '0',
             stats: includeStatsCheckbox.checked ? '1' : '0',
             pharmacogenomics: includePharmacogenomicsCheckbox.checked ? '1' : '0',
+            variants: includeVariantsCheckbox.checked ? '1' : '0',
             details: includeDetailsCheckbox.checked ? '1' : '0'
         });
         return `/doctor-docs/${specialty}/print?${params}`;
@@ -250,6 +256,7 @@ document.addEventListener('DOMContentLoaded', function() {
                 include_medications: includeMedications,
                 include_stats: includeStats,
                 include_pharmacogenomics: includePharmacogenomics,
+                include_variants: includeVariantsCheckbox.checked,
                 include_details: includeDetailsCheckbox.checked
             };
             if (useCustomPath && customPath) {

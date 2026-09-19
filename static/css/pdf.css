@@ -137,6 +137,12 @@ body {
     font-style: italic;
 }
 
+/* Caution under the first table of DNA variants in a document */
+.note {
+    color: #666;
+    font-size: 0.9em;
+}
+
 .main-content {
     max-width: 1200px;
     margin: 0 auto;

@@ -52,7 +52,7 @@ class TestPdfFallback(unittest.TestCase):
         self.assertFalse(data['success'])
         self.assertIn('printable version', data['message'])
         self.assertEqual(data['print_url'],
-                         '/doctor-docs/geneticist/print?medications=1&stats=0&pharmacogenomics=1&details=1')
+                         '/doctor-docs/geneticist/print?medications=1&stats=0&pharmacogenomics=1&variants=1&details=1')
 
     def test_unknown_specialty_still_404_when_weasyprint_missing(self):
         with mock.patch.object(pdf_generator, 'pdf_unavailable_reason',

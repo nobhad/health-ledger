@@ -39,7 +39,7 @@
                 <li><div class="list-item"><span class="list-item-title">{{ m.gene }} &middot; {{ m.rsid }} &middot; {{ m.genotype }}</span><span class="list-item-meta">{{ m.description }}</span></div></li>
                 {% endfor %}
             </ul>
-            <p class="note">The gene each variant sits in is checked against NCBI dbSNP, and the drug-metabolism star alleles against CPIC. The short descriptions are still general background, not a reading of your results: talk to a doctor or pharmacist before acting on any of them.</p>
+            <p class="note">The gene each variant sits in is checked against NCBI dbSNP, and the drug-metabolism star alleles against CPIC. {{ variant_caution }}</p>
             {% else %}
             <p>None of the well-known variants fall in genes this ledger tracks yet. The file is still worth adding: every variant is kept, and genes added later are matched against it.</p>
             {% endif %}

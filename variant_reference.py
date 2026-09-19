@@ -99,3 +99,22 @@ def variants_by_gene():
     for rsid, (gene, description) in KNOWN_VARIANTS.items():
         grouped.setdefault(gene, []).append((rsid, description))
     return grouped
+
+
+# One sentence, used wherever a genotype from a consumer DNA file is shown:
+# the import preview, the gene pages and the doctor documents. The names in
+# this table are checked (see above); what they mean for a person is not.
+VARIANT_CAUTION = ('The short descriptions are general background, not a reading of your '
+                   'results: talk to a doctor or pharmacist before acting on any of them.')
+
+
+def variants_for_gene(gene_symbol: str):
+    """[(rs number, description), ...] for one gene, in rs-number order."""
+    grouped = variants_by_gene().get((gene_symbol or '').upper(), [])
+    return sorted(grouped, key=lambda pair: _rs_number(pair[0]))
+
+
+def _rs_number(rsid: str) -> int:
+    """rs4244285 -> 4244285, so rs334 sorts before rs4680 as a reader expects."""
+    digits = rsid[2:] if rsid.lower().startswith('rs') else rsid
+    return int(digits) if digits.isdigit() else 0

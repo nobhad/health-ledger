@@ -14,6 +14,7 @@ sys.path.insert(0, str(Path(__file__).parent.parent))
 from database_manager import GeneticProfileDB
 from doctor_templates import get_doctor_template
 from config import get_logger, OUTPUT_DIR, DOCUMENT_DISCLAIMER
+from variant_reference import VARIANT_CAUTION
 
 logger = get_logger('doctor_document')
 
@@ -22,6 +23,7 @@ def generate_doctor_document_html(db: GeneticProfileDB, specialty: str,
                                   include_medications: bool = True,
                                   include_stats: bool = True,
                                   include_pharmacogenomics: bool = True,
+                                  include_variants: bool = True,
                                   include_details: bool = True,
                                   asset_base: str = '',
                                   body_prefix_html: str = '') -> str:
@@ -76,6 +78,7 @@ def generate_doctor_document_html(db: GeneticProfileDB, specialty: str,
         genes = [g for g in genes if g]  # Remove None values
     
     # Generate gene sections
+    shown_variant_caution = False
     for gene in genes:
         if not gene:
             continue
@@ -86,6 +89,14 @@ def generate_doctor_document_html(db: GeneticProfileDB, specialty: str,
         genotypes = db.get_genotypes_for_gene(gene['id'])
         if genotypes:
             html_parts.append(f'<p><strong>Genotype:</strong> {genotypes[0].get("genotype", "Not specified")}</p>')
+        
+        # What the person's own DNA file called at this gene's well-known
+        # variants. Empty until a raw-data file has been imported.
+        if include_variants:
+            variants = db.get_variant_genotypes_for_gene(gene['gene_symbol'])
+            if variants:
+                html_parts.extend(variant_table_html(variants, with_caution=not shown_variant_caution))
+                shown_variant_caution = True
         
         # Get trait associations if in relevant sections
         if template['sections'] == 'all' or 'traits' in template['sections']:
@@ -201,6 +212,28 @@ CATEGORY_HEADINGS = [
     ('moderate', 'Moderate gene-drug interaction'),
     ('use_as_directed', 'Use as directed'),
 ]
+
+
+def variant_table_html(variants: List[Dict], with_caution: bool = True) -> List[str]:
+    """
+    One gene's variants as the person's DNA file called them: rs number,
+    genotype, and what the variant is commonly called.
+
+    The caution belongs in the document a doctor reads, but once, under the
+    first such table, rather than under every gene.
+    """
+    parts = ['<h3>Variants in your DNA file</h3>']
+    if with_caution:
+        parts.append(f'<p class="note">{html.escape(VARIANT_CAUTION)}</p>')
+    parts.append('<table class="variant-table">')
+    parts.append('<tr><th>Variant</th><th>Genotype</th><th>Commonly called</th></tr>')
+    for variant in variants:
+        parts.append('<tr><td>{}</td><td>{}</td><td>{}</td></tr>'.format(
+            html.escape(variant.get('rsid', '')),
+            html.escape(variant.get('genotype', '')),
+            html.escape(variant.get('description', ''))))
+    parts.append('</table>')
+    return parts
 
 
 def format_date_of_birth(value: str) -> str:

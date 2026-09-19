@@ -28,6 +28,8 @@ from datetime import datetime
 from typing import List, Dict, Optional, Tuple
 from pathlib import Path
 
+import variant_reference
+
 try:
     import config
     from config import get_logger
@@ -601,6 +603,26 @@ class GeneticProfileDB:
         cursor.execute("SELECT * FROM snps WHERE gene_id = ? ORDER BY rs_number", (gene_id,))
         return [dict(row) for row in cursor.fetchall()]
     
+    def get_variant_genotypes_for_gene(self, gene_symbol: str) -> List[Dict]:
+        """
+        The well-known variants in a gene that a DNA import actually called,
+        with the person's genotype at each.
+
+        Pairs `variant_reference` (public knowledge: which rs numbers sit in
+        this gene and what each is called) with `snp_genotypes` (this
+        person's file). Variants the file did not call are left out rather
+        than listed as blanks, so an empty list means "nothing on file for
+        this gene", which is also what a ledger with no DNA import returns.
+
+        Each row: {'rsid', 'genotype', 'description'}.
+        """
+        known = variant_reference.variants_for_gene(gene_symbol)
+        if not known:
+            return []
+        called = self.get_snp_genotypes([rsid for rsid, _ in known])
+        return [{'rsid': rsid, 'genotype': called[rsid], 'description': description}
+                for rsid, description in known if rsid in called]
+
     def get_genotypes_for_gene(self, gene_id: int) -> List[Dict]:
         """Get all genotypes for a gene"""
         cursor = self.conn.cursor()

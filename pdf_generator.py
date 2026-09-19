@@ -239,6 +239,7 @@ def generate_doctor_pdf(db, doctor_type: str, output_path: str,
                        include_medications: bool = True,
                        include_stats: bool = True,
                        include_pharmacogenomics: bool = True,
+                       include_variants: bool = True,
                        include_details: bool = True) -> bool:
     """
     Generate PDF for a specific doctor specialty.
@@ -262,6 +263,7 @@ def generate_doctor_pdf(db, doctor_type: str, output_path: str,
                                                      include_medications=include_medications,
                                                      include_stats=include_stats,
                                                      include_pharmacogenomics=include_pharmacogenomics,
+                                                     include_variants=include_variants,
                                                      include_details=include_details)
         
         # Create temporary file for main document

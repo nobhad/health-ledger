@@ -410,6 +410,12 @@ function showResults(data, title) {
             if (value === null || value === undefined) {
                 value = '';
             }
+            // A gene's own variants read as a list, not as JSON in a cell.
+            if (key === 'variants' && isVariantList(value)) {
+                html += '<td data-search="' + escapeHtml(variantSearchText(value)) + '">'
+                    + variantListHtml(value) + '</td>';
+                return;
+            }
             if (typeof value === 'object' && value !== null) {
                 if (Array.isArray(value)) {
                     value = value.join(', ');
@@ -435,6 +441,18 @@ function showResults(data, title) {
     resultsEl.innerHTML = html;
     const duration = performance.now() - startTime;
     window.debugLog(`showResults() completed in ${duration.toFixed(2)}ms`);
+}
+function isVariantList(value) {
+    return Array.isArray(value) && value.length > 0
+        && value.every(row => typeof row === 'object' && row !== null && 'rsid' in row);
+}
+function variantListHtml(variants) {
+    const items = variants.map(v => '<li><strong>' + escapeHtml(v.rsid) + '</strong> ' + escapeHtml(v.genotype)
+        + (v.description ? ' &middot; ' + escapeHtml(v.description) : '') + '</li>').join('');
+    return '<ul class="cell-list">' + items + '</ul>';
+}
+function variantSearchText(variants) {
+    return variants.map(v => v.rsid + ' ' + v.genotype + ' ' + v.description).join(' ').toLowerCase();
 }
 function escapeHtml(text) {
     if (text === null || text === undefined) {

@@ -40,6 +40,7 @@ from profile_generator import generate_profile_html
 import ledger_setup
 import pdf_generator
 import raw_dna
+import variant_reference
 from doctor_templates import get_available_specialties, DOCTOR_TEMPLATES
 
 # Set up logging
@@ -483,7 +484,8 @@ def _original_name(spooled: Path) -> str:
 
 def _render_import(**context):
     db = get_db()
-    return render_template('import.html', imports=db.get_dna_imports(), **context)
+    return render_template('import.html', imports=db.get_dna_imports(),
+                           variant_caution=variant_reference.VARIANT_CAUTION, **context)
 
 
 @app.route('/import')
@@ -721,6 +723,9 @@ def gene_info():
             - health_conditions: List of associated health conditions
             - interacting_genes: List of interacting gene symbols
             - pharmacogenomic: Drug metabolism information (if available)
+            - variants: The well-known variants in this gene that a DNA
+              import called, as {rsid, genotype, description}; empty when
+              no raw-data file has been imported
     
     Example:
         GET /api/gene-info?gene=COMT
@@ -792,7 +797,8 @@ def gene_info():
             'traits': [t['trait_name'] for t in traits],
             'health_conditions': [c['condition_name'] for c in conditions],
             'interacting_genes': [i.get('interacting_gene_symbol', i.get('interacting_gene', '')) for i in interactions],
-            'pharmacogenomic': pharmacogenomic
+            'pharmacogenomic': pharmacogenomic,
+            'variants': db.get_variant_genotypes_for_gene(gene['gene_symbol'])
         }
         
         app_logger.info(f"Returning info for {gene_symbol}: {len(traits)} traits, {len(conditions)} conditions")
@@ -1359,6 +1365,7 @@ def api_pdf_doctor(specialty):
             include_medications = data.get('include_medications', True)
             include_stats = data.get('include_stats', True)
             include_pharmacogenomics = data.get('include_pharmacogenomics', True)
+            include_variants = data.get('include_variants', True)
             include_details = data.get('include_details', True)
         else:
             save_path = None
@@ -1366,12 +1373,14 @@ def api_pdf_doctor(specialty):
             include_medications = True
             include_stats = True
             include_pharmacogenomics = True
+            include_variants = True
             include_details = True
         
         unavailable = _pdf_unavailable(url_for(
             'doctor_document_print', specialty=specialty,
             medications=int(bool(include_medications)), stats=int(bool(include_stats)),
             pharmacogenomics=int(bool(include_pharmacogenomics)),
+            variants=int(bool(include_variants)),
             details=int(bool(include_details))))
         if unavailable:
             return unavailable
@@ -1400,6 +1409,7 @@ def api_pdf_doctor(specialty):
                                include_medications=include_medications,
                                include_stats=include_stats,
                                include_pharmacogenomics=include_pharmacogenomics,
+                               include_variants=include_variants,
                                include_details=include_details):
             app_logger.info(f"PDF saved to: {final_path}")
             
@@ -1478,7 +1488,8 @@ def doctor_document_print(specialty):
     Works on every computer, WeasyPrint or not: the print dialog's own
     "Save as PDF" makes the file. The original test report is not appended
     here (that needs WeasyPrint); the toolbar says so. Query flags
-    medications, stats and pharmacogenomics take 0 to leave a section out.
+    medications, stats, pharmacogenomics, variants and details take 0 to
+    leave a section out.
     """
     specialty = specialty.lower()
     if specialty not in get_available_specialties():
@@ -1497,6 +1508,7 @@ def doctor_document_print(specialty):
             include_medications=wanted('medications'),
             include_stats=wanted('stats'),
             include_pharmacogenomics=wanted('pharmacogenomics'),
+            include_variants=wanted('variants'),
             include_details=wanted('details'),
             asset_base='/', body_prefix_html=toolbar)
     except Exception as e:
