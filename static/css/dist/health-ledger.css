@@ -3108,8 +3108,18 @@ input[type="date"]::-webkit-calendar-picker-indicator {
 }
 
 .card-body {
+  display: flex;
+  flex: 1 1 auto;
+  flex-direction: column;
   margin: 0;
   color: var(--color-text-primary);
+}
+
+/* A card's action sits on its bottom edge, so the buttons of cards in one
+   row line up whatever their text runs to. */
+.card-actions {
+  margin-top: auto;
+  padding-top: var(--space-2);
 }
 
 .card-body > * + * {
@@ -4211,6 +4221,15 @@ html[data-theme="dark"] .theme-toggle-icon--dark {
 .results-container:not(:empty),
 .loading.show {
   padding: var(--portal-content-padding);
+}
+
+/* A form that is the whole page: stacks its sections like the page body
+   does and lets a fill grid inside it take the remaining height. */
+.form-stack {
+  display: flex;
+  flex: 1 1 auto;
+  flex-direction: column;
+  min-height: 0;
 }
 
 /* The one block on a page that takes the remaining height and scrolls

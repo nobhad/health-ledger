@@ -14,21 +14,24 @@
 {% endif %}
 
 {% if first_run %}
-    {# One form around both panels: the data folder chosen in the first
-       applies to whichever button is pressed. #}
-    <form class="grid grid-2 grid--fill" method="post" enctype="multipart/form-data">
+    {# One form: the data folder chosen at the top applies to whichever
+       button is pressed below. #}
+    <form class="form-stack" method="post" enctype="multipart/form-data">
+    <div class="section">
+        <div class="section-header"><h3 class="section-title">Where your records will live</h3></div>
+        <p class="note">Everything private stays in this one folder on your computer: the database, your source documents, generated PDFs and backups. Keep the suggestion or type another folder.</p>
+        <div class="form-group">
+            <label for="dataFolder" class="field-label">Data folder</label>
+            <input type="text" id="dataFolder" name="data_folder" value="{{ proposed_folder }}" autocomplete="off" spellcheck="false" class="form-input">
+        </div>
+    </div>
+    <div class="grid grid-2 grid--fill">
     <div class="card">
         <div class="card-header"><h3>Start fresh</h3></div>
         <div class="card-body">
             <p>Begin with an empty ledger. Records are added afterwards, and you can import a database at any time from the Backup page.</p>
-            <h4>Where your records will live</h4>
-            <p class="note">Everything private stays in this one folder on your computer: the database, your source documents, generated PDFs and backups. Keep the suggestion or type another folder.</p>
-            <div class="form-row">
-                <label for="dataFolder" class="field-label">Data folder</label>
-                <input type="text" id="dataFolder" name="data_folder" value="{{ proposed_folder }}" autocomplete="off" spellcheck="false" class="form-input">
-            </div>
-            <div class="form-group">
-                <button type="submit" formaction="/setup/start" class="btn btn-primary">
+            <div class="card-actions">
+                <button type="submit" formaction="/setup/start" class="btn btn-primary btn-block">
                     <i data-lucide="sparkles"></i>
                     Start with an empty ledger
                 </button>
@@ -38,16 +41,10 @@
     <div class="card">
         <div class="card-header"><h3>Import a database</h3></div>
         <div class="card-body">
-            <p>Choose the <code>.db</code> file Health Ledger made for you: a backup, an export, or a copy from another computer. It is checked before it replaces anything, and it goes into the data folder chosen on the left.</p>
+            <p>Choose the <code>.db</code> file Health Ledger made for you: a backup, an export, or a copy from another computer. It is checked before it replaces anything, and it goes into the data folder above.</p>
             <div class="form-group">
                 <label for="databaseFile" class="field-label">Database file</label>
                 <input type="file" id="databaseFile" name="database" accept=".db,.sqlite,.sqlite3,application/vnd.sqlite3,application/x-sqlite3" class="form-input">
-            </div>
-            <div class="form-group">
-                <button type="submit" formaction="/setup/import" class="btn btn-primary">
-                    <i data-lucide="upload"></i>
-                    Import this database
-                </button>
             </div>
 
             {% if backups %}
@@ -66,7 +63,14 @@
                 {% endfor %}
             </ul>
             {% endif %}
+            <div class="card-actions">
+                <button type="submit" formaction="/setup/import" class="btn btn-primary btn-block">
+                    <i data-lucide="upload"></i>
+                    Import this database
+                </button>
+            </div>
         </div>
+    </div>
     </div>
     </form>
     {% else %}
