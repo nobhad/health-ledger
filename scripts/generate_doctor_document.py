@@ -18,7 +18,8 @@ logger = get_logger('doctor_document')
 
 def generate_doctor_document_html(db: GeneticProfileDB, specialty: str,
                                   include_medications: bool = True,
-                                  include_stats: bool = True) -> str:
+                                  include_stats: bool = True,
+                                  include_pharmacogenomics: bool = True) -> str:
     """
     Generate HTML document for a specific doctor specialty.
     
@@ -95,8 +96,9 @@ def generate_doctor_document_html(db: GeneticProfileDB, specialty: str,
                     html_parts.append(f'<li>{condition["condition_name"]}</li>')
                 html_parts.append('</ul>')
         
-        # Get pharmacogenomic data if in relevant sections
-        if 'pharmacogenomics' in template['sections'] or template['sections'] == 'all':
+        # Drug-metabolism findings are the person's choice (a checkbox on the
+        # Doctor Docs page), whatever the template lists.
+        if include_pharmacogenomics:
             pg_data = db.get_pharmacogenomic_data_for_gene(gene['id'])
             if pg_data:
                 html_parts.append('<h3>Pharmacogenomic Information</h3>')
@@ -112,6 +114,11 @@ def generate_doctor_document_html(db: GeneticProfileDB, specialty: str,
         
         html_parts.append('<hr>')
     
+    # The report's own medication guidance, by category, when it has been
+    # imported (scripts/import_pharmacogenomics.py).
+    if include_pharmacogenomics:
+        html_parts.extend(medication_guidance_html(db))
+
     # Add current medications if requested
     if include_medications:
         medications = db.get_current_medications()
@@ -177,6 +184,49 @@ def generate_doctor_document_html(db: GeneticProfileDB, specialty: str,
     html_parts.append('</body></html>')
     
     return '\n'.join(html_parts)
+
+
+CATEGORY_HEADINGS = [
+    ('significant', 'Significant gene-drug interaction'),
+    ('moderate', 'Moderate gene-drug interaction'),
+    ('use_as_directed', 'Use as directed'),
+]
+
+
+def medication_guidance_html(db: GeneticProfileDB) -> List[str]:
+    """
+    The genetic test report's medication categories as HTML parts, or an
+    empty list when none have been imported. Significant and moderate
+    interactions are listed one per line; "use as directed" is one
+    paragraph, since it is the long list.
+    """
+    rows = db.get_medication_interactions()
+    if not rows:
+        return []
+    by_category = {}
+    for row in rows:
+        by_category.setdefault(row['category'], []).append(row)
+    source_names = sorted({r['source_name'] for r in rows if r.get('source_name')})
+    parts = ['<h2>Medication Guidance from the Genetic Test Report</h2>']
+    if source_names:
+        parts.append(f'<p><em>As stated in: {", ".join(source_names)}</em></p>')
+    for key, heading in CATEGORY_HEADINGS:
+        items = by_category.get(key)
+        if not items:
+            continue
+        parts.append(f'<h3>{heading} ({len(items)})</h3>')
+        names = []
+        for item in items:
+            name = item['drug_name']
+            if item.get('brand_name'):
+                name += f' ({item["brand_name"]})'
+            names.append(name)
+        if key == 'use_as_directed':
+            parts.append('<p>' + ', '.join(names) + '</p>')
+        else:
+            parts.append('<ul>' + ''.join(f'<li>{n}</li>' for n in names) + '</ul>')
+    parts.append('<hr>')
+    return parts
 
 
 def generate_doctor_document(db: GeneticProfileDB, specialty: str, 

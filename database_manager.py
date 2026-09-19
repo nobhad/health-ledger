@@ -1211,6 +1211,81 @@ class GeneticProfileDB:
         logger.info(f"Added drug {drug_name} to pharmacogenomic_data_id {pharmacogenomic_data_id}")
         return cursor.lastrowid
     
+    def replace_pharmacogenomic_data_for_gene(self, gene_id: int, metabolism_status: str,
+                                              genotype_phenotype: Optional[str] = None,
+                                              drugs: Optional[List[str]] = None) -> int:
+        """
+        Set a gene's pharmacogenomic record, replacing whatever it had.
+
+        Idempotent: running an import twice leaves one record per gene.
+        Returns the new record's id.
+        """
+        cursor = self.conn.cursor()
+        cursor.execute("""
+            DELETE FROM gene_pharmacogenomic_drugs
+            WHERE pharmacogenomic_data_id IN (SELECT id FROM pharmacogenomic_data WHERE gene_id = ?)
+        """, (gene_id,))
+        cursor.execute("DELETE FROM pharmacogenomic_data WHERE gene_id = ?", (gene_id,))
+        cursor.execute("""
+            INSERT INTO pharmacogenomic_data (gene_id, metabolism_status, genotype_phenotype)
+            VALUES (?, ?, ?)
+        """, (gene_id, metabolism_status, genotype_phenotype))
+        record_id = cursor.lastrowid
+        for drug in drugs or []:
+            cursor.execute("""
+                INSERT INTO gene_pharmacogenomic_drugs (pharmacogenomic_data_id, drug_name)
+                VALUES (?, ?)
+            """, (record_id, drug))
+        self.conn.commit()
+        return record_id
+
+    def replace_medication_interactions_for_source(self, primary_source_id: int,
+                                                   interactions: List[Dict]) -> int:
+        """
+        Store a report's medication categories, replacing the source's earlier rows.
+
+        Each interaction: {'drug_name', 'category', 'brand_name'?, 'notes'?}.
+        Returns the number of rows written.
+        """
+        cursor = self.conn.cursor()
+        cursor.execute("DELETE FROM medication_interactions WHERE primary_source_id = ?",
+                       (primary_source_id,))
+        for item in interactions:
+            cursor.execute("""
+                INSERT INTO medication_interactions
+                    (primary_source_id, drug_name, brand_name, category, notes)
+                VALUES (?, ?, ?, ?, ?)
+            """, (primary_source_id, item['drug_name'], item.get('brand_name'),
+                  item['category'], item.get('notes')))
+        self.conn.commit()
+        return len(interactions)
+
+    def get_medication_interactions(self, primary_source_id: Optional[int] = None) -> List[Dict]:
+        """
+        The report's medication guidance, most significant category first,
+        then by drug name. Empty when nothing has been imported.
+        """
+        cursor = self.conn.cursor()
+        sql = """
+            SELECT mi.id, mi.primary_source_id, mi.drug_name, mi.brand_name, mi.category, mi.notes,
+                   ps.source_name, ps.document_date
+            FROM medication_interactions mi
+            LEFT JOIN primary_sources ps ON ps.id = mi.primary_source_id
+        """
+        params: tuple = ()
+        if primary_source_id is not None:
+            sql += " WHERE mi.primary_source_id = ?"
+            params = (primary_source_id,)
+        sql += """
+            ORDER BY CASE mi.category
+                         WHEN 'significant' THEN 0
+                         WHEN 'moderate' THEN 1
+                         ELSE 2
+                     END, mi.drug_name
+        """
+        cursor.execute(sql, params)
+        return [dict(row) for row in cursor.fetchall()]
+
     def get_pharmacogenomic_data_for_gene(self, gene_id: int) -> Optional[Dict]:
         """
         Get pharmacogenomic data for a specific gene.

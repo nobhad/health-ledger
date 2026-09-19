@@ -203,7 +203,8 @@ def generate_source_pdf(db, source_id: int, output_path: str) -> bool:
 def generate_doctor_pdf(db, doctor_type: str, output_path: str,
                        include_original: bool = True,
                        include_medications: bool = True,
-                       include_stats: bool = True) -> bool:
+                       include_stats: bool = True,
+                       include_pharmacogenomics: bool = True) -> bool:
     """
     Generate PDF for a specific doctor specialty.
     Includes original genetic test report at the end if available.
@@ -224,7 +225,8 @@ def generate_doctor_pdf(db, doctor_type: str, output_path: str,
         # Generate main document HTML with options
         html_content = generate_doctor_document_html(db, doctor_type,
                                                      include_medications=include_medications,
-                                                     include_stats=include_stats)
+                                                     include_stats=include_stats,
+                                                     include_pharmacogenomics=include_pharmacogenomics)
         
         # Create temporary file for main document
         with tempfile.NamedTemporaryFile(delete=False, suffix='.pdf') as tmp:

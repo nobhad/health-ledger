@@ -1224,11 +1224,13 @@ def api_pdf_doctor(specialty):
             include_original = data.get('include_original', True)
             include_medications = data.get('include_medications', True)
             include_stats = data.get('include_stats', True)
+            include_pharmacogenomics = data.get('include_pharmacogenomics', True)
         else:
             save_path = None
             include_original = True
             include_medications = True
             include_stats = True
+            include_pharmacogenomics = True
         
         # Generate filename: LastFirst_Specialty_YYYY-MM-DD.pdf
         today = datetime.now().strftime('%Y-%m-%d')
@@ -1252,7 +1254,8 @@ def api_pdf_doctor(specialty):
         if generate_doctor_pdf(db, specialty, str(final_path), 
                                include_original=include_original,
                                include_medications=include_medications,
-                               include_stats=include_stats):
+                               include_stats=include_stats,
+                               include_pharmacogenomics=include_pharmacogenomics):
             app_logger.info(f"PDF saved to: {final_path}")
             
             # Return file for download

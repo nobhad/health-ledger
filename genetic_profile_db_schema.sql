@@ -135,6 +135,21 @@ CREATE TABLE IF NOT EXISTS gene_pharmacogenomic_drugs (
     FOREIGN KEY (pharmacogenomic_data_id) REFERENCES pharmacogenomic_data(id)
 );
 
+-- Medication guidance as a genetic test report states it: each medication
+-- the report lists, in the report's own category (use as directed, moderate
+-- or significant gene-drug interaction). Replaced whole per source by
+-- scripts/import_pharmacogenomics.py.
+CREATE TABLE IF NOT EXISTS medication_interactions (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    primary_source_id INTEGER NOT NULL,
+    drug_name TEXT NOT NULL,
+    brand_name TEXT,
+    category TEXT NOT NULL,
+    notes TEXT,
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    FOREIGN KEY (primary_source_id) REFERENCES primary_sources(id)
+);
+
 -- Research findings table
 CREATE TABLE IF NOT EXISTS research_findings (
     id INTEGER PRIMARY KEY AUTOINCREMENT,
@@ -260,6 +275,7 @@ CREATE INDEX IF NOT EXISTS idx_primary_source_findings_source_id ON primary_sour
 CREATE INDEX IF NOT EXISTS idx_primary_source_findings_gene_id ON primary_source_findings(related_gene_id);
 CREATE INDEX IF NOT EXISTS idx_pharmacogenomic_data_gene_id ON pharmacogenomic_data(gene_id);
 CREATE INDEX IF NOT EXISTS idx_gene_pharmacogenomic_drugs_pg_id ON gene_pharmacogenomic_drugs(pharmacogenomic_data_id);
+CREATE INDEX IF NOT EXISTS idx_medication_interactions_source ON medication_interactions(primary_source_id);
 CREATE INDEX IF NOT EXISTS idx_primary_source_findings_type ON primary_source_findings(finding_type);
 CREATE INDEX IF NOT EXISTS idx_health_metrics_source_id ON health_metrics(primary_source_id);
 CREATE INDEX IF NOT EXISTS idx_health_metrics_type ON health_metrics(metric_type);

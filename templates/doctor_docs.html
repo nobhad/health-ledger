@@ -34,6 +34,10 @@
                     Include original genetic test report
                 </label>
                 <label class="check-label">
+                    <input type="checkbox" id="includePharmacogenomics" checked>
+                    Include drug-metabolism findings (genes, affected medications, the report's medication guidance)
+                </label>
+                <label class="check-label">
                     <input type="checkbox" id="includeMedications" checked>
                     Include current medications
                 </label>
@@ -125,6 +129,7 @@ document.addEventListener('DOMContentLoaded', function() {
     const includeOriginalCheckbox = document.getElementById('includeOriginal');
     const includeMedicationsCheckbox = document.getElementById('includeMedications');
     const includeStatsCheckbox = document.getElementById('includeStats');
+    const includePharmacogenomicsCheckbox = document.getElementById('includePharmacogenomics');
     
     generateBtn.addEventListener('click', async function() {
         const specialty = specialtySelect.value;
@@ -138,6 +143,7 @@ document.addEventListener('DOMContentLoaded', function() {
             const includeOriginal = includeOriginalCheckbox.checked;
             const includeMedications = includeMedicationsCheckbox.checked;
             const includeStats = includeStatsCheckbox.checked;
+            const includePharmacogenomics = includePharmacogenomicsCheckbox.checked;
             
             // Determine if we should use a custom path
             const useCustomPath = useCustomPathCheckbox.checked;
@@ -147,7 +153,8 @@ document.addEventListener('DOMContentLoaded', function() {
             const requestBody = {
                 include_original: includeOriginal,
                 include_medications: includeMedications,
-                include_stats: includeStats
+                include_stats: includeStats,
+                include_pharmacogenomics: includePharmacogenomics
             };
             if (useCustomPath && customPath) {
                 requestBody.save_path = customPath;

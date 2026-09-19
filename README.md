@@ -122,7 +122,18 @@ python3 app.py            # http://localhost:5001
 ```bash
 # Import from markdown document
 python3 scripts/import_from_markdown.py
+
+# Drug-metabolism findings from the genetic test report already in the
+# ledger: each gene's phenotype, the medications it affects (public
+# reference in pharmacogenomic_reference.py) and the report's own
+# medication categories. Dry-run first; the real run replaces earlier rows.
+python3 scripts/import_pharmacogenomics.py --dry-run
+python3 scripts/import_pharmacogenomics.py --add-missing-genes
+python3 scripts/import_pharmacogenomics.py --set VKORC1="Increased Sensitivity"
 ```
+
+On the Doctor Docs page, "Include drug-metabolism findings" adds these to
+a specialty PDF; untick it for a document without them.
 
 ### Running Tests
 
