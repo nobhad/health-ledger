@@ -6,7 +6,6 @@ Supports exporting to SQLite file, JSON, and creating timestamped backups
 
 import sqlite3
 import json
-import shutil
 from pathlib import Path
 from datetime import datetime
 from typing import Dict, List, Optional
@@ -14,8 +13,9 @@ import sys
 
 # Add parent directory to path for imports
 sys.path.insert(0, str(Path(__file__).parent.parent))
+import config
 from database_manager import GeneticProfileDB
-from config import DB_PATH, BACKUPS_DIR, get_logger
+from config import get_logger
 
 logger = get_logger('backup')
 
@@ -31,7 +31,7 @@ def export_database(output_path: str) -> bool:
         bool: True if successful, False otherwise
     """
     try:
-        db_path = Path(DB_PATH)
+        db_path = Path(config.DB_PATH)
         output = Path(output_path)
         
         if not db_path.exists():
@@ -41,8 +41,16 @@ def export_database(output_path: str) -> bool:
         # Create output directory if needed
         output.parent.mkdir(parents=True, exist_ok=True)
         
-        # Copy database file
-        shutil.copy2(db_path, output)
+        # Copy through SQLite's backup API. The database runs in WAL mode, so
+        # a plain file copy could miss writes still in the write-ahead log;
+        # the API produces one consistent, self-contained file.
+        src = sqlite3.connect(f'file:{db_path}?mode=ro', uri=True)
+        dest = sqlite3.connect(output)
+        try:
+            src.backup(dest)
+        finally:
+            src.close()
+            dest.close()
         logger.info(f"Database exported to: {output_path}")
         return True
         
@@ -100,18 +108,18 @@ def export_to_json(output_path: str) -> bool:
         return False
 
 
-def create_backup(backup_dir: str = str(BACKUPS_DIR)) -> Optional[str]:
+def create_backup(backup_dir: Optional[str] = None) -> Optional[str]:
     """
     Create a timestamped backup of the database.
     
     Args:
-        backup_dir: Directory where backups are stored
+        backup_dir: Directory where backups are stored (default: config.BACKUPS_DIR)
         
     Returns:
         str: Path to backup file if successful, None otherwise
     """
     try:
-        backup_path = Path(backup_dir)
+        backup_path = Path(backup_dir or config.BACKUPS_DIR)
         backup_path.mkdir(parents=True, exist_ok=True)
         
         timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
@@ -128,18 +136,18 @@ def create_backup(backup_dir: str = str(BACKUPS_DIR)) -> Optional[str]:
         return None
 
 
-def list_backups(backup_dir: str = str(BACKUPS_DIR)) -> List[Dict]:
+def list_backups(backup_dir: Optional[str] = None) -> List[Dict]:
     """
     List all available backups.
     
     Args:
-        backup_dir: Directory where backups are stored
+        backup_dir: Directory where backups are stored (default: config.BACKUPS_DIR)
         
     Returns:
         List of backup information dictionaries
     """
     try:
-        backup_path = Path(backup_dir)
+        backup_path = Path(backup_dir or config.BACKUPS_DIR)
         if not backup_path.exists():
             return []
         
