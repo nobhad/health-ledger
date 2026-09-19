@@ -92,26 +92,29 @@ patient narrative in tracked files.
 
 ## 🚀 Quick Start
 
-### Installation
+1. Run `./start.sh` (Mac/Linux; or double-click `Health Ledger.command`) or
+   `start.bat` (Windows). The first run creates a Python environment and
+   installs what it needs; every run starts the server and opens
+   http://127.0.0.1:5001 in your browser.
+2. The first screen asks where your records should live (a "Health Ledger"
+   folder in your home folder is proposed; type another if you prefer) and
+   how to begin:
+   - **Start fresh** — begin with an empty ledger and add records later.
+   - **Import a database** — choose the `.db` file Health Ledger made
+     before (a backup, an export, a copy from another computer). It is
+     checked before it replaces anything, and if the ledger already holds
+     records they are backed up first.
+
+   The folder choice is saved to the git-ignored `.env` for the next launch.
+
+   That screen stays at `/setup` (also linked from the Backup page) for
+   restoring a backup or importing later on.
+
+### Running by hand
 
 ```bash
-# Install dependencies
 pip3 install -r requirements.txt
-
-# Initialize database (if needed)
-python3 -c "from database_manager import GeneticProfileDB; db = GeneticProfileDB(); db.close()"
-```
-
-### Running the Web Application
-
-```bash
-# Start the Flask server
-python3 app.py
-
-# Or use the startup script
-./start_web_query.sh
-
-# Access at http://localhost:5001
+python3 app.py            # http://localhost:5001
 ```
 
 ### Importing Data
