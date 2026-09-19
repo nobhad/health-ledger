@@ -495,10 +495,11 @@ html[data-theme="dark"] .theme-toggle-icon--dark {
   padding: var(--portal-content-padding);
 }
 
-/* Filter controls in a row, buttons aligned to the controls' baseline. */
+/* Filter controls share the row's width equally, so at any width the
+   fields span the panel rather than huddling on the left. */
 .filters-form {
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(var(--table-col-lg), 1fr));
+  grid-template-columns: repeat(3, minmax(0, 1fr));
   gap: var(--space-2);
   align-items: end;
 }
@@ -553,6 +554,10 @@ html[data-theme="dark"] .theme-toggle-icon--dark {
 
 /* Tablet and down: three-up grids become two-up. */
 @media (--tablet-down) {
+  .filters-form {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
   .grid-3 {
     grid-template-columns: repeat(2, 1fr);
   }
@@ -678,7 +683,8 @@ html[data-theme="dark"] .theme-toggle-icon--dark {
 
   .grid-2,
   .grid-3,
-  .stat-grid {
+  .stat-grid,
+  .filters-form {
     grid-template-columns: 1fr;
   }
 

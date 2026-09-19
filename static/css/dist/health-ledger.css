@@ -3425,13 +3425,21 @@ input[type="date"]::-webkit-calendar-picker-indicator {
    the input keeps its resting border (no focus accent while the list is
    the thing you are looking at), drops its bottom edge, and the list
    continues from it with no top edge of its own. */
+/* Focused or open, the field takes the brand accent (the design system's
+   focus colour) and the list below takes the same, so the whole open box
+   is one accent frame: field on top, list beneath, shared edge not drawn. */
 .multiselect-wrapper:focus-within .multiselect-input,
 .multiselect-wrapper:has(.multiselect-dropdown.show) .multiselect-input {
-  border-color: var(--dropdown-border-color);
+  border-color: var(--color-accent);
   border-bottom-color: transparent;
-  box-shadow: none; /* no focus ring: the open list is the focus state */
+  box-shadow: none; /* the accent frame is the ring */
   outline: none;
   transition: none;
+}
+
+.multiselect-wrapper:focus-within .multiselect-dropdown,
+.multiselect-dropdown.show {
+  border-color: var(--color-accent);
 }
 
 .multiselect-dropdown {
@@ -3768,21 +3776,23 @@ input[type="date"]::-webkit-calendar-picker-indicator {
   transition: border-color var(--transition-fast);
 }
 
-/* Keyboard focus on a closed trigger reads as the hover ground, not a
-   ring; open, the list itself is the focus state. */
-.dropdown-trigger:focus-visible {
-  background: var(--color-bg-hover);
+/* Focus and the open state wear the brand accent, as every focused
+   control in the design system does; the menu below continues the same
+   accent frame. */
+.dropdown-trigger:focus-visible,
+.dropdown-trigger[data-state="open"] {
+  border-color: var(--color-accent);
   box-shadow: none;
   outline: none;
-}
-
-.dropdown-trigger[data-state="open"]:focus-visible {
-  background: var(--dropdown-bg);
 }
 
 .dropdown-trigger[data-state="open"] {
   border-bottom-color: transparent;
   transition: none;
+}
+
+.dropdown-trigger[data-state="open"] + .dropdown-menu {
+  border-color: var(--color-accent);
 }
 
 .dropdown-value {
@@ -4483,10 +4493,11 @@ html[data-theme="dark"] .theme-toggle-icon--dark {
   padding: var(--portal-content-padding);
 }
 
-/* Filter controls in a row, buttons aligned to the controls' baseline. */
+/* Filter controls share the row's width equally, so at any width the
+   fields span the panel rather than huddling on the left. */
 .filters-form {
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(var(--table-col-lg), 1fr));
+  grid-template-columns: repeat(3, minmax(0, 1fr));
   gap: var(--space-2);
   align-items: end;
 }
@@ -4541,6 +4552,10 @@ html[data-theme="dark"] .theme-toggle-icon--dark {
 
 /* Tablet and down: three-up grids become two-up. */
 @media (max-width: 991px) {
+  .filters-form {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
   .grid-3 {
     grid-template-columns: repeat(2, 1fr);
   }
@@ -4666,7 +4681,8 @@ html[data-theme="dark"] .theme-toggle-icon--dark {
 
   .grid-2,
   .grid-3,
-  .stat-grid {
+  .stat-grid,
+  .filters-form {
     grid-template-columns: 1fr;
   }
 
