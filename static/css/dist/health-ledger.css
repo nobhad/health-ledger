@@ -267,17 +267,17 @@ html {
  * ============================================ */
 
 ::-moz-selection {
-  background-color: var(--color-accent);
+  background-color: var(--color-brand-red);
   color: var(--color-neutral-100);
 }
 
 ::selection {
-  background-color: var(--color-accent);
+  background-color: var(--color-brand-red);
   color: var(--color-neutral-100);
 }
 
 ::-moz-selection {
-  background-color: var(--color-accent);
+  background-color: var(--color-brand-red);
   color: var(--color-neutral-100);
 }
 
@@ -567,7 +567,7 @@ summary::-webkit-details-marker {
 }
 
 details:focus-within {
-  outline: 2px solid var(--color-accent);
+  outline: 2px solid var(--color-brand-red);
   outline-offset: -2px;
 }
 
@@ -688,33 +688,27 @@ details > summary:focus-visible {
    * Global color primitives used by both main site and portals
    */
 
-  /* Brand Colors - Main site uses crimson red */
-  --color-brand-primary: #dc2626;
-  --color-brand-primary-rgb: 220, 38, 38;
+  /* THE BRAND RED. One name, one hue, a value per mode — #b91c1c on light
+     grounds and #f87171 on dark (the dark override sits with the rest of the
+     dark theme below).
+
+     It used to be four names for four crimsons: --color-brand-primary
+     (#dc2626, "the logo and brand fills"), --color-brand-accent (#b91c1c,
+     darkened for text contrast), --color-brand-accent-dark (#f87171) and
+     --color-accent forwarding onto whichever applied. Nine names in all
+     resolved to #b91c1c alone. A reader could not tell which to reach for,
+     and the split by usage — fill vs text — is not something a token can
+     enforce.
+
+     #b91c1c is the value that survives both jobs. Measured on the five light
+     grounds it lands on: 4.90 on the page, 5.54 on the menu button, 5.93 on
+     gray-100, 6.38 on the portal surface, 6.47 on white — AA as body text
+     everywhere, where #dc2626 managed 3.66 on the page ground and 4.43 on
+     gray-100. The logo and brand fills take the same red now; a fill only
+     owes 3:1 and clears it comfortably. */
+  --color-brand-red: #b91c1c;
+  --color-brand-red-rgb: 185, 28, 28;
   --color-brand-secondary: #10b981;
-  /* Darker than --color-brand-primary above, and deliberately so. The accent
-     is what 160 rules set as TEXT, and #dc2626 measures 3.66:1 on the page
-     ground, 4.14:1 on the menu button and 4.43:1 on gray-100 — three of the
-     five light surfaces it lands on, all short of the 4.5:1 that body-size
-     text needs. #b91c1c clears every one of them (4.90 / 5.54 / 5.93 / 6.38 /
-     6.47) at the same hue, nine points of lightness down.
-
-     It is not a new colour: it is already --color-interactive-primary-hover
-     below, so the accent's hover state stops being a hue change and becomes
-     the weight change it always read as.
-
-     --color-brand-primary keeps #dc2626 for the logo and brand fills. Non-text
-     accent use — borders, focus rings, the CRT chrome — only owes 3:1, which
-     the brighter red clears everywhere. */
-  --color-brand-accent: #b91c1c;
-
-  /* And its counterpart for dark grounds. The same reasoning runs the other
-     way there: on --color-gray-900 (#171717), #b91c1c is 2.77:1 and even the
-     original #dc2626 was only 3.71:1 — the accent has never passed as text in
-     dark mode. #f87171 measures 6.48:1 and is already the dark crimson the
-     design-system docs page uses, so the two now agree. */
-  --color-brand-accent-dark: #f87171;
-
   /* Ink for a surface that is VIVID IN BOTH THEMES — a status pill, a filled
      badge, the callout's bubble art. Deliberately not --color-text-primary:
      that flips to near-white in dark mode, and these backgrounds do not flip
@@ -742,7 +736,6 @@ details > summary:focus-visible {
   /* Functional Colors */
   --color-success-500: #10b981;
     --color-warning-500: #f59e0b;
-    --color-error-500: #ef4444;
     --color-info-500: #3b82f6;
   
   /* ============================================
@@ -795,9 +788,8 @@ details > summary:focus-visible {
   /* Border Colors - Standard borders */
   --color-border-primary: var(--color-gray-300);
   --color-border-secondary: var(--color-gray-200);
-    --color-border-focus: var(--color-brand-primary);
+    --color-border-focus: var(--color-brand-red);
   
-  --color-interactive-primary-hover: #b91c1c;
         
   /* State Colors */
   --color-state-hover: rgba(0, 0, 0, 0.05);
@@ -927,10 +919,7 @@ html[data-theme="light"] {
   --color-dark: #333333;
   --color-light: #ffffff;
   --color-primary: var(--color-text-primary);
-  --color-accent-rgb: var(--color-brand-primary-rgb);
-  --color-accent-hover: var(--color-brand-accent);
   --color-secondary: var(--color-brand-secondary);
-  --color-accent: var(--color-brand-accent);
   --color-border: #000000;
 
   /* Ink for something drawn on a light surface *regardless of theme* — line
@@ -942,10 +931,8 @@ html[data-theme="light"] {
     --color-shadow: rgba(0, 0, 0, 0.2);
 
   /* App-level aliases (for components that need a single variable) */
-  --app-color-primary: var(--color-brand-primary);
     --app-color-success: var(--color-success);
   --app-color-warning: var(--color-warning);
-  --app-color-danger: var(--color-danger);
 
   /* Portal label ink under the light theme. Labels sit a step darker than body
      copy (--color-text-primary is #333333 there) so an uppercase run at
@@ -956,7 +943,10 @@ html[data-theme="light"] {
       
   /* Legacy status colors */
   --color-success: #10b981;
-      --color-warning: #fbbf24;
+  /* Warning as a FILL, light mode. Amber-500 rather than the amber-400 that
+     was here: #fbbf24 on a light ground is a dot you have to look for. The
+     dark theme keeps #fbbf24, where it is the one that reads. */
+  --color-warning: #f59e0b;
 
   /* Warning as TEXT, which is a different problem from warning as a fill.
      #fbbf24 is a light amber: it reads on near-black and is about 1.6:1 on the
@@ -965,11 +955,23 @@ html[data-theme="light"] {
      for dots, fills and icons; a sentence gets amber-700 here and the swatch
      itself under the dark theme. */
   --color-text-warning: #92400e;
-  --color-error: #dc2626;
+
+  /* THE ERROR RED, and deliberately a different red from the brand — rose
+     rather than crimson. It was four names (--color-error #dc2626,
+     --color-error-500 #ef4444, --color-danger forwarding onto the brand
+     accent, --app-color-danger onto that) and in light mode three of them
+     resolved to the brand red, so a destructive action was painted in the
+     same colour as a link.
+
+     Rose-700 because error is TEXT more often than not — 26 of its 53 uses
+     are a `color:` — and it has to pass as text on the same light grounds:
+     4.76 on the page, 5.76 on gray-100, 6.20 on the portal surface, 6.29 on
+     white. #dc2626 would have failed two of those (3.66 and 4.43), which is
+     the very measurement that darkened the brand red in the first place. */
+  --color-error: #be123c;
+  --color-error-rgb: 190, 18, 60;
+  --color-error-light: #ffe4e6;
   --color-info: #3b82f6;
-    --color-error-light: #fee2e2;
-      --color-danger: var(--color-brand-accent); /* light mode: one red, see --status-cancelled */
-  --color-danger-rgb: 220, 38, 38;
 
   /* The activity palette. These four are read only by the --activity-*-color
      set in portal-theme.css, which paints the admin client-detail timeline —
@@ -1002,13 +1004,14 @@ html[data-theme="light"] {
   --status-completed: #10b981; /* Green - Completed/Success */
     --status-completed-bg: rgba(16, 185, 129, 0.15);
 
-  /* Light mode uses the brand's darker red for every "red" signal — the
-     bright #ef4444 read as a second, unrelated red beside the accent used
-     for nav, progress and links. Dark mode keeps the brighter value below,
-     where it is needed for contrast. */
-  --status-cancelled: var(--color-brand-accent); /* Red - Cancelled/Lost */
-    --status-cancelled-bg: rgba(185, 28, 28, 0.15);
-  --color-error-500: var(--color-brand-accent);
+  /* Cancelled IS the error state, so it takes the error red rather than a
+     red of its own. This used to be the brand red, on the reasoning that a
+     second unrelated red sat badly beside the accent — true of the bright
+     #ef4444 it was compared against, but the rose error red is a considered
+     second red rather than an accidental one, and a cancelled row reading
+     the same colour as the nav was the cost of having only one. */
+  --status-cancelled: var(--color-error); /* Red - Cancelled/Lost */
+    --status-cancelled-bg: rgba(190, 18, 60, 0.15);
 
   --status-qualified: #8b5cf6; /* Purple - Qualified/Review */
     
@@ -1068,7 +1071,6 @@ html[data-theme="light"] {
   --color-mac-maximize: #27ca40;
 
   /* RGB variants for rgba() usage */
-  --color-error-rgb: 239, 68, 68;
   --color-success-rgb: 16, 185, 129;
 
   /* Legacy skeleton loading */
@@ -1088,9 +1090,26 @@ html[data-theme="light"] {
 /* Dark theme legacy aliases - Main site only */
 /* Same vacuous guard as above; see the note there. */
 html[data-theme="dark"] {
-  /* On near-black the light amber IS the readable one — 10.4:1. See the note
-     beside --color-text-warning in the light block. */
+  /* Warning as a fill on near-black: the light amber is the one that reads
+     here, where amber-500 is the one that reads on light. The two modes take
+     different values for the same reason the reds do. */
+  --color-warning: #fbbf24;
+  /* And as text: on near-black the fill colour IS readable — 10.4:1. See the
+     note beside --color-text-warning in the light block. */
   --color-text-warning: var(--color-warning);
+
+  /* THE BRAND RED on dark grounds. On --color-gray-900 (#171717) the light
+     value #b91c1c is 2.77:1 and even the old #dc2626 only 3.71:1 — the brand
+     red has never passed as text in dark mode. #f87171 measures 6.48:1. */
+  --color-brand-red: #f87171;
+  --color-brand-red-rgb: 248, 113, 113;
+
+  /* THE ERROR RED on dark grounds — rose-300, the counterpart of the light
+     rose-700, staying a different red from the brand in both modes. Measured
+     9.48 on gray-900, 9.20 on the portal's dark surface, 6.68 on the #333 the
+     public site uses. */
+  --color-error: #fda4af;
+  --color-error-rgb: 253, 164, 175;
   --color-neutral-300: #333333;
   --color-neutral-100: #3a3a3a;
   --color-neutral-700: #d0d0d0;
@@ -1098,9 +1117,6 @@ html[data-theme="dark"] {
   --color-dark: #e0e0e0;
   --color-light: #1a1a1a;
   --color-secondary: var(--color-brand-secondary);
-  /* The DARK accent — see --color-brand-accent-dark. Inheriting the light
-     one here put a 2.77:1 red on near-black. */
-  --color-accent: var(--color-brand-accent-dark);
   --color-shadow: rgba(0, 0, 0, 1);
 
   /* Business card - soft white */
@@ -1603,7 +1619,7 @@ html[data-theme="dark"] {
  * inside them.
  */
 :root {
-  --focus-ring-color: var(--color-accent);
+  --focus-ring-color: var(--color-brand-red);
   --focus-ring-width: 2px;
 }
 
@@ -1954,13 +1970,13 @@ html[data-theme="dark"] {
   /* Button colors - danger (transparent bg, red text/border). The background
      is not a token: it is `transparent` in both themes, so the two
      declarations only made you look in two places to learn nothing. */
-  --portal-btn-danger-color: var(--color-error-500);
-  --portal-btn-danger-border: var(--color-error-500);
+  --portal-btn-danger-color: var(--color-error);
+  --portal-btn-danger-border: var(--color-error);
 
   /* Button colors - danger hover */
-  --portal-btn-danger-hover-bg: var(--color-error-500);
+  --portal-btn-danger-hover-bg: var(--color-error);
   --portal-btn-danger-hover-color: var(--color-text-primary);
-  --portal-btn-danger-hover-border: var(--color-error-500);
+  --portal-btn-danger-hover-border: var(--color-error);
 
   /* Button effects - BRUTALIST: no shadows. There is no token for the
      shadow: it was `none` in every declaration and every reference already
@@ -2642,7 +2658,7 @@ small {
 
 .icon-btn:hover,
 .icon-btn:focus-visible {
-  color: var(--color-accent);
+  color: var(--color-brand-red);
 }
 
 .icon-btn svg.lucide {
@@ -2678,7 +2694,7 @@ small {
 .nav-btn:hover,
 .nav-btn.is-active,
 .nav-btn:focus-visible {
-  color: var(--color-accent);
+  color: var(--color-brand-red);
   text-decoration: none;
   box-shadow: none;
 }
@@ -2833,7 +2849,7 @@ textarea.form-input {
 
 :is(.form-input, .form-control, .form-select, .filter-input, .filter-select, .multiselect-input, .form-textarea):is(:focus, :focus-visible) {
   outline: none;
-  border-color: var(--color-accent);
+  border-color: var(--color-brand-red);
 }
 
 /* Native select: no system chrome, the theme's caret. */
@@ -2922,7 +2938,7 @@ input[type="checkbox"]:checked {
 }
 
 input[type="checkbox"]:focus-visible {
-  border-color: var(--color-accent);
+  border-color: var(--color-brand-red);
 }
 
 input[type="checkbox"]:disabled {
@@ -3103,7 +3119,7 @@ input[type="date"]::-webkit-calendar-picker-indicator {
 }
 
 :is(.data-table, .table, .results-table) tbody tr.abnormal td:first-child {
-  box-shadow: var(--app-edge-mark) var(--color-danger);
+  box-shadow: var(--app-edge-mark) var(--color-error);
 }
 
 :is(.data-table, .table, .results-table) thead {
@@ -3169,7 +3185,7 @@ input[type="date"]::-webkit-calendar-picker-indicator {
 
 .abnormal-badge,
 .badge-danger {
-  color: var(--color-danger);
+  color: var(--color-error);
 }
 
 .badge-success {
@@ -3210,7 +3226,7 @@ input[type="date"]::-webkit-calendar-picker-indicator {
 .alert-error,
 .alert-danger,
 .status-message.is-error {
-  color: var(--color-danger);
+  color: var(--color-error);
 }
 
 .alert-warning {
@@ -3236,7 +3252,7 @@ input[type="date"]::-webkit-calendar-picker-indicator {
   height: var(--space-5);
   margin: 0 auto var(--space-2);
   border: var(--border-width-thick) solid var(--portal-alpha-white-20);
-  border-top-color: var(--color-accent);
+  border-top-color: var(--color-brand-red);
   border-radius: var(--border-radius-full);
   animation: spin var(--animation-spinner);
 }
@@ -3334,7 +3350,7 @@ input[type="date"]::-webkit-calendar-picker-indicator {
    is one accent frame: field on top, list beneath, shared edge not drawn. */
 .multiselect-wrapper:focus-within .multiselect-input,
 .multiselect-wrapper:has(.multiselect-dropdown.show) .multiselect-input {
-  border-color: var(--color-accent);
+  border-color: var(--color-brand-red);
   border-bottom-color: transparent;
   box-shadow: none; /* the accent frame is the ring */
   outline: none;
@@ -3343,7 +3359,7 @@ input[type="date"]::-webkit-calendar-picker-indicator {
 
 .multiselect-wrapper:focus-within .multiselect-dropdown,
 .multiselect-dropdown.show {
-  border-color: var(--color-accent);
+  border-color: var(--color-brand-red);
 }
 
 .multiselect-dropdown {
@@ -3504,7 +3520,7 @@ input[type="date"]::-webkit-calendar-picker-indicator {
 
 .panel-splitter:hover,
 .panel-splitter.active {
-  background: var(--color-accent);
+  background: var(--color-brand-red);
 }
 
 .panel-collapsed {
@@ -3685,7 +3701,7 @@ input[type="date"]::-webkit-calendar-picker-indicator {
    accent frame. */
 .dropdown-trigger:focus-visible,
 .dropdown-trigger[data-state="open"] {
-  border-color: var(--color-accent);
+  border-color: var(--color-brand-red);
   box-shadow: none;
   outline: none;
 }
@@ -3696,7 +3712,7 @@ input[type="date"]::-webkit-calendar-picker-indicator {
 }
 
 .dropdown-trigger[data-state="open"] + .dropdown-menu {
-  border-color: var(--color-accent);
+  border-color: var(--color-brand-red);
 }
 
 .dropdown-value {
@@ -3804,7 +3820,7 @@ a.stat-card:hover {
 }
 
 .stat-hint--alert {
-  color: var(--color-danger);
+  color: var(--color-error);
 }
 
 /* ============================================
@@ -3835,7 +3851,7 @@ a.stat-card:hover {
 }
 
 a.list-item:hover {
-  color: var(--color-accent);
+  color: var(--color-brand-red);
   text-decoration: none;
 }
 
@@ -3867,7 +3883,7 @@ a.list-item:hover {
 }
 
 .action-link:hover {
-  color: var(--color-accent);
+  color: var(--color-brand-red);
   text-decoration: none;
 }
 
@@ -3985,7 +4001,7 @@ html[data-sidebar="collapsed"] .sidebar {
 }
 
 .sidebar-brand:hover {
-  color: var(--color-accent);
+  color: var(--color-brand-red);
   text-decoration: none;
 }
 
@@ -4800,7 +4816,7 @@ html[data-theme="dark"] .theme-toggle-icon--dark {
 }
 
 .doc-nav-link.is-active {
-  color: var(--color-accent);
+  color: var(--color-brand-red);
   font-weight: var(--font-weight-bold);
 }
 
@@ -4867,7 +4883,7 @@ html[data-theme="dark"] .theme-toggle-icon--dark {
 }
 
 :is(.profile-content, .summary-content, .card-body, .source-details, .preview-panel) a {
-  color: var(--color-accent);
+  color: var(--color-brand-red);
   text-decoration: none;
 }
 
@@ -4937,7 +4953,7 @@ html[data-theme="dark"] .theme-toggle-icon--dark {
 }
 
 :is(.profile-content, .summary-content) :is(.cite-num, .cite-link) {
-  color: var(--color-accent);
+  color: var(--color-brand-red);
   font-weight: var(--font-weight-semibold);
   text-decoration: none;
 }
@@ -5156,12 +5172,12 @@ body[data-page="ledger"] {
   --portal-alpha-black-50: color-mix(in srgb, black, transparent 50%);
 
   /* Semantic color alphas - for colored highlights/backgrounds */
-  --portal-alpha-primary-10: rgba(var(--color-accent-rgb), 0.1);
+  --portal-alpha-primary-10: rgba(var(--color-brand-red-rgb), 0.1);
 
   /* ----------------------------------------
    * FOCUS STATE COLORS
    * ---------------------------------------- */
-  --focus-ring-color: var(--color-accent);
+  --focus-ring-color: var(--color-brand-red);
   --focus-ring-width: 1px;
   --focus-ring-offset: var(--space-0);
   /* Thin 1px ring — inherits element's own border visually, no thick glow */
@@ -5512,7 +5528,6 @@ body[data-page="ledger"] {
   --color-light: var(--color-bg-primary);
   --color-nav-text: var(--color-text-primary);
   /* App-level aliases — derived from primaries */
-  --app-color-primary: var(--color-text-primary);
 
   /* Form variables — derived from primaries */
 

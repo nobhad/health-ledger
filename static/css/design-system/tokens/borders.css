@@ -77,7 +77,7 @@
  * inside them.
  */
 :root {
-  --focus-ring-color: var(--color-accent);
+  --focus-ring-color: var(--color-brand-red);
   --focus-ring-width: 2px;
 }
 

@@ -60,12 +60,12 @@ html {
  * ============================================ */
 
 ::selection {
-  background-color: var(--color-accent);
+  background-color: var(--color-brand-red);
   color: var(--color-neutral-100);
 }
 
 ::-moz-selection {
-  background-color: var(--color-accent);
+  background-color: var(--color-brand-red);
   color: var(--color-neutral-100);
 }
 
@@ -355,7 +355,7 @@ summary::-webkit-details-marker {
 }
 
 details:focus-within {
-  outline: 2px solid var(--color-accent);
+  outline: 2px solid var(--color-brand-red);
   outline-offset: -2px;
 }
 

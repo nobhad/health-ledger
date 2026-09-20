@@ -84,7 +84,7 @@ html[data-sidebar="collapsed"] .sidebar {
 }
 
 .sidebar-brand:hover {
-  color: var(--color-accent);
+  color: var(--color-brand-red);
   text-decoration: none;
 }
 

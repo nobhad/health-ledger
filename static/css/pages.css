@@ -90,7 +90,7 @@
 }
 
 .doc-nav-link.is-active {
-  color: var(--color-accent);
+  color: var(--color-brand-red);
   font-weight: var(--font-weight-bold);
 }
 
@@ -157,7 +157,7 @@
 }
 
 :is(.profile-content, .summary-content, .card-body, .source-details, .preview-panel) a {
-  color: var(--color-accent);
+  color: var(--color-brand-red);
   text-decoration: none;
 }
 
@@ -227,7 +227,7 @@
 }
 
 :is(.profile-content, .summary-content) :is(.cite-num, .cite-link) {
-  color: var(--color-accent);
+  color: var(--color-brand-red);
   font-weight: var(--font-weight-semibold);
   text-decoration: none;
 }

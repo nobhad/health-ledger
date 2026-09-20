@@ -105,7 +105,7 @@
 
 .icon-btn:hover,
 .icon-btn:focus-visible {
-  color: var(--color-accent);
+  color: var(--color-brand-red);
 }
 
 .icon-btn svg.lucide {
@@ -141,7 +141,7 @@
 .nav-btn:hover,
 .nav-btn.is-active,
 .nav-btn:focus-visible {
-  color: var(--color-accent);
+  color: var(--color-brand-red);
   text-decoration: none;
   box-shadow: none;
 }
@@ -287,7 +287,7 @@ textarea.form-input {
 
 :is(.form-input, .form-control, .form-select, .filter-input, .filter-select, .multiselect-input, .form-textarea):is(:focus, :focus-visible) {
   outline: none;
-  border-color: var(--color-accent);
+  border-color: var(--color-brand-red);
 }
 
 /* Native select: no system chrome, the theme's caret. */
@@ -372,7 +372,7 @@ input[type="checkbox"]:checked {
 }
 
 input[type="checkbox"]:focus-visible {
-  border-color: var(--color-accent);
+  border-color: var(--color-brand-red);
 }
 
 input[type="checkbox"]:disabled {
@@ -553,7 +553,7 @@ input[type="date"]::-webkit-calendar-picker-indicator {
 }
 
 :is(.data-table, .table, .results-table) tbody tr.abnormal td:first-child {
-  box-shadow: var(--app-edge-mark) var(--color-danger);
+  box-shadow: var(--app-edge-mark) var(--color-error);
 }
 
 :is(.data-table, .table, .results-table) thead {
@@ -619,7 +619,7 @@ input[type="date"]::-webkit-calendar-picker-indicator {
 
 .abnormal-badge,
 .badge-danger {
-  color: var(--color-danger);
+  color: var(--color-error);
 }
 
 .badge-success {
@@ -660,7 +660,7 @@ input[type="date"]::-webkit-calendar-picker-indicator {
 .alert-error,
 .alert-danger,
 .status-message.is-error {
-  color: var(--color-danger);
+  color: var(--color-error);
 }
 
 .alert-warning {
@@ -686,7 +686,7 @@ input[type="date"]::-webkit-calendar-picker-indicator {
   height: var(--space-5);
   margin: 0 auto var(--space-2);
   border: var(--border-width-thick) solid var(--portal-alpha-white-20);
-  border-top-color: var(--color-accent);
+  border-top-color: var(--color-brand-red);
   border-radius: var(--border-radius-full);
   animation: spin var(--animation-spinner);
 }
@@ -784,7 +784,7 @@ input[type="date"]::-webkit-calendar-picker-indicator {
    is one accent frame: field on top, list beneath, shared edge not drawn. */
 .multiselect-wrapper:focus-within .multiselect-input,
 .multiselect-wrapper:has(.multiselect-dropdown.show) .multiselect-input {
-  border-color: var(--color-accent);
+  border-color: var(--color-brand-red);
   border-bottom-color: transparent;
   box-shadow: none; /* the accent frame is the ring */
   outline: none;
@@ -793,7 +793,7 @@ input[type="date"]::-webkit-calendar-picker-indicator {
 
 .multiselect-wrapper:focus-within .multiselect-dropdown,
 .multiselect-dropdown.show {
-  border-color: var(--color-accent);
+  border-color: var(--color-brand-red);
 }
 
 .multiselect-dropdown {
@@ -952,7 +952,7 @@ input[type="date"]::-webkit-calendar-picker-indicator {
 
 .panel-splitter:hover,
 .panel-splitter.active {
-  background: var(--color-accent);
+  background: var(--color-brand-red);
 }
 
 .panel-collapsed {
@@ -1131,7 +1131,7 @@ input[type="date"]::-webkit-calendar-picker-indicator {
    accent frame. */
 .dropdown-trigger:focus-visible,
 .dropdown-trigger[data-state="open"] {
-  border-color: var(--color-accent);
+  border-color: var(--color-brand-red);
   box-shadow: none;
   outline: none;
 }
@@ -1142,7 +1142,7 @@ input[type="date"]::-webkit-calendar-picker-indicator {
 }
 
 .dropdown-trigger[data-state="open"] + .dropdown-menu {
-  border-color: var(--color-accent);
+  border-color: var(--color-brand-red);
 }
 
 .dropdown-value {
@@ -1248,7 +1248,7 @@ a.stat-card:hover {
 }
 
 .stat-hint--alert {
-  color: var(--color-danger);
+  color: var(--color-error);
 }
 
 /* ============================================
@@ -1279,7 +1279,7 @@ a.stat-card:hover {
 }
 
 a.list-item:hover {
-  color: var(--color-accent);
+  color: var(--color-brand-red);
   text-decoration: none;
 }
 
@@ -1311,7 +1311,7 @@ a.list-item:hover {
 }
 
 .action-link:hover {
-  color: var(--color-accent);
+  color: var(--color-brand-red);
   text-decoration: none;
 }
 

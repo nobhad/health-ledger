@@ -155,12 +155,12 @@ body[data-page="ledger"] {
   --portal-alpha-black-50: color-mix(in srgb, black, transparent 50%);
 
   /* Semantic color alphas - for colored highlights/backgrounds */
-  --portal-alpha-primary-10: rgba(var(--color-accent-rgb), 0.1);
+  --portal-alpha-primary-10: rgba(var(--color-brand-red-rgb), 0.1);
 
   /* ----------------------------------------
    * FOCUS STATE COLORS
    * ---------------------------------------- */
-  --focus-ring-color: var(--color-accent);
+  --focus-ring-color: var(--color-brand-red);
   --focus-ring-width: 1px;
   --focus-ring-offset: var(--space-0);
   /* Thin 1px ring — inherits element's own border visually, no thick glow */
@@ -511,7 +511,6 @@ body[data-page="ledger"] {
   --color-light: var(--color-bg-primary);
   --color-nav-text: var(--color-text-primary);
   /* App-level aliases — derived from primaries */
-  --app-color-primary: var(--color-text-primary);
 
   /* Form variables — derived from primaries */
 
