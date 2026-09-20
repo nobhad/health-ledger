@@ -323,10 +323,12 @@ BLOOD_PRESSURE_PATTERN = re.compile(
     re.IGNORECASE,
 )
 
-# "Temperature 36.8 °C (98.3 °F)", "Temp: 98.6 F", "99.1°F". A bare number
-# followed by a letter only counts when the degree sign is present.
+# "Temperature 36.8 °C (98.3 °F)", "Temp: 98.6 F", "Fever 101.2F", "99.1°F".
+# A bare number followed by a letter only counts when the degree sign is
+# present. "Fever" is a label people write in their own logs, and a reading
+# labelled that way is the one most worth keeping.
 TEMPERATURE_PATTERN = re.compile(
-    r'(?:\b(?:temperature|temp)\b\s*:?\s*(?P<v1>\d{2,3}(?:\.\d+)?)\s*°?\s*(?P<u1>[FC])\b'
+    r'(?:\b(?:temperature|temp|fever)\b\s*:?\s*(?:of\s+)?(?P<v1>\d{2,3}(?:\.\d+)?)\s*°?\s*(?P<u1>[FC])\b'
     r'|(?P<v2>\d{2,3}(?:\.\d+)?)\s*°\s*(?P<u2>[FC])\b)',
     re.IGNORECASE,
 )

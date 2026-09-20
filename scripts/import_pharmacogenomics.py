@@ -10,6 +10,11 @@ A pharmacogenomic panel report states two things this ledger can use:
      Directed", "Moderate Gene-Drug Interaction", "Significant Gene-Drug
      Interaction".
 
+The Import page does this now: adding a report there fills these tables in
+the same preview-then-confirm step (documents.py calls plan_import and
+apply_import below). This script stays for a report already in the ledger,
+for --set, and for anyone who prefers the terminal.
+
 This script reads both from the extracted text of the ledger's test-report
 sources, pairs each gene's phenotype with the genotype already on file and
 the medications the gene is known to affect (pharmacogenomic_reference.py),

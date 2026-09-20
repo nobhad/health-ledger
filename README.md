@@ -121,14 +121,41 @@ python3 app.py            # http://localhost:5001
 
 ### Importing Data
 
+Use the Import page (`/import`). It takes a file, reads it, shows you what it
+found, and writes nothing until you say "Add to my ledger":
+
+- **Documents from your care** — lab results, a visit note, a letter or a
+  patient-portal export, as PDF or text. The readings in it (lab values,
+  blood pressure, temperature) are listed with their dates before they are
+  added, and the file is kept in your data folder.
+- **A pharmacogenomic test report** — recognised from its text. Adding it
+  also fills the drug-metabolism tables: each gene's result, the medications
+  that gene is known to affect (public reference in
+  `pharmacogenomic_reference.py`) and the report's own medication categories.
+  Genes the report names that the ledger does not track yet are listed, with
+  a box to start tracking them.
+- **DNA raw data** — see below.
+
+A scanned page is a picture, with no text in it to pull out. With the optional
+OCR extras installed (`requirements-extras.txt`) the app reads it off the
+page; without them the file is still kept with your records, marked as holding
+no searchable text.
+
+Importing the same file again updates what it stored rather than filing a
+second copy.
+
+The same readers from the terminal, if you prefer it:
+
 ```bash
+python3 scripts/import_document.py ~/Downloads/labs.pdf --dry-run
+python3 scripts/import_document.py ~/Downloads/labs.pdf
+python3 scripts/import_document.py ~/Downloads/report.pdf --add-genes
+
 # Import from markdown document
 python3 scripts/import_from_markdown.py
 
-# Drug-metabolism findings from the genetic test report already in the
-# ledger: each gene's phenotype, the medications it affects (public
-# reference in pharmacogenomic_reference.py) and the report's own
-# medication categories. Dry-run first; the real run replaces earlier rows.
+# For a report already in the ledger, or to record a phenotype its text did
+# not yield. Dry-run first; the real run replaces earlier rows.
 python3 scripts/import_pharmacogenomics.py --dry-run
 python3 scripts/import_pharmacogenomics.py --add-missing-genes
 python3 scripts/import_pharmacogenomics.py --set VKORC1="Increased Sensitivity"

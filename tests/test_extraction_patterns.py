@@ -53,11 +53,18 @@ class TestTemperature(unittest.TestCase):
     def test_labelled_fahrenheit(self):
         self.assertEqual(extract_temperature_reading('Temp: 98.6 F'), {'value': 98.6, 'unit': 'F'})
 
+    def test_fever_is_a_label_too(self):
+        # What a person writes in their own log, and the reading most worth keeping.
+        for line in ['fever 101.2F', 'Fever: 101.2 F', 'fever of 101.2F']:
+            self.assertEqual(extract_temperature_reading(line), {'value': 101.2, 'unit': 'F'}, line)
+
     def test_numbers_followed_by_a_letter_are_not_temperatures(self):
         for line in ['BROOKLINE, MA 02445 Former / Aliases',
                      '2445 Fenway Park',
                      '12 cups of coffee',
-                     'Temp 2445 F']:
+                     'Temp 2445 F',
+                     'Fever reducer given',
+                     'Fever 2445 F']:
             self.assertEqual(extract_temperature_reading(line), {}, line)
 
 

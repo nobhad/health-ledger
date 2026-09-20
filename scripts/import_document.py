@@ -25,6 +25,9 @@ def main() -> int:
     parser.add_argument('file', help='the PDF or text file to read')
     parser.add_argument('--dry-run', action='store_true',
                         help='read the file and print what would be added, writing nothing')
+    parser.add_argument('--add-genes', action='store_true',
+                        help='for a test report: also start tracking the genes it names '
+                             'that the ledger does not have yet')
     args = parser.parse_args()
 
     path = Path(args.file).expanduser()
@@ -34,7 +37,8 @@ def main() -> int:
 
     db = GeneticProfileDB()
     try:
-        summary = documents.import_file(db, path, path.name, dry_run=args.dry_run)
+        summary = documents.import_file(db, path, path.name, dry_run=args.dry_run,
+                                        add_genes=args.add_genes)
     except documents.UnreadableDocument as e:
         print(f"That file could not be read: {e}")
         return 1
@@ -42,8 +46,11 @@ def main() -> int:
         db.close()
 
     pages = f", {summary.page_count} pages" if summary.page_count else ""
-    print(f"{summary.file_name}: {summary.kind_label}{pages}, "
-          f"{summary.text_characters:,} characters of text")
+    how = {documents.TEXT_FROM_OCR: ' (read by OCR from a scan)',
+           documents.TEXT_FROM_NOTHING: ''}.get(summary.text_source, '')
+    text = (f"{summary.text_characters:,} characters of text{how}" if summary.has_text
+            else "no text could be read; the file is kept but cannot be searched")
+    print(f"{summary.file_name}: {summary.kind_label}{pages}, {text}")
     if summary.document_date:
         print(f"  dated {summary.document_date}")
     if summary.replaces:
@@ -55,6 +62,15 @@ def main() -> int:
         unit = f" {metric['unit']}" if metric.get('unit') else ''
         flag = '  (outside the stated range)' if metric.get('is_abnormal') else ''
         print(f"    - {metric['metric_name']}: {value}{unit}  {metric.get('collection_date')}{flag}")
+
+    if summary.gene_findings:
+        print(f"  {len(summary.gene_findings)} gene result(s) and {summary.medication_count} "
+              f"medication(s) from the report")
+        for finding in summary.gene_findings:
+            print(f"    - {finding['gene']}: {finding['metabolism_status']}")
+    if summary.unknown_genes:
+        fix = "" if args.add_genes else "  (--add-genes starts tracking them)"
+        print(f"  not tracked here yet: {', '.join(summary.unknown_genes)}{fix}")
 
     if args.dry_run:
         print("\nDry run: nothing was written. Run again without --dry-run to add it.")

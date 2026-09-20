@@ -13,15 +13,24 @@
         <div class="card-header"><h3>What the document holds</h3></div>
         <div class="card-body">
             <ul class="list">
-                <li><div class="list-item"><span class="list-item-title">{{ document.file_name }}</span><span class="list-item-meta">{{ document.kind_label }}{% if document.page_count %} &middot; {{ document.page_count }} page{{ '' if document.page_count == 1 else 's' }}{% endif %} &middot; {{ '{:,}'.format(document.text_characters) }} characters of text</span></div></li>
+                <li><div class="list-item"><span class="list-item-title">{{ document.file_name }}</span><span class="list-item-meta">{{ document.kind_label }}{% if document.page_count %} &middot; {{ document.page_count }} page{{ '' if document.page_count == 1 else 's' }}{% endif %}{% if document.has_text %} &middot; {{ '{:,}'.format(document.text_characters) }} characters of text{% else %} &middot; no text could be read{% endif %}</span></div></li>
                 {% if document.document_date %}
                 <li><div class="list-item"><span class="list-item-title">Dated {{ document.document_date }}</span><span class="list-item-meta">the first date written in the document</span></div></li>
                 {% endif %}
             </ul>
             <p>Adding it keeps a copy of the file in your data folder and files the text with your records, so it can be searched and shown on a doctor document.{% if document.replaces %} This file was imported before; adding it again replaces that copy.{% endif %}</p>
+            {% if document.has_text %}
             <h4>The text it starts with</h4>
             <p class="note">{{ document.excerpt }}{% if document.text_characters > document.excerpt | length %}&hellip;{% endif %}</p>
-            <form method="post">
+            {% if document.read_by_ocr %}
+            <p class="note">There was no text in this file to read, so it was read off the page by OCR. That is good enough to search, but it misreads characters; check anything important against the original.</p>
+            {% endif %}
+            {% else %}
+            <h4>No text could be read</h4>
+            <p>This looks like a scan or a photograph of a page: a picture, with no text in it to pull out.{% if not ocr_available %} Installing the optional OCR extras would let the app read pictures of text; see <code>requirements-extras.txt</code>.{% endif %}</p>
+            <p>Adding it still keeps the file with your records, where you can open it. It will not be searchable and no readings can be taken from it.</p>
+            {% endif %}
+            <form method="post" id="documentConfirm">
                 <input type="hidden" name="token" value="{{ token }}">
                 <div class="card-actions">
                     <button type="submit" formaction="/import/document" class="btn btn-primary">
@@ -34,9 +43,24 @@
         </div>
     </div>
     <div class="card">
-        <div class="card-header"><h3>Readings it would add</h3></div>
+        <div class="card-header"><h3>{% if document.gene_findings %}Drug-metabolism findings{% else %}Readings it would add{% endif %}</h3></div>
         <div class="card-body">
-            {% if document.metrics %}
+            {% if document.gene_findings %}
+            <p>This reads like a pharmacogenomic test report. {{ document.gene_findings | length }} gene{{ '' if document.gene_findings | length == 1 else 's' }} with a result, and {{ document.medication_count }} medication{{ '' if document.medication_count == 1 else 's' }} the report sorts into its own categories, would be added.</p>
+            <ul class="list">
+                {% for finding in document.gene_findings %}
+                <li><div class="list-item"><span class="list-item-title">{{ finding.gene }} &middot; {{ finding.metabolism_status }}</span><span class="list-item-meta">{{ finding.drugs | length }} medication{{ '' if finding.drugs | length == 1 else 's' }} this gene is known to affect</span></div></li>
+                {% endfor %}
+            </ul>
+            {% if document.unknown_genes %}
+            <p>The report also names {{ document.unknown_genes | join(', ') }}, which this ledger does not track yet.</p>
+            <label class="check-label">
+                <input type="checkbox" name="add_genes" value="1" form="documentConfirm" checked>
+                Start tracking {{ 'it' if document.unknown_genes | length == 1 else 'them' }} too
+            </label>
+            {% endif %}
+            <p class="note">These come from the report as written, and replace anything a previous import of it stored. What they mean for a medicine is a conversation with your doctor or pharmacist.</p>
+            {% elif document.metrics %}
             <p>{{ document.metric_count }} reading{{ '' if document.metric_count == 1 else 's' }} would be added to your numbers{% if document.abnormal_count %}, {{ document.abnormal_count }} outside the range the document states{% endif %}.</p>
             <ul class="list">
                 {% for metric in document.metrics %}

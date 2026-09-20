@@ -7,6 +7,7 @@ anything is written, and filed with the readings they hold.
 import io
 import os
 import sys
+from unittest import mock
 import tempfile
 import unittest
 from pathlib import Path
@@ -40,7 +41,8 @@ at this time. Kind regards.
 """
 
 
-class TestDocuments(unittest.TestCase):
+class DocumentsCase(unittest.TestCase):
+    """A ledger in a temporary data folder, and the helpers for feeding it files."""
 
     def setUp(self):
         self.data_root = tempfile.mkdtemp(prefix='ledger-docs-')
@@ -62,6 +64,13 @@ class TestDocuments(unittest.TestCase):
         path = Path(self.data_root) / name
         path.write_text(text)
         return path
+
+    def upload(self, name, text):
+        return self.client.post('/import/preview', content_type='multipart/form-data',
+                                data={'file': (io.BytesIO(text.encode()), name)})
+
+
+class TestDocuments(DocumentsCase):
 
     # --- reading -----------------------------------------------------------
 
@@ -87,9 +96,19 @@ class TestDocuments(unittest.TestCase):
         with self.assertRaises(documents.UnreadableDocument):
             documents.read(self.write('scan.heic', 'x'))
 
-    def test_a_file_with_no_text_is_refused(self):
-        with self.assertRaises(documents.UnreadableDocument):
-            documents.read(self.write('blank.txt', '   \n  '))
+    def test_a_file_with_no_text_is_described_not_refused(self):
+        summary = documents.read(self.write('blank.txt', '   \n  '))
+        self.assertFalse(summary.has_text)
+        self.assertEqual(summary.text_source, documents.TEXT_FROM_NOTHING)
+        self.assertEqual(summary.metrics, [])
+
+    def test_a_file_with_no_text_can_still_be_kept(self):
+        summary = documents.import_file(self.db, self.write('blank.txt', '   \n  '))
+        sources = self.db.get_all_primary_sources()
+        self.assertEqual(len(sources), 1)
+        self.assertIsNone(sources[0]['extracted_text'])
+        self.assertTrue((Path(config.PRIMARY_SOURCES_DIR) / 'documents' / 'blank.txt').is_file())
+        self.assertIsNotNone(summary.source_id)
 
     # --- writing -----------------------------------------------------------
 
@@ -122,10 +141,6 @@ class TestDocuments(unittest.TestCase):
 
     # --- the page ----------------------------------------------------------
 
-    def upload(self, name, text):
-        return self.client.post('/import/preview', content_type='multipart/form-data',
-                                data={'file': (io.BytesIO(text.encode()), name)})
-
     def test_the_page_previews_a_document_without_writing(self):
         response = self.upload('labs.txt', LAB_TEXT)
         self.assertEqual(response.status_code, 200)
@@ -147,10 +162,134 @@ class TestDocuments(unittest.TestCase):
         self.assertEqual(response.status_code, 400)
         self.assertIn('not a kind this page reads', response.get_data(as_text=True))
 
+    def test_the_page_offers_to_keep_a_file_it_cannot_read(self):
+        response = self.upload('scan.txt', '  ')
+        self.assertEqual(response.status_code, 200)
+        page = response.get_data(as_text=True)
+        self.assertIn('No text could be read', page)
+        self.assertIn('Add to my ledger', page)
+
     def test_dna_files_still_reach_the_dna_reader(self):
         raw = "# rsid\tchromosome\tposition\tgenotype\nrs4244285\t10\t94781859\tAG\n"
         page = self.upload('dna.txt', raw).get_data(as_text=True)
         self.assertIn('variants called', page)
+
+
+class TestScannedDocuments(DocumentsCase):
+    """A page with no text layer: OCR when it is installed, kept either way."""
+
+    def scanned_pdf(self, name='scan.pdf', message='Glucose 95 mg/dL 70-99'):
+        """A PDF that holds a picture of text and no text layer."""
+        from PIL import Image, ImageDraw
+        image = Image.new('RGB', (1200, 400), 'white')
+        draw = ImageDraw.Draw(image)
+        draw.text((40, 40), 'Example Clinic Laboratory', fill='black')
+        draw.text((40, 90), 'Collected March 14, 2024', fill='black')
+        draw.text((40, 140), message, fill='black')
+        path = Path(self.data_root) / name
+        image.save(path, 'PDF', resolution=150)
+        return path
+
+    def test_a_scan_has_no_text_layer(self):
+        import pdfplumber
+        with pdfplumber.open(self.scanned_pdf()) as pdf:
+            self.assertFalse((pdf.pages[0].extract_text() or '').strip())
+
+    @unittest.skipUnless(documents.ocr_available(), 'OCR extras are not installed')
+    def test_ocr_reads_a_scan(self):
+        summary = documents.read(self.scanned_pdf())
+        self.assertEqual(summary.text_source, documents.TEXT_FROM_OCR)
+        self.assertTrue(summary.read_by_ocr)
+        self.assertIn('Clinic', summary.excerpt)
+
+    def test_without_ocr_a_scan_is_still_kept(self):
+        with mock.patch.object(documents, 'read_by_ocr', return_value=''):
+            summary = documents.import_file(self.db, self.scanned_pdf())
+        self.assertEqual(summary.text_source, documents.TEXT_FROM_NOTHING)
+        self.assertFalse(summary.has_text)
+        self.assertEqual(len(self.db.get_all_primary_sources()), 1)
+        self.assertEqual(summary.page_count, 1)
+
+
+REPORT_TEXT = """Pharmacogenomic Panel Report
+Collected March 14, 2024
+Gene Phenotype Summary
+CYP2D6 Intermediate Metabolizer
+CYP2C19 Extensive (Normal) Metabolizer
+HTR2A Increased Sensitivity
+XYZ9 Poor Metabolizer
+
+Use as Directed
+citalopram (Celexa®)
+sertraline (Zoloft®)
+Moderate Gene-Drug Interaction
+paroxetine (Paxil®) 6
+Significant Gene-Drug Interaction
+nortriptyline (Pamelor®) 7
+"""
+
+
+class TestReportImport(DocumentsCase):
+    """A pharmacogenomic report fills the drug-metabolism tables from the page."""
+
+    def setUp(self):
+        super().setUp()
+        for symbol in ('CYP2D6', 'CYP2C19', 'HTR2A'):
+            self.db.add_gene(symbol, f'{symbol} gene', '1')
+
+    def report(self, name='report.txt'):
+        return self.write(name, REPORT_TEXT)
+
+    def test_a_report_is_recognised_as_one(self):
+        self.assertEqual(documents.read(self.report()).kind, 'test_report')
+
+    def test_the_preview_lists_the_genes_and_writes_nothing(self):
+        summary = documents.import_file(self.db, self.report(), dry_run=True)
+        self.assertEqual(sorted(f['gene'] for f in summary.gene_findings),
+                         ['CYP2C19', 'CYP2D6', 'HTR2A'])
+        self.assertEqual(summary.unknown_genes, ['XYZ9'])
+        self.assertEqual(summary.medication_count, 4)
+        self.assertEqual(self.db.get_all_primary_sources(), [])
+        self.assertIsNone(self.db.get_pharmacogenomic_data_for_gene(
+            self.db.get_gene_by_symbol('CYP2D6')['id']))
+
+    def test_confirming_fills_the_drug_metabolism_tables(self):
+        summary = documents.import_file(self.db, self.report())
+        record = self.db.get_pharmacogenomic_data_for_gene(
+            self.db.get_gene_by_symbol('CYP2D6')['id'])
+        self.assertIsNotNone(record)
+        self.assertEqual(record['metabolism_status'], 'Intermediate Metabolizer')
+        self.assertEqual(len(self.db.get_medication_interactions(summary.source_id)), 4)
+
+    def test_genes_the_ledger_lacks_are_skipped_unless_asked_for(self):
+        documents.import_file(self.db, self.report())
+        self.assertIsNone(self.db.get_gene_by_symbol('XYZ9'))
+
+    def test_genes_the_ledger_lacks_can_be_started(self):
+        documents.import_file(self.db, self.report(), add_genes=True)
+        self.assertIsNotNone(self.db.get_gene_by_symbol('XYZ9'))
+
+    def test_importing_the_report_again_does_not_duplicate(self):
+        first = documents.import_file(self.db, self.report())
+        documents.import_file(self.db, self.report())
+        self.assertEqual(len(self.db.get_all_primary_sources()), 1)
+        self.assertEqual(len(self.db.get_medication_interactions(first.source_id)), 4)
+
+    def test_the_page_previews_then_writes_the_findings(self):
+        response = self.client.post('/import/preview', content_type='multipart/form-data',
+                                    data={'file': (io.BytesIO(REPORT_TEXT.encode()), 'report.txt')})
+        page = response.get_data(as_text=True)
+        self.assertIn('Drug-metabolism findings', page)
+        self.assertIn('Intermediate Metabolizer', page)
+        self.assertIn('XYZ9', page)
+        self.assertEqual(self.db.get_all_primary_sources(), [])
+
+        token = page.split('name="token" value="', 1)[1].split('"', 1)[0]
+        self.client.post('/import/document', data={'token': token, 'add_genes': '1'})
+        fresh = GeneticProfileDB(str(config.DB_PATH))
+        self.assertIsNotNone(fresh.get_gene_by_symbol('XYZ9'))
+        self.assertIsNotNone(fresh.get_pharmacogenomic_data_for_gene(
+            fresh.get_gene_by_symbol('CYP2D6')['id']))
 
 
 if __name__ == '__main__':

@@ -487,7 +487,8 @@ def _original_name(spooled: Path) -> str:
 def _render_import(**context):
     db = get_db()
     return render_template('import.html', imports=db.get_dna_imports(),
-                           variant_caution=variant_reference.VARIANT_CAUTION, **context)
+                           variant_caution=variant_reference.VARIANT_CAUTION,
+                           ocr_available=documents.ocr_available(), **context)
 
 
 @app.route('/import')
@@ -567,10 +568,12 @@ def import_document():
     spooled = _spooled_upload(request.form.get('token', ''))
     if spooled is None:
         return _render_import(error='That file is no longer waiting to be imported. Choose it again.'), 400
+    add_genes = request.form.get('add_genes') == '1'
     try:
-        summary = documents.import_file(get_db(), spooled, _original_name(spooled))
+        summary = documents.import_file(get_db(), spooled, _original_name(spooled),
+                                        add_genes=add_genes)
         app_logger.info(f"Imported document: {summary.kind}, {summary.metric_count} readings, "
-                        f"source {summary.source_id}")
+                        f"{len(summary.gene_findings)} genes, source {summary.source_id}")
         return redirect(url_for('index', notice='document'))
     except documents.UnreadableDocument as e:
         return _render_import(error=str(e)), 400
