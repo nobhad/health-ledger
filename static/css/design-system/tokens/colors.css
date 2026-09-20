@@ -287,10 +287,6 @@ html[data-theme="light"] {
     --app-color-success: var(--color-success);
   --app-color-warning: var(--color-warning);
   --app-color-danger: var(--color-danger);
-  --app-color-info: var(--color-info);
-  --app-color-purple: var(--color-purple);
-  --app-color-warning-light: var(--color-warning-light);
-  --app-color-danger-dark: var(--color-danger-dark);
 
   /* Portal label ink under the light theme. Labels sit a step darker than body
      copy (--color-text-primary is #333333 there) so an uppercase run at
@@ -302,7 +298,6 @@ html[data-theme="light"] {
   /* Legacy status colors */
   --color-success: #10b981;
       --color-warning: #fbbf24;
-    --color-warning-light: #fef3c7;
 
   /* Warning as TEXT, which is a different problem from warning as a fill.
      #fbbf24 is a light amber: it reads on near-black and is about 1.6:1 on the
@@ -312,16 +307,19 @@ html[data-theme="light"] {
      itself under the dark theme. */
   --color-text-warning: #92400e;
   --color-error: #dc2626;
-    --color-error-light: #fee2e2;
   --color-info: #3b82f6;
+    --color-error-light: #fee2e2;
       --color-danger: var(--color-brand-accent); /* light mode: one red, see --status-cancelled */
   --color-danger-rgb: 220, 38, 38;
-  --color-danger-dark: #ff4757;
 
-  /* Legacy color aliases for components */
+  /* The activity palette. These four are read only by the --activity-*-color
+     set in portal-theme.css, which paints the admin client-detail timeline —
+     one hue per activity type. Not a general palette: nothing else should
+     reach for a pink or a cyan. */
   --color-purple: #c084fc;
   --color-pink: #f472b6;
   --color-cyan: #22d3ee;
+  --color-admin-purple: #a855f7;
 
   /* ================================================
      STATUS COLORS - SINGLE SOURCE OF TRUTH
@@ -361,18 +359,11 @@ html[data-theme="light"] {
     
   --status-on-hold: #f97316; /* Orange - On Hold/Blocked/High Priority */
     
-  /* Legacy status dot/indicator colors - mapped to primary */
-
-    --color-status-pending-border: #f59e0b;
-
+  /* Status text colours. The matching --color-status-*-border set was removed
+     2026-09-19: five borders no rule ever drew. */
   --color-status-progress-text: #1e40af;
-  --color-status-progress-border: #3b82f6;
-
-      --color-status-review-border: #8b5cf6;
 
   --color-status-completed-text: #065f46;
-  --color-status-completed-border: #10b981;
-
   /* The same two statuses as bare TEXT on a dark surface — same reason
      --color-brand-accent-dark exists. The light pair's text half is far too
      dark there (2.00:1 and 2.27:1), and the pill's own colour is not light
@@ -388,8 +379,6 @@ html[data-theme="light"] {
      6.99:1 on the #333 the page puts behind the badge. */
   --color-status-planned-text: #155e75;
   --color-status-planned-text-dark: #22d3ee;
-
-      --color-status-hold-border: #6b7280;
 
       
     
@@ -433,7 +422,6 @@ html[data-theme="light"] {
   --color-card-bg-gradient-end: #f8f9fa;
   --color-card-text: #333333;
 
-    --color-admin-purple: #a855f7;
   
   /* Legacy form variables */
       }

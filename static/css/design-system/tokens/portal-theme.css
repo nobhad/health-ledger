@@ -590,7 +590,7 @@ html[data-theme="dark"] body[data-page="ledger"] {
  * Activity type colors for admin client detail
  * ============================================ */
 [data-page="admin"] {
-  --activity-email-color: var(--app-color-info);
+  --activity-email-color: var(--color-info);
   --activity-invoice-color: var(--app-color-success);
   --activity-project-color: var(--color-admin-purple);
   --activity-file-color: var(--app-color-warning);

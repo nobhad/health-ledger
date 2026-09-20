@@ -75,9 +75,11 @@
    * FONT WEIGHTS
    * ============================================ */
 
+  /* One name per weight. --font-weight-normal and --font-weight-base were
+     both 400 as well, described as aliases for legacy consumers that had
+     stopped existing; five rules still called them, and one carried the
+     comment "Medium weight as portal default" over a value of 400. */
   --font-weight-regular: 400;
-  --font-weight-normal: 400; /* Alias for regular — used by legacy variables.css consumers */
-  --font-weight-base: 400; /* Alias for regular — used by portal components */
   --font-weight-medium: 500;
   --font-weight-semibold: 600;
   --font-weight-bold: 700;
