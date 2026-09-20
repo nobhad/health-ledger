@@ -65,7 +65,7 @@
 
   /* Button colors - danger hover */
   --portal-btn-danger-hover-bg: var(--color-error);
-  --portal-btn-danger-hover-color: var(--color-text-primary);
+  --portal-btn-danger-hover-color: var(--color-ink-on-fill);
   --portal-btn-danger-hover-border: var(--color-error);
 
   /* Button effects - BRUTALIST: no shadows. There is no token for the

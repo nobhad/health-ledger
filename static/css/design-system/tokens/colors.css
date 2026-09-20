@@ -49,6 +49,15 @@
      owes 3:1 and clears it comfortably. */
   --color-brand-red: #b91c1c;
   --color-brand-red-rgb: 185, 28, 28;
+
+  /* Ink for something painted ON a semantic fill — a button's hover state, a
+     filled pill. It is the INVERSE of the surface, not the surface's text
+     colour: in light mode the fills are the dark end of their hue and want a
+     white label, in dark mode they are the bright end and want a near-black
+     one. Using --color-text-primary there, which is what the success and
+     danger buttons did, put #333 on a dark red (2.01:1) in light mode and
+     white on a light rose (1.89:1) in dark. With this it is 6.20 and 9.20. */
+  --color-ink-on-fill: #ffffff;
   --color-brand-secondary: #10b981;
   /* Ink for a surface that is VIVID IN BOTH THEMES — a status pill, a filled
      badge, the callout's bubble art. Deliberately not --color-text-primary:
@@ -75,9 +84,14 @@
   --color-off-white: #e0e0e0;
 
   /* Functional Colors */
-  --color-success-500: #10b981;
-    --color-warning-500: #f59e0b;
-    --color-info-500: #3b82f6;
+  /* The -500 suffix said "the 500 step of a ramp" over a palette that has no
+     ramp — there was never a -400 or a -600. --color-success-500,
+     --color-warning-500 and --color-info-500 held the same values as
+     --color-success, --color-warning and --color-info, except mode-blind:
+     --color-warning takes a different amber per theme and its -500 twin did
+     not, so whichever one a rule happened to call decided whether it followed
+     the theme. Removed 2026-09-19; --color-error-500 went the same way with
+     the reds. */
   
   /* ============================================
    * SEMANTIC COLOR TOKENS - MAIN SITE (LIGHT)
@@ -282,20 +296,22 @@ html[data-theme="light"] {
      --color-gray-900's literal a second time. */
   --color-label-ink: var(--color-gray-900);
       
-  /* Legacy status colors */
-  --color-success: #10b981;
-  /* Warning as a FILL, light mode. Amber-500 rather than the amber-400 that
-     was here: #fbbf24 on a light ground is a dot you have to look for. The
-     dark theme keeps #fbbf24, where it is the one that reads. */
-  --color-warning: #f59e0b;
+  /* THE SEMANTIC COLOURS, light mode.
+     Every one of these carries a value per mode, the same way the two reds
+     do. They used to hold one value for both, picked to look right as a
+     filled pill on the portal's dark surface, and measured as TEXT on a light
+     ground they ran from 3.66:1 down to 1.26:1 — the amber was the 1.26, which
+     is the "yellow is impossible to read on light bg" that was reported once
+     and fixed for that one colour only.
 
-  /* Warning as TEXT, which is a different problem from warning as a fill.
-     #fbbf24 is a light amber: it reads on near-black and is about 1.6:1 on the
-     light theme's surface, which is not reading at all (Noelle, 2026-09-13:
-     "yellow is impossible to read on light bg"). The swatch stays what it is
-     for dots, fills and icons; a sentence gets amber-700 here and the swatch
-     itself under the dark theme. */
-  --color-text-warning: #92400e;
+     The light values are the darker end of each hue, the dark values the
+     brighter end. Four of the pairs are not new: they are the ones already
+     chosen for --color-status-*-text and --color-text-warning, which existed
+     precisely because the base tokens could not be read. Those names are gone
+     now; the base token does the job. */
+  --color-success: #065f46;
+  --color-warning: #92400e;
+
 
   /* THE ERROR RED, and deliberately a different red from the brand — rose
      rather than crimson. It was four names (--color-error #dc2626,
@@ -312,7 +328,7 @@ html[data-theme="light"] {
   --color-error: #be123c;
   --color-error-rgb: 190, 18, 60;
   --color-error-light: #ffe4e6;
-  --color-info: #3b82f6;
+  --color-info: #1e40af;
 
   /* The activity palette. These four are read only by the --activity-*-color
      set in portal-theme.css, which paints the admin client-detail timeline —
@@ -338,11 +354,11 @@ html[data-theme="light"] {
      ================================================ */
 
   /* Primary status variables - USE THESE */
-  --status-active: #3b82f6; /* Blue - Active/In Progress */
+  --status-active: #1e40af; /* Blue - Active/In Progress */
     
-  --status-pending: #fbbf24; /* Yellow - Pending/On Hold */
+  --status-pending: #92400e; /* Amber - Pending/On Hold */
     
-  --status-completed: #10b981; /* Green - Completed/Success */
+  --status-completed: #065f46; /* Green - Completed/Success */
     --status-completed-bg: rgba(16, 185, 129, 0.15);
 
   /* Cancelled IS the error state, so it takes the error red rather than a
@@ -354,34 +370,27 @@ html[data-theme="light"] {
   --status-cancelled: var(--color-error); /* Red - Cancelled/Lost */
     --status-cancelled-bg: rgba(190, 18, 60, 0.15);
 
-  --status-qualified: #8b5cf6; /* Purple - Qualified/Review */
+  --status-qualified: #6d28d9; /* Violet - Qualified/Review */
     
-  --status-inactive: #6b7280; /* Gray - Inactive/Read */
+  --status-inactive: #4b5563; /* Gray - Inactive/Read */
     
-  --status-new: #06b6d4; /* Cyan - New (distinct from pending) */
+  --status-new: #155e75; /* Cyan - New (distinct from pending) */
     
-  --status-on-hold: #f97316; /* Orange - On Hold/Blocked/High Priority */
+  --status-on-hold: #9a3412; /* Orange - On Hold/Blocked/High Priority */
     
   /* Status text colours. The matching --color-status-*-border set was removed
      2026-09-19: five borders no rule ever drew. */
-  --color-status-progress-text: #1e40af;
-
-  --color-status-completed-text: #065f46;
   /* The same two statuses as bare TEXT on a dark surface — same reason
      --color-brand-accent-dark exists. The light pair's text half is far too
      dark there (2.00:1 and 2.27:1), and the pill's own colour is not light
      enough either: #3b82f6 measures 3.44:1 on the #333 the public site puts
      behind it. One step lighter each clears AA at 4.97 and 6.57. */
-  --color-status-progress-text-dark: #60a5fa;
-  --color-status-completed-text-dark: #34d399;
 
   /* Planned, the third of these. The raw --status-new cyan (#06b6d4) is fine
      on dark and fails outright on light: 7.38:1 against the portal ground,
      1.93:1 against the page's. Same treatment as the two above — a dark cyan
      for the light theme, a light one for dark. Measured: 5.77:1 on #e5e5e5,
      6.99:1 on the #333 the page puts behind the badge. */
-  --color-status-planned-text: #155e75;
-  --color-status-planned-text-dark: #22d3ee;
 
       
     
@@ -431,19 +440,28 @@ html[data-theme="light"] {
 /* Dark theme legacy aliases - Main site only */
 /* Same vacuous guard as above; see the note there. */
 html[data-theme="dark"] {
-  /* Warning as a fill on near-black: the light amber is the one that reads
-     here, where amber-500 is the one that reads on light. The two modes take
-     different values for the same reason the reds do. */
+  /* THE SEMANTIC COLOURS, dark mode — the brighter end of each hue, the way
+     the light block takes the darker end. Measured as text on the two dark
+     grounds these land on, the site's #333333 and the portal's near-black:
+     amber 7.57 / 10.43, green 6.57 / 9.05, blue 4.97 / 6.85, cyan 6.99 / 9.63,
+     violet 4.64 / 6.40, gray 4.98 / 6.86, orange 5.58 / 7.69. */
   --color-warning: #fbbf24;
-  /* And as text: on near-black the fill colour IS readable — 10.4:1. See the
-     note beside --color-text-warning in the light block. */
-  --color-text-warning: var(--color-warning);
+  --color-success: #34d399;
+  --color-info: #60a5fa;
+  --status-active: #60a5fa;
+  --status-pending: #fbbf24;
+  --status-completed: #34d399;
+  --status-qualified: #a78bfa;
+  --status-inactive: #9ca3af;
+  --status-new: #22d3ee;
+  --status-on-hold: #fb923c;
 
   /* THE BRAND RED on dark grounds. On --color-gray-900 (#171717) the light
      value #b91c1c is 2.77:1 and even the old #dc2626 only 3.71:1 — the brand
      red has never passed as text in dark mode. #f87171 measures 6.48:1. */
   --color-brand-red: #f87171;
   --color-brand-red-rgb: 248, 113, 113;
+  --color-ink-on-fill: #171717;
 
   /* THE ERROR RED on dark grounds — rose-300, the counterpart of the light
      rose-700, staying a different red from the brand in both modes. Measured

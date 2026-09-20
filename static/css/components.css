@@ -664,7 +664,7 @@ input[type="date"]::-webkit-calendar-picker-indicator {
 }
 
 .alert-warning {
-  color: var(--color-text-warning);
+  color: var(--color-warning);
 }
 
 /* ============================================
