@@ -4,7 +4,7 @@
 {% block page_body_class %} page-body--flush{% endblock %}
 
 {% block page_title %}Overview{% endblock %}
-{% block page_description %}Everything here stays on this computer. This is what the ledger holds and where to go next.{% endblock %}
+{% block page_description %}Everything here stays on this computer. This is what your ledger holds, and where to go next.{% endblock %}
 
 {% block content %}
 {% if notice %}
@@ -17,22 +17,22 @@
         <span class="stat-hint">{{ stats.pharmacogenomic }} with drug-metabolism data</span>
     </a>
     <a class="stat-card" href="/query">
-        <span class="stat-label">Trait associations</span>
+        <span class="stat-label">Traits</span>
         <span class="stat-value">{{ stats.traits }}</span>
         <span class="stat-hint">Search by trait</span>
     </a>
     <a class="stat-card" href="/query">
-        <span class="stat-label">Health conditions</span>
+        <span class="stat-label">Conditions</span>
         <span class="stat-value">{{ stats.conditions }}</span>
         <span class="stat-hint">Search by condition</span>
     </a>
     <a class="stat-card" href="/sources">
-        <span class="stat-label">Primary sources</span>
+        <span class="stat-label">Sources</span>
         <span class="stat-value">{{ stats.sources }}</span>
         <span class="stat-hint">{{ stats.findings }} extracted findings</span>
     </a>
     <a class="stat-card" href="/metrics">
-        <span class="stat-label">Health metrics</span>
+        <span class="stat-label">Metrics</span>
         <span class="stat-value">{{ stats.metrics }}</span>
         {% if stats.abnormal %}
         <span class="stat-hint stat-hint--alert">{{ stats.abnormal }} flagged abnormal</span>
