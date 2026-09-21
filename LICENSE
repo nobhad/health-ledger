@@ -1,0 +1,130 @@
+Health Ledger — Source-Available License
+Version 1.0, 2026-09-20
+
+Copyright (c) 2026 Noelle Bhaduri (No Bhad Codes). All rights reserved.
+
+This software is source-available, not open source. The code is published so
+that you can read it, verify what it does with your medical records, and run
+it yourself. It is not placed in the public domain and it is not licensed for
+redistribution.
+
+
+1. DEFINITIONS
+
+   "The Software" means the source code, documentation, build scripts and
+   packaged applications published under this licence.
+
+   "The Author" means Noelle Bhaduri.
+
+   "Personal Use" means use by a natural person, for their own records or the
+   records of members of their household or family for whom they are
+   responsible, with no fee charged and no commercial benefit sought.
+
+
+2. WHAT YOU MAY DO
+
+   a. Read, study and audit the source code, in full, for any purpose.
+
+   b. Download, install and run the Software for Personal Use, on any number
+      of devices you control.
+
+   c. Modify the Software, and run your modified copy, for Personal Use.
+
+   d. Make copies for backup, and move your copy between your own devices.
+
+   e. Quote excerpts of the source code in reviews, security reports,
+      educational material, articles and academic work, with attribution.
+
+
+3. WHAT YOU MAY NOT DO, WITHOUT WRITTEN PERMISSION FROM THE AUTHOR
+
+   a. Redistribute the Software, modified or unmodified, in source or in
+      compiled form, to any third party. This includes publishing it to an
+      app store, a package registry, a mirror, or a download page that is not
+      the Author's own.
+
+   b. Use the Software, or any part of it, commercially. This includes using
+      it inside a business, a clinic, a practice or an institution; charging
+      for it; charging for a service built on it; and using it to provide
+      services to other people.
+
+   c. Operate the Software as a hosted or managed service for anyone other
+      than yourself and your household.
+
+   d. Sublicense, sell, rent or lease the Software.
+
+   e. Remove or obscure this licence, the copyright notice, or the medical
+      disclaimer in Section 6, from any copy you hold.
+
+   Forking the public repository on a code-hosting platform, in the ordinary
+   way that platform provides, in order to read the code or to prepare a
+   contribution under Section 4, is permitted and is not "redistribution"
+   under Section 3(a).
+
+
+4. CONTRIBUTIONS
+
+   If you send the Author a contribution — a patch, a pull request, a fix —
+   you grant the Author a perpetual, worldwide, irrevocable, royalty-free
+   licence to use, modify, relicense and distribute it as part of the
+   Software. You confirm that you have the right to do so. You keep your own
+   copyright in what you wrote.
+
+
+5. NO WARRANTY
+
+   THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+   IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+   FITNESS FOR A PARTICULAR PURPOSE, ACCURACY, AND NONINFRINGEMENT.
+
+   IN NO EVENT SHALL THE AUTHOR BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+   LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING
+   FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER
+   DEALINGS IN THE SOFTWARE.
+
+   You are responsible for your own data. Keep your own backups. The Software
+   writes to a folder you choose, and the Author cannot recover anything lost
+   from it.
+
+
+6. NOT MEDICAL ADVICE, NOT A MEDICAL DEVICE
+
+   Health Ledger is a filing cabinet. It stores, organises and prints records
+   that already exist. It does not diagnose, treat, cure or prevent anything,
+   and it is not a substitute for professional medical advice.
+
+   It has not been reviewed or approved by the FDA, the MHRA, the EMA, or any
+   other regulator, and it is not certified as a medical device anywhere.
+
+   The pharmacogenomic and genetic reference tables in the Software are
+   compiled from public sources. A gene or variant being named correctly is
+   not the same as it being safe to act on. Nothing the Software shows you is
+   a reason to start, stop or change a medication. Talk to your doctor or
+   pharmacist.
+
+
+7. THIRD-PARTY COMPONENTS
+
+   The Software depends on, and its packaged builds include, third-party
+   open-source components under their own licences — among them Flask (BSD),
+   Jinja (BSD), Waitress (ZPL), Pillow (MIT-CMU), pdfplumber (MIT) and
+   pdfminer.six (MIT). Those components remain under their own licences,
+   which this licence does not alter or restrict. The vendored design system
+   under static/css/design-system/ is the Author's own work; see
+   static/css/design-system/VENDORED.md.
+
+
+8. TERMINATION
+
+   This licence ends automatically if you breach it. On termination you must
+   stop using the Software and destroy your copies. Your own medical records
+   are yours; nothing here affects them.
+
+
+9. ASKING FOR MORE
+
+   If you want to do something Section 3 forbids — use it in a practice,
+   build on it commercially, redistribute a fork — ask. The answer may well
+   be yes.
+
+   Contact: https://nobhad.codes

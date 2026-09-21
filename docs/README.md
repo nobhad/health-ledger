@@ -10,18 +10,22 @@ Complete documentation for the Genetic Profile Database application.
 ## 📚 Quick Navigation
 
 ### 🚀 Getting Started
+
 - **[Quick Start Guide](guides/QUICK_START.md)** - Get up and running in 5 minutes
 - **[Web Interface Guide](guides/WEB_INTERFACE.md)** - Using the web query interface
 
 ### 🗄️ Database Documentation
+
 - **[Database Overview](database/README.md)** - Complete database documentation
 - **[Database Overview (Short)](database/OVERVIEW.md)** - Quick reference
 
 ### 🏗️ Architecture & API
+
 - **[System Architecture](architecture/ARCHITECTURE.md)** - Complete system architecture
 - **[API Reference](api/API_REFERENCE.md)** - All API endpoints
 
 ### 📦 Features
+
 - **[Query Interface](features/QUERY_INTERFACE.md)** - Search and query functionality
 - **[Profile Viewer](features/PROFILE_VIEWER.md)** - Full profile document display
 - **[Summary Generator](features/SUMMARY_GENERATOR.md)** - Personalized summary creation
@@ -31,23 +35,26 @@ Complete documentation for the Genetic Profile Database application.
 - **[Database Queries](features/DATABASE_QUERIES.md)** - Programmatic database access
 
 ### 📖 User Guides
+
 - **[Healthcare Summary Guide](guides/HEALTHCARE_SUMMARY.md)** - Creating healthcare summaries
 - **[Primary Sources Guide](guides/PRIMARY_SOURCES.md)** - Extracting primary source data
 
 ### 🔧 Troubleshooting
+
 - **[Troubleshooting Guide](troubleshooting/README.md)** - Complete troubleshooting documentation
 - **[Common Issues](troubleshooting/COMMON_ISSUES.md)** - Quick fixes for common problems
 - **[Debugging Guide](troubleshooting/DEBUGGING_GUIDE.md)** - Comprehensive debugging
 - **[JavaScript Debugging](troubleshooting/DEBUGGING_JAVASCRIPT.md)** - Frontend debugging
 
 ### 📝 Templates
-- **[Gene Section Template](templates/GENE_SECTION.md)** - Template for gene documentation
+
+- **[Gene Section Template](templates/TEMPLATE_GENE_SECTION.md)** - Template for gene documentation
 
 ---
 
 ## 📁 Documentation Structure
 
-```
+```text
 docs/
 ├── README.md                    # This file - Documentation index
 │
@@ -132,6 +139,7 @@ python3 scripts/import_from_markdown.py
 ## 🔄 Recent Updates
 
 ### December 7, 2025 - Documentation Overhaul
+
 - ✅ Reorganized documentation structure
 - ✅ Consolidated duplicate files
 - ✅ Updated all database statistics
@@ -139,6 +147,7 @@ python3 scripts/import_from_markdown.py
 - ✅ Improved navigation and cross-references
 
 ### December 7, 2025 - Database Fixes
+
 - ✅ Fixed data import (SNPs, genotypes, traits, conditions)
 - ✅ Removed 201 duplicate genotypes
 - ✅ Fixed gene-gene interactions import
@@ -148,9 +157,11 @@ python3 scripts/import_from_markdown.py
 
 ## 📖 Main Project Files
 
-- **[Main README](../README.md)** - Project overview
-- **[Project Status](../PROJECT_STATUS.md)** - Current project status
-- **[Database Import Status](../DATABASE_IMPORT_STATUS.md)** - Import status
+- **[Main README](../README.md)** - What it is and how to install it
+- **[Development](DEVELOPMENT.md)** - Running from source, structure, the rules
+- **[Current work](../CURRENT_WORK.md)** - State of play and roadmap
+- **[Changelog](../CHANGELOG.md)** - What changed, by version
+- **[Packaging](../packaging/README.md)** - Building the downloadable apps
 
 ---
 

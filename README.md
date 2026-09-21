@@ -1,338 +1,112 @@
 # Health Ledger
 
-A comprehensive system for documenting, managing, and querying genetic profile data from pharmacogenomic testing, with support for both non-pharmacogenomic traits and drug metabolism information.
+Your medical records, on your own computer, in one place you can search and
+print.
 
-## 🎯 Project Status
+Health Ledger keeps lab results, visit notes, letters, portal exports and DNA
+test reports in a single private file, and turns them into a document you can
+hand a doctor. It runs entirely on your machine. Nothing is uploaded, there is
+no account, and there is no server to sign in to.
 
-**✅ PRODUCTION-READY** - All high and medium priority items complete!
+> **Not medical advice.** Health Ledger is a filing cabinet, not a doctor. It
+> does not diagnose or treat anything and it is not an approved medical
+> device. Nothing it shows you is a reason to start, stop or change a
+> medication. Talk to your doctor or pharmacist.
 
-### Completed Features
+## Download
 
-- ✅ **Complete Database System** - SQLite database with full schema
-- ✅ **Web Query Interface** - Interactive web application for querying genetic data
-- ✅ **Data Import** - Automated import from markdown documents
-- ✅ **Input Validation** - Comprehensive validation on all API endpoints
-- ✅ **Error Handling** - Standardized error responses and logging
-- ✅ **Test Suite** - Unit and integration tests (14/14 passing)
-- ✅ **Documentation** - Complete documentation for all features
-- ✅ **Pharmacogenomic Data** - Full support for drug metabolism information
-- ✅ **Gene-Gene Interactions** - Import and query gene interaction data
+Get the latest version from the
+[Releases page](https://github.com/YOUR-USERNAME/health-ledger/releases/latest).
 
-## 📁 Project Structure
+| Your computer | Download | Then |
+| --- | --- | --- |
+| Mac | `HealthLedger-<version>-macOS-arm64.dmg` | Open it, drag Health Ledger to Applications. First launch: **right-click the app, choose Open**. |
+| Windows | `HealthLedger-<version>-windows-x64.zip` | Unzip it, open the folder, run `HealthLedger.exe`. First launch: **More info → Run anyway**. |
+| Linux | Run from source | See [INSTALL.md](INSTALL.md). |
 
-```
-health-ledger/
-├── app.py                      # Flask web application
-├── database_manager.py          # Database API
-├── validation.py               # Input validation utilities
-├── config.py                   # Application configuration
-├── requirements.txt            # Python dependencies
-├── .gitignore                 # Git ignore rules
-├── genetic_profile.db         # SQLite database
-├── genetic_profile_db_schema.sql  # Database schema
-│
-├── templates/                  # Jinja templates (base, header, footer, components + one per page)
-│
-├── static/                     # Static assets
-│   ├── css/
-│   │   ├── health-ledger.css  # Bundle entry (imports, in cascade-layer order)
-│   │   ├── design-system/     # VENDORED no-bhad-codes tokens/reset/fonts (see VENDORED.md)
-│   │   ├── app-tokens.css     # The few tokens this app adds
-│   │   ├── base.css           # Element defaults
-│   │   ├── components.css     # ALL reusable component classes
-│   │   ├── layout.css         # Header, nav, footer, grids
-│   │   ├── pages.css          # Rendered documents, page-specific rules
-│   │   ├── utilities.css      # Atomic helpers
-│   │   ├── dist/              # Built bundle (npm run build:css) — what base.html loads
-│   │   ├── pdf.css            # WeasyPrint-only stylesheet for generated PDFs
-│   │   └── print.css          # Print rules for generated PDFs
-│   ├── fonts/                 # Inconsolata (self-hosted)
-│   └── js/
-│       ├── debug.js           # Debug utilities
-│       ├── multiselect.js     # Multiselect dropdowns
-│       └── query.js           # Query interface logic
-│
-├── scripts/                    # Utility scripts
-│   ├── import_from_markdown.py # Import markdown to database
-│   ├── generate_html.py       # Generate HTML from markdown
-│   └── ...                    # Other utility scripts
-│
-├── docs/                       # Documentation
-│   ├── README.md              # Documentation index
-│   ├── api/                   # API documentation
-│   ├── architecture/          # Architecture docs
-│   ├── features/              # Feature documentation
-│   └── ...                    # Other documentation
-│
-├── tests/                      # Test suite
-│   ├── test_validation.py     # Validation tests
-│   ├── test_database_manager.py # Database tests
-│   └── test_api_endpoints.py  # API integration tests
-│
-├── primary_sources/            # Primary source documents
-└── output/                     # Generated output files
-```
+Those first-launch steps are needed because the app is not signed with a paid
+certificate. [INSTALL.md](INSTALL.md) explains what the warnings mean and what
+to do about them.
 
-## Where your data lives
+## The first five minutes
 
-Everything private — the SQLite database, `primary_sources/`, `output/`, `logs/`
-and `backups/` — sits under **one directory outside this repository**, named by
-`HEALTH_LEDGER_DATA_DIR`. Set it once in a git-ignored `.env` (copy
-`.env.example`):
+1. Open Health Ledger. It starts a small server on your own machine and opens
+   your browser. That browser tab *is* the app.
+2. It asks where to keep your records. A folder called **Health Ledger** in
+   your home folder is suggested; pick anywhere you like. Everything private
+   lives there, and only there.
+3. Choose **Start fresh** if this is new, or **Import a database** if you are
+   moving from another computer or restoring a backup.
+4. Go to **Import** and give it a file — a lab PDF, a visit note, a DNA raw
+   data download. It shows you what it found and writes nothing until you
+   press **Add to my ledger**.
+5. When you have a doctor's appointment, go to **Doctor Docs**, pick the
+   specialty, and print or save the document it makes.
 
-```
-HEALTH_LEDGER_DATA_DIR=~/HealthLedgerData
-```
+To quit: use the Health Ledger icon in your menu bar (Mac) or system tray
+(Windows) and choose **Quit**. Closing the browser tab leaves it running.
 
-`config.py` derives every data path from it. Left unset, the paths fall back to
-the project folder, where they are git-ignored. Nothing under the data
-directory is ever committed; `python3 scripts/check_private_data.py` (also run
-by the tests and the pre-commit hook) refuses record file names, home paths and
-patient narrative in tracked files.
+## What you can put in it
 
-## 🚀 Quick Start
+- **Documents from your care** — lab results, visit notes, letters, or a
+  patient-portal export, as PDF or plain text. Readings inside them (lab
+  values, blood pressure, temperature) are pulled out with their dates.
+- **A pharmacogenomic test report** — recognised from its text. Adding it also
+  fills in which medications each gene is known to affect.
+- **DNA raw data** — the download from 23andMe, AncestryDNA, MyHeritage,
+  FamilyTreeDNA or Living DNA, zipped or not. Clinical VCF files are not read
+  yet.
 
-1. Run `./start.sh` (Mac/Linux; or double-click `Health Ledger.command`) or
-   `start.bat` (Windows). The first run creates a Python environment and
-   installs what it needs; every run starts the server and opens
-   http://127.0.0.1:5001 in your browser.
-2. The first screen asks where your records should live (a "Health Ledger"
-   folder in your home folder is proposed; type another if you prefer) and
-   how to begin:
-   - **Start fresh** — begin with an empty ledger and add records later.
-   - **Import a database** — choose the `.db` file Health Ledger made
-     before (a backup, an export, a copy from another computer). It is
-     checked before it replaces anything, and if the ledger already holds
-     records they are backed up first.
+A scanned page is a picture with no text in it. Health Ledger keeps it with
+your records either way, and marks it as having no searchable text.
 
-   The folder choice is saved to the git-ignored `.env` for the next launch.
-
-   That screen stays at `/setup` (also linked from the Backup page) for
-   restoring a backup or importing later on.
-
-### Running by hand
-
-```bash
-pip3 install -r requirements.txt          # what the app needs
-pip3 install -r requirements-extras.txt   # optional: OCR, DICOM, PubMed scripts
-pip3 install -r requirements-dev.txt      # optional: the test suite
-python3 app.py            # http://localhost:5001
-```
-
-### Importing Data
-
-Use the Import page (`/import`). It takes a file, reads it, shows you what it
-found, and writes nothing until you say "Add to my ledger":
-
-- **Documents from your care** — lab results, a visit note, a letter or a
-  patient-portal export, as PDF or text. The readings in it (lab values,
-  blood pressure, temperature) are listed with their dates before they are
-  added, and the file is kept in your data folder.
-- **A pharmacogenomic test report** — recognised from its text. Adding it
-  also fills the drug-metabolism tables: each gene's result, the medications
-  that gene is known to affect (public reference in
-  `pharmacogenomic_reference.py`) and the report's own medication categories.
-  Genes the report names that the ledger does not track yet are listed, with
-  a box to start tracking them.
-- **DNA raw data** — see below.
-
-A scanned page is a picture, with no text in it to pull out. With the optional
-OCR extras installed (`requirements-extras.txt`) the app reads it off the
-page; without them the file is still kept with your records, marked as holding
-no searchable text.
-
-Importing the same file again updates what it stored rather than filing a
+Importing the same file twice updates what it stored rather than filing a
 second copy.
 
-The same readers from the terminal, if you prefer it:
+## Where your records live
 
-```bash
-python3 scripts/import_document.py ~/Downloads/labs.pdf --dry-run
-python3 scripts/import_document.py ~/Downloads/labs.pdf
-python3 scripts/import_document.py ~/Downloads/report.pdf --add-genes
+In the folder you chose in step 2, and nowhere else. The database, the
+original files, generated documents, logs and backups all sit under it.
 
-# Import from markdown document
-python3 scripts/import_from_markdown.py
+- Nothing is sent anywhere. The app has no analytics, no crash reporting and
+  no update check.
+- The server listens on `127.0.0.1` only, so no other machine on your network
+  can reach it.
+- Back it up like any other folder. Use the **Backup** page, or copy the
+  folder to a drive. Nobody can recover it for you.
+- Moving to a new computer: copy the folder across, install the app, and on
+  the first screen choose **Import a database**.
 
-# For a report already in the ledger, or to record a phenotype its text did
-# not yield. Dry-run first; the real run replaces earlier rows.
-python3 scripts/import_pharmacogenomics.py --dry-run
-python3 scripts/import_pharmacogenomics.py --add-missing-genes
-python3 scripts/import_pharmacogenomics.py --set VKORC1="Increased Sensitivity"
-```
+## Making PDFs
 
-On the Doctor Docs page, "Include drug-metabolism findings" adds these to
-a specialty PDF; untick it for a document without them. The same page has
-"Your details" (name, date of birth, address, phone, insurance), printed at
-the top of every document you share with a doctor; untick "Include my
-details" for a copy without them.
+The downloadable app makes its documents through your browser's own print
+window: choose **Open printable version**, then **Print → Save as PDF**.
 
-### DNA raw data
+Direct PDF generation needs a graphics library that cannot travel inside a
+downloadable app. If you run Health Ledger from source and install that
+library, the **Generate PDF** buttons appear on their own.
+[INSTALL.md](INSTALL.md) has the details.
 
-The Import page (`/import`) reads the raw-data download from 23andMe,
-AncestryDNA, MyHeritage, FamilyTreeDNA or Living DNA, zipped or not. It shows
-what the file holds and which of your variants fall in genes the ledger
-tracks before anything is written. From the terminal:
+## If something goes wrong
 
-```bash
-python3 scripts/import_raw_dna.py ~/Downloads/genome.zip --dry-run
-python3 scripts/import_raw_dna.py ~/Downloads/genome.zip
-```
+- The browser tab did not open: go to `http://127.0.0.1:5001` yourself. If
+  that port was busy the app picked the next free one — the menu-bar icon
+  shows the address it actually used.
+- Mac says the app is damaged or from an unidentified developer: right-click
+  the app and choose **Open**, once. See [INSTALL.md](INSTALL.md).
+- Something else: [open an issue](https://github.com/YOUR-USERNAME/health-ledger/issues).
+  Please do not paste your medical records into it.
 
-Every called variant is kept in `snp_genotypes`; a later file replaces the
-same variants. VCF files from clinical labs are not read yet.
+## For developers
 
-### Running Tests
+The code is published so you can read it and check what it does with your
+records. Start with [docs/DEVELOPMENT.md](docs/DEVELOPMENT.md) — how it runs
+from source, project structure, the design-system and privacy rules, and the
+test suite. [packaging/README.md](packaging/README.md) covers building the
+downloadable apps.
 
-```bash
-# Run all tests
-python3 -m unittest discover tests
+## Licence
 
-# Run specific test file
-python3 -m unittest tests.test_validation
-```
-
-## 📚 Documentation
-
-Complete documentation is available in the `docs/` directory:
-
-- **[Main Documentation](docs/README.md)** - Complete documentation index
-- **[API Reference](docs/api/API_REFERENCE.md)** - All API endpoints
-- **[Architecture](docs/architecture/ARCHITECTURE.md)** - System architecture
-- **[Features](docs/features/)** - Feature-specific documentation
-- **[Debugging Guide](docs/troubleshooting/DEBUGGING_GUIDE.md)** - Troubleshooting
-
-## 🔧 Key Features
-
-### Database System
-
-- **Every gene** documented with traits, conditions, and interactions
-- **Pharmacogenomic data** for drug metabolism
-- **Gene-gene interactions** for understanding genetic relationships
-- **Primary source integration** from medical records and test results
-- **Citation management** with PubMed and database references
-
-### Web Interface
-
-- **Query Interface** - Search by gene, condition, or trait
-- **Multiselect Dropdowns** - Searchable, filterable options
-- **Full Profile Viewer** - Complete genetic profile document
-- **Personalized Summary** - Key findings and recommendations
-- **Responsive Design** - Works on all devices
-
-### Data Management
-
-- **Automated Import** - Import from markdown documents
-- **Data Validation** - Input validation on all endpoints
-- **Error Handling** - Comprehensive error handling and logging
-- **Thread Safety** - Thread-safe database connections
-
-## 🧪 Testing
-
-The application includes a comprehensive test suite:
-
-- **Unit Tests** - Validation and database operations
-- **Integration Tests** - API endpoint testing
-- **Test Coverage** - All critical paths covered
-
-Run tests with:
-```bash
-python3 -m unittest discover tests -v
-```
-
-## 🔒 Security
-
-- **Input Validation** - All inputs validated and sanitized
-- **XSS Protection** - HTML tag filtering
-- **SQL Injection Prevention** - Parameterized queries
-- **Request Size Limits** - Protection against DoS attacks
-
-## 📊 Database Schema
-
-The database includes tables for:
-- Genes, SNPs, Genotypes
-- Trait and health condition associations
-- Gene-gene interactions
-- Pharmacogenomic data
-- Citations and references
-- Primary source documents
-- Health metrics and findings
-
-See [Database Schema](genetic_profile_db_schema.sql) for complete details.
-
-## 🛠️ Development
-
-### Adding New Features
-
-1. Create feature branch
-2. Implement feature with tests
-3. Update documentation
-4. Run test suite
-5. Submit for review
-
-### Code Standards
-
-- Follow PEP 8 style guide
-- Add docstrings to all functions
-- Include type hints where appropriate
-- Write tests for new features
-- Update documentation
-
-## 📝 License
-
-Personal medical project - private use only.
-
-## 📞 Support
-
-For issues or questions:
-1. Check [Debugging Guide](docs/troubleshooting/DEBUGGING_GUIDE.md)
-2. Review [Troubleshooting](docs/troubleshooting/README.md)
-3. Check [API Reference](docs/api/API_REFERENCE.md)
-
----
-
-**Last Updated:** December 7, 2025  
-**Status:** Production-Ready ✅  
-**Version:** 1.0.0
-
-## Running
-
-```bash
-./start.sh            # macOS / Linux — or double-click "Health Ledger.command" on a Mac
-start.bat             # Windows — double-click
-npm run dev           # same as ./start.sh
-```
-
-The first run creates `./venv` and installs `requirements.txt`; every run starts the
-server on http://127.0.0.1:5001 and opens it in your browser. The server only listens on
-this machine.
-
-PDF files are made by WeasyPrint, which needs a helper library the Python install
-does not bring: Pango from Homebrew on a Mac (`brew install pango`), GTK on Windows
-(<https://doc.courtbouillon.org/weasyprint/stable/first_steps.html#windows>). Without
-it the app still works: Doctor Docs offers "Open printable version" instead, and the
-browser's print window has its own Save as PDF.
-
-The optional scripts for scanned documents (OCR), DICOM images and PubMed lookups need
-`requirements-extras.txt`; the file says which programs each one also needs.
-
-
-## Styling
-
-The UI uses the **no-bhad-codes design system** (its token layer, reset and fonts), vendored
-into `static/css/design-system/` by `scripts/sync_design_system.sh`. The app's own
-stylesheets reference only those tokens plus the handful in `static/css/app-tokens.css` —
-no literal colours or sizes in component CSS. Cascade layers follow the design system's
-`layer-order.css`; `portal-theme.css` is imported last and unlayered, keyed to
-`<body data-page="ledger">`, and provides the light/dark palette (toggle in the header,
-stored under `health-ledger-theme` in localStorage).
-
-```bash
-npm install
-npm run build:css        # static/css/health-ledger.css -> static/css/dist/health-ledger.css
-npm run watch:css        # rebuild on change
-npm run sync:design-system   # re-copy tokens from ../no-bhad-codes and rebuild
-```
-
-The built bundle is committed so the Flask app runs without Node. Generated PDFs
-(WeasyPrint) do not use the bundle; they load `pdf.css` + `print.css`.
+Source-available, not open source: read it, run it, modify it for yourself.
+Redistribution and commercial use need permission. See [LICENSE](LICENSE), and
+[SECURITY.md](SECURITY.md) for reporting a vulnerability.
