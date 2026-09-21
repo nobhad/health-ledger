@@ -260,6 +260,8 @@ def index():
             'restored': 'The backup was restored.',
             'dna': 'Your DNA raw data was added.',
             'document': 'The document was added to your records.',
+            'first-record': ('That is your first record in. Everything below is '
+                             'built from what you add, so it fills out as you go.'),
         }.get(request.args.get('notice', ''))
 
         return render_template('overview.html',
@@ -409,7 +411,9 @@ def setup_start():
         db = get_db()
         ledger_setup.mark_setup_completed(db.conn)
         app_logger.info("Setup: started with an empty ledger")
-        return redirect(url_for('index', notice='fresh'))
+        # Rather than an empty overview, the first thing after setup is
+        # the one step that makes the app useful: put a record in it.
+        return redirect(url_for('import_page', first='1'))
     except ValueError as e:
         return _render_setup(error=str(e), status=400)
     except Exception as e:
@@ -498,6 +502,10 @@ def _original_name(spooled: Path) -> str:
 
 def _render_import(**context):
     db = get_db()
+    # The guided first run carries its flag through the preview and the
+    # confirm, in the query string on the way in and a hidden field after,
+    # so the framing does not disappear halfway through.
+    context.setdefault('first_run', request.values.get('first') == '1')
     return render_template('import.html', imports=db.get_dna_imports(),
                            variant_caution=variant_reference.VARIANT_CAUTION,
                            ocr_available=documents.ocr_available(), **context)
@@ -564,7 +572,8 @@ def import_dna():
         summary = raw_dna.import_file(get_db(), spooled, _original_name(spooled))
         app_logger.info(f"Imported DNA raw data: {summary.provider_name}, "
                         f"{summary.variant_count} variants, {len(summary.in_ledger)} in tracked genes")
-        return redirect(url_for('index', notice='dna'))
+        return redirect(url_for('index', notice='first-record'
+                                if request.form.get('first') == '1' else 'dna'))
     except raw_dna.UnreadableRawData as e:
         return _render_import(error=str(e)), 400
     except Exception as e:
@@ -586,7 +595,8 @@ def import_document():
                                         add_genes=add_genes)
         app_logger.info(f"Imported document: {summary.kind}, {summary.metric_count} readings, "
                         f"{len(summary.gene_findings)} genes, source {summary.source_id}")
-        return redirect(url_for('index', notice='document'))
+        return redirect(url_for('index', notice='first-record'
+                                if request.form.get('first') == '1' else 'document'))
     except documents.UnreadableDocument as e:
         return _render_import(error=str(e)), 400
     except Exception as e:

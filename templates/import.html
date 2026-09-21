@@ -7,6 +7,24 @@
 {% if error %}
 <div class="alert alert-error" role="alert">{{ error }}</div>
 {% endif %}
+{% if first_run %}
+{# Setup hands straight over to this. Somebody who has just installed the
+   app has an empty ledger, and one record in is the difference between a
+   thing that works and a thing that looks broken. Skippable, because a
+   wizard nobody can leave is worse than no wizard. #}
+<div class="card">
+    <div class="card-body">
+        <p><strong>Let's add your first record.</strong> Choose any file your
+           doctor, lab or DNA service has given you &mdash; a PDF of a lab
+           result, a visit note, a letter, or a raw-data download. Health
+           Ledger reads it and shows you what it found. Nothing is saved
+           until you say so, and nothing leaves this computer.</p>
+        <div class="card-actions">
+            <a class="btn btn-secondary" href="{{ url_for('index') }}">Skip for now</a>
+        </div>
+    </div>
+</div>
+{% endif %}
 {% if document %}
 <div class="grid grid-2 grid--fill">
     <div class="card">
@@ -31,6 +49,7 @@
             <p>Adding it still keeps the file with your records, where you can open it. It will not be searchable and no readings can be taken from it.</p>
             {% endif %}
             <form method="post" id="documentConfirm">
+                {% if first_run %}<input type="hidden" name="first" value="1">{% endif %}
                 <input type="hidden" name="token" value="{{ token }}">
                 <div class="card-actions">
                     <button type="submit" formaction="/import/document" class="btn btn-primary">
@@ -85,6 +104,7 @@
             </ul>
             <p>Adding it stores every called variant with your records and keeps a copy of the file in your data folder. A file imported before is replaced where the same variants appear.</p>
             <form method="post">
+                {% if first_run %}<input type="hidden" name="first" value="1">{% endif %}
                 <input type="hidden" name="token" value="{{ token }}">
                 <div class="card-actions">
                     <button type="submit" formaction="/import/dna" class="btn btn-primary">
@@ -132,6 +152,7 @@
             </ul>
             {% endif %}
             <form method="post" action="/import/preview" enctype="multipart/form-data">
+                {% if first_run %}<input type="hidden" name="first" value="1">{% endif %}
                 <div class="form-group">
                     <label for="rawDataFile" class="field-label">Raw-data file</label>
                     <input type="file" id="rawDataFile" name="file" accept=".txt,.csv,.tsv,.zip,.gz,text/plain,text/csv,application/zip,application/gzip" class="form-input">
@@ -152,6 +173,7 @@
             <p class="note">A scanned page photographed into a PDF has no text to read. Clinical VCF files are planned, not yet read.</p>
             <p>To bring in a whole database or go back to a backup, use <a href="/setup">Import or restore</a>.</p>
             <form method="post" action="/import/preview" enctype="multipart/form-data">
+                {% if first_run %}<input type="hidden" name="first" value="1">{% endif %}
                 <div class="form-group">
                     <label for="documentFile" class="field-label">Document</label>
                     <input type="file" id="documentFile" name="file" accept=".pdf,.txt,.log,.md,.csv,application/pdf,text/plain" class="form-input">

@@ -108,13 +108,24 @@ class TestFirstRun(SetupTestCase):
         # folder leaves the records where they are.
         response = self.client.post('/setup/start', data={'data_folder': str(self.tmp)})
         self.assertEqual(response.status_code, 302)
-        self.assertIn('notice=fresh', response.headers['Location'])
-
-        response = self.client.get('/?notice=fresh')
-        self.assertEqual(response.status_code, 200)
-        self.assertIn('Your ledger is ready', response.get_data(as_text=True))
+        # An empty ledger is not worth looking at, so setup hands straight
+        # over to putting the first record in.
+        self.assertIn('/import', response.headers['Location'])
+        self.assertIn('first=1', response.headers['Location'])
         for folder in ('backups', 'primary_sources', 'output', 'logs'):
             self.assertTrue((self.tmp / folder).is_dir(), folder)
+
+    def test_the_first_run_import_page_is_framed_as_a_first_step(self):
+        self.client.post('/setup/start', data={'data_folder': str(self.tmp)})
+        html = self.client.get('/import?first=1').get_data(as_text=True)
+        self.assertIn('first record', html)
+        # And it can be skipped: nobody is trapped in a wizard.
+        self.assertIn('Skip for now', html)
+
+    def test_finishing_the_first_import_says_so_on_the_overview(self):
+        self.make_ledger_db(self.db_path)
+        html = self.client.get('/?notice=first-record').get_data(as_text=True)
+        self.assertIn('That is your first record in', html)
 
     def test_ledger_with_content_never_redirects(self):
         self.make_ledger_db(self.db_path)
