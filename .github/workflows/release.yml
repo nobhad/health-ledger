@@ -35,6 +35,23 @@ jobs:
       - name: Build
         run: packaging/build_macos.sh
 
+      # A build that produces a file and crashes on launch is worth nothing,
+      # and nobody finds that out until somebody downloads it.
+      - name: Smoke test the built app
+        run: |
+          export HEALTH_LEDGER_DATA_DIR="$RUNNER_TEMP/ledger"
+          "dist/Health Ledger.app/Contents/MacOS/Health Ledger" \
+            --no-browser --no-tray --port 5099 &
+          pid=$!
+          for i in $(seq 1 60); do
+            sleep 1
+            if curl -fsS -o /dev/null "http://127.0.0.1:5099/"; then
+              echo "the app answered on attempt $i"; kill $pid; exit 0
+            fi
+          done
+          echo "::error::the packaged app never answered on 127.0.0.1:5099"
+          kill $pid 2>/dev/null; exit 1
+
       - uses: actions/upload-artifact@v4
         with:
           name: macos-dmg
@@ -54,6 +71,26 @@ jobs:
       - name: Build
         shell: pwsh
         run: packaging\build_windows.ps1
+
+      # Nobody has run this build on Windows hardware. Until somebody does,
+      # this is the only thing standing between a broken .exe and a release.
+      - name: Smoke test the built executable
+        shell: pwsh
+        run: |
+          $env:HEALTH_LEDGER_DATA_DIR = Join-Path $env:RUNNER_TEMP 'ledger'
+          $exe = Join-Path (Get-Location) 'dist\HealthLedger\HealthLedger.exe'
+          $p = Start-Process -FilePath $exe `
+            -ArgumentList '--no-browser','--no-tray','--port','5099' -PassThru
+          $ok = $false
+          foreach ($i in 1..60) {
+            Start-Sleep -Seconds 1
+            try {
+              Invoke-WebRequest -Uri 'http://127.0.0.1:5099/' -UseBasicParsing -TimeoutSec 2 | Out-Null
+              Write-Host "the app answered on attempt $i"; $ok = $true; break
+            } catch { }
+          }
+          if ($p -and -not $p.HasExited) { Stop-Process -Id $p.Id -Force }
+          if (-not $ok) { throw 'the packaged executable never answered on 127.0.0.1:5099' }
 
       - uses: actions/upload-artifact@v4
         with:

@@ -734,8 +734,6 @@ html[data-theme="dark"] .theme-toggle-icon--dark {
   .is-fill,
   .is-fill > :is(.table-container, .card-body, .panel-content),
   .grid--fill > .card > .card-body,
-  .profile-content,
-  .summary-content,
   .panel-content {
     flex: 0 0 auto;
     min-height: auto;
@@ -776,22 +774,10 @@ html[data-theme="dark"] .theme-toggle-icon--dark {
     border-bottom-width: 0;
   }
 
-  .doc-layout {
-    display: block;
-    flex: 0 0 auto;
-    min-height: auto;
-  }
-
-  .doc-nav {
-    max-height: none;
-    border-right: none;
-    border-bottom: var(--portal-border);
-  }
-
-  .doc-nav-list {
-    max-height: none;
-    overflow: visible;
-  }
+  /* The document pages' phone rules are NOT here. .doc-layout and the two
+     content panes are defined in pages.css, which is a later cascade layer
+     than this file, so an override written here never applied. They live at
+     the foot of pages.css instead. */
 
   .panel-container {
     flex-direction: column;

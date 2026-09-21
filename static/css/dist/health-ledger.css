@@ -4758,8 +4758,6 @@ html[data-theme="dark"] .theme-toggle-icon--dark {
   .is-fill,
   .is-fill > :is(.table-container, .card-body, .panel-content),
   .grid--fill > .card > .card-body,
-  .profile-content,
-  .summary-content,
   .panel-content {
     flex: 0 0 auto;
     min-height: auto;
@@ -4800,22 +4798,10 @@ html[data-theme="dark"] .theme-toggle-icon--dark {
     border-bottom-width: 0;
   }
 
-  .doc-layout {
-    display: block;
-    flex: 0 0 auto;
-    min-height: auto;
-  }
-
-  .doc-nav {
-    max-height: none;
-    border-right: none;
-    border-bottom: var(--portal-border);
-  }
-
-  .doc-nav-list {
-    max-height: none;
-    overflow: visible;
-  }
+  /* The document pages' phone rules are NOT here. .doc-layout and the two
+     content panes are defined in pages.css, which is a later cascade layer
+     than this file, so an override written here never applied. They live at
+     the foot of pages.css instead. */
 
   .panel-container {
     flex-direction: column;
@@ -5211,6 +5197,49 @@ html[data-theme="dark"] .theme-toggle-icon--dark {
 
 :is(.profile-content, .summary-content) ol > li[id^="ref-"] {
   scroll-margin-top: var(--space-10);
+}
+
+/* ============================================
+ * PHONES
+ * These belong here rather than in layout.css's responsive block: the
+ * selectors below are defined in this file, and `pages` is a later cascade
+ * layer than `layouts`, so the same rules written there lost to the
+ * unconditional ones here and the document stayed two columns wide on a
+ * phone -- wide enough to push the drawer toggle off the screen.
+ * ============================================ */
+@media (max-width: 767px) {
+  .doc-layout {
+    display: block;
+    flex: 0 0 auto;
+    min-height: auto;
+  }
+
+  .doc-nav {
+    max-height: none;
+    border-right: none;
+    border-bottom: var(--portal-border);
+  }
+
+  .doc-nav-list {
+    max-height: none;
+    overflow: visible;
+  }
+
+  .doc-main-title {
+    height: auto;
+    min-height: var(--app-control-height);
+    flex-wrap: wrap;
+    padding-block: var(--space-1);
+  }
+
+  .profile-content,
+  .summary-content {
+    flex: 0 0 auto;
+    min-height: auto;
+    height: auto;
+    max-height: none;
+    overflow: visible;
+  }
 }
 }
 

@@ -16,7 +16,7 @@ no account, and there is no server to sign in to.
 ## Download
 
 Get the latest version from the
-[Releases page](https://github.com/YOUR-USERNAME/health-ledger/releases/latest).
+[Releases page](https://github.com/nobhad/health-ledger/releases/latest).
 
 | Your computer | Download | Then |
 | --- | --- | --- |
@@ -94,7 +94,7 @@ library, the **Generate PDF** buttons appear on their own.
   shows the address it actually used.
 - Mac says the app is damaged or from an unidentified developer: right-click
   the app and choose **Open**, once. See [INSTALL.md](INSTALL.md).
-- Something else: [open an issue](https://github.com/YOUR-USERNAME/health-ledger/issues).
+- Something else: [open an issue](https://github.com/nobhad/health-ledger/issues).
   Please do not paste your medical records into it.
 
 ## For developers

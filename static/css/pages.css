@@ -312,3 +312,46 @@
 :is(.profile-content, .summary-content) ol > li[id^="ref-"] {
   scroll-margin-top: var(--space-10);
 }
+
+/* ============================================
+ * PHONES
+ * These belong here rather than in layout.css's responsive block: the
+ * selectors below are defined in this file, and `pages` is a later cascade
+ * layer than `layouts`, so the same rules written there lost to the
+ * unconditional ones here and the document stayed two columns wide on a
+ * phone -- wide enough to push the drawer toggle off the screen.
+ * ============================================ */
+@media (--mobile) {
+  .doc-layout {
+    display: block;
+    flex: 0 0 auto;
+    min-height: auto;
+  }
+
+  .doc-nav {
+    max-height: none;
+    border-right: none;
+    border-bottom: var(--portal-border);
+  }
+
+  .doc-nav-list {
+    max-height: none;
+    overflow: visible;
+  }
+
+  .doc-main-title {
+    height: auto;
+    min-height: var(--app-control-height);
+    flex-wrap: wrap;
+    padding-block: var(--space-1);
+  }
+
+  .profile-content,
+  .summary-content {
+    flex: 0 0 auto;
+    min-height: auto;
+    height: auto;
+    max-height: none;
+    overflow: visible;
+  }
+}

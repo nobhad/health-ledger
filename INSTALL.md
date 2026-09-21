@@ -6,7 +6,7 @@ pick unless you want to read and change the code.
 ## Download the app
 
 Get the file for your computer from the
-[Releases page](https://github.com/YOUR-USERNAME/health-ledger/releases/latest).
+[Releases page](https://github.com/nobhad/health-ledger/releases/latest).
 
 ### macOS
 
@@ -53,7 +53,7 @@ You need [Python 3.9 or newer](https://www.python.org/downloads/). Git is
 handy but you can download the source as a zip instead.
 
 ```bash
-git clone https://github.com/YOUR-USERNAME/health-ledger.git
+git clone https://github.com/nobhad/health-ledger.git
 cd health-ledger
 ./start.sh            # macOS and Linux
 ```
