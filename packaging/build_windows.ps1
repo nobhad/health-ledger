@@ -39,7 +39,7 @@ Get-Content (Join-Path $Root 'requirements.txt') |
 & $Py -m pip install -q --disable-pip-version-check -r $runtimeReqs -r (Join-Path $Root 'packaging\requirements-build.txt')
 
 Write-Host '==> Drawing the icons'
-& $Py (Join-Path $Root 'packaging\make_icons.py')
+& $Py (Join-Path $Root 'packaging\make_icons.py') --no-render
 
 Write-Host '==> Building the executable'
 $DistApp = Join-Path $Root 'dist\HealthLedger'

@@ -39,7 +39,7 @@ grep -v -i '^weasyprint' requirements.txt > "$ROOT/build/requirements-runtime.tx
     -r packaging/requirements-build.txt
 
 echo "==> Drawing the icons"
-"$PY" packaging/make_icons.py
+"$PY" packaging/make_icons.py --no-render
 
 echo "==> Building the app bundle"
 rm -rf "$ROOT/dist/Health Ledger.app" "$ROOT/build/Health Ledger"

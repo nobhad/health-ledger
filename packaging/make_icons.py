@@ -61,6 +61,7 @@ HEART_PATH = (
 PULSE_PATH = 'M3.22 13H9.5l.5-1 2 4.5 2-7 1.5 3.5h5.27'
 
 CHROME = '/Applications/Google Chrome.app/Contents/MacOS/Google Chrome'
+CHROME_TIMEOUT_SECONDS = 120
 
 # Digests of the drawing and of the raster it produced.
 #
@@ -170,7 +171,7 @@ def svg_digest(svg_text: str) -> str:
     return hashlib.sha256(svg_text.encode('utf-8')).hexdigest()
 
 
-def render_png(svg_path: Path, png_path: Path) -> bool:
+def render_png(svg_path: Path, png_path: Path, allow_render: bool = True) -> bool:
     """
     Rasterise with headless Chrome. False when nothing was rendered.
 
@@ -188,11 +189,24 @@ def render_png(svg_path: Path, png_path: Path) -> bool:
             and stamp.get('icon.png') == file_digest(png_path)):
         print('icon.png was rendered from this exact drawing; keeping it')
         return True
+
+    if not allow_render:
+        # This is a build, not a drawing session. Rasterising here is how a
+        # release ends up with an icon nobody reviewed -- and on a CI runner
+        # it is also an hour of a hung browser. Say what is wrong instead.
+        raise SystemExit(
+            'icon.png does not match icon.svg, and this build will not render '
+            'one.\nRun  python3 packaging/make_icons.py  locally and commit '
+            'the result.')
+
     if not Path(CHROME).exists():
         print('skipping icon.png (needs Google Chrome to rasterise the SVG); '
               'the committed one is kept')
         return False
-    with tempfile.TemporaryDirectory() as tmp:
+    # ignore_cleanup_errors: Chrome keeps writing into its profile directory
+    # after the screenshot is taken, and a tidy-up race is not a reason to
+    # fail a build. This exact OSError killed the 1.0.0 macOS release.
+    with tempfile.TemporaryDirectory(ignore_cleanup_errors=True) as tmp:
         page = Path(tmp) / 'icon.html'
         page.write_text(
             '<!doctype html><meta charset=utf-8>'
@@ -205,7 +219,10 @@ def render_png(svg_path: Path, png_path: Path) -> bool:
             f'--window-size={MASTER_SIZE},{MASTER_SIZE}',
             '--virtual-time-budget=4000',
             f'--screenshot={png_path}', str(page),
-        ], check=True, capture_output=True)
+        # A browser that never returns is the difference between a slow
+        # build and a build that hangs for an hour, which is what happened
+        # on the first attempt at this release.
+        ], check=True, capture_output=True, timeout=CHROME_TIMEOUT_SECONDS)
     write_stamp(stamp_path, digest, file_digest(png_path))
     print(f'wrote {png_path.relative_to(ROOT)} and {stamp_path.relative_to(ROOT)}')
     return True
@@ -237,11 +254,16 @@ def write_icns(png_path: Path, path: Path) -> None:
     print(f'wrote {path.relative_to(ROOT)}')
 
 
-def main() -> int:
+def main(argv=None) -> int:
+    argv = sys.argv[1:] if argv is None else argv
+    # The build scripts pass --no-render: they may verify the icon, never
+    # redraw it.
+    allow_render = '--no-render' not in argv
+
     svg = HERE / 'icon.svg'
     png = HERE / 'icon.png'
     write_svg(svg)
-    if not render_png(svg, png) and not png.is_file():
+    if not render_png(svg, png, allow_render=allow_render) and not png.is_file():
         print('no icon.png to work from; cannot build the other sizes')
         return 1
     write_ico(png, HERE / 'icon.ico')
