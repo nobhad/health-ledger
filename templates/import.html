@@ -123,6 +123,14 @@
         <div class="card-header"><h3>DNA raw data</h3></div>
         <div class="card-body">
             <p>The file 23andMe, AncestryDNA, MyHeritage, FamilyTreeDNA or Living DNA let you download from your account: a text or CSV file, often zipped. Choose it as it came; there is no need to unzip it.</p>
+            {% if imports %}
+            <h4>Already in the ledger</h4>
+            <ul class="list">
+                {% for item in imports %}
+                <li><div class="list-item"><span class="list-item-title">{{ item.provider or 'DNA raw data' }} &middot; {{ item.imported_at[:10] }}</span><span class="list-item-meta">{{ item.file_name }} &middot; {{ '{:,}'.format(item.variant_count) }} variants &middot; {{ item.matched_count }} in genes this ledger tracks</span></div></li>
+                {% endfor %}
+            </ul>
+            {% endif %}
             <form method="post" action="/import/preview" enctype="multipart/form-data">
                 <div class="form-group">
                     <label for="rawDataFile" class="field-label">Raw-data file</label>
@@ -135,20 +143,14 @@
                     </button>
                 </div>
             </form>
-            {% if imports %}
-            <h4>Already in the ledger</h4>
-            <ul class="list">
-                {% for item in imports %}
-                <li><div class="list-item"><span class="list-item-title">{{ item.provider or 'DNA raw data' }} &middot; {{ item.imported_at[:10] }}</span><span class="list-item-meta">{{ item.file_name }} &middot; {{ '{:,}'.format(item.variant_count) }} variants &middot; {{ item.matched_count }} in genes this ledger tracks</span></div></li>
-                {% endfor %}
-            </ul>
-            {% endif %}
         </div>
     </div>
     <div class="card">
         <div class="card-header"><h3>A document from your care</h3></div>
         <div class="card-body">
             <p>Lab results, a visit note, a letter or an export from a patient portal, as a PDF or a text file. The text is read and shown to you first, along with any readings found in it.</p>
+            <p class="note">A scanned page photographed into a PDF has no text to read. Clinical VCF files are planned, not yet read.</p>
+            <p>To bring in a whole database or go back to a backup, use <a href="/setup">Import or restore</a>.</p>
             <form method="post" action="/import/preview" enctype="multipart/form-data">
                 <div class="form-group">
                     <label for="documentFile" class="field-label">Document</label>
@@ -161,8 +163,6 @@
                     </button>
                 </div>
             </form>
-            <p class="note">A scanned page photographed into a PDF has no text to read. Clinical VCF files are planned, not yet read.</p>
-            <p>To bring in a whole database or go back to a backup, use <a href="/setup">Import or restore</a>.</p>
         </div>
     </div>
 </div>

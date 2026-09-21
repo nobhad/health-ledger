@@ -74,6 +74,11 @@
   align-items: center;
   min-height: var(--space-5);
   padding: var(--space-0-5) var(--space-3);
+  /* A gene name is one unbroken word that can be longer than this column
+     (METHYLENETETRAHYDROFOLATE), and with nowhere to break it ran out past
+     the rule and was clipped mid-word. */
+  min-width: 0;
+  overflow-wrap: anywhere;
   font-family: var(--portal-subtab-family);
   font-size: var(--font-size-sm);
   font-weight: var(--portal-subtab-weight);

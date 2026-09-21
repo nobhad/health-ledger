@@ -7,7 +7,7 @@
 {% block page_description %}Search for genes, traits, and health conditions in your genetic profile database.{% endblock %}
 
 {% block content %}
-<div class="grid grid-3">
+<div class="grid grid-3 grid--aligned">
     {% call card("Find Genes by Health Condition", "query-card") %}
         {{ multiselect("condition", "Health Condition(s)", "Search conditions", "condition") }}
         <div class="card-actions">{{ button("Search", "queryByCondition()", class="btn-primary btn-block") }}</div>

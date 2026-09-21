@@ -1215,7 +1215,6 @@ input[type="date"]::-webkit-calendar-picker-indicator {
 .stat-card {
   display: flex;
   flex-direction: column;
-  gap: var(--space-0-5);
   padding: var(--space-2) var(--portal-content-padding);
   border: var(--portal-border);
   color: inherit;
@@ -1237,12 +1236,16 @@ a.stat-card:hover {
 }
 
 .stat-value {
+  /* Not a gap: in .stat-grid the card is a subgrid, which takes its
+     gutters from the parent and ignores its own. */
+  margin-block-start: var(--space-0-5);
   font-size: var(--font-size-2xl);
   font-weight: var(--font-weight-bold);
   line-height: var(--line-height-tight);
 }
 
 .stat-hint {
+  margin-block-start: var(--space-0-5);
   font-size: var(--font-size-sm);
   color: var(--color-text-secondary);
 }

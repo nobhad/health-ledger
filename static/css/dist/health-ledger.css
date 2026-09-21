@@ -3805,7 +3805,6 @@ input[type="date"]::-webkit-calendar-picker-indicator {
 .stat-card {
   display: flex;
   flex-direction: column;
-  gap: var(--space-0-5);
   padding: var(--space-2) var(--portal-content-padding);
   border: var(--portal-border);
   color: inherit;
@@ -3827,12 +3826,16 @@ a.stat-card:hover {
 }
 
 .stat-value {
+  /* Not a gap: in .stat-grid the card is a subgrid, which takes its
+     gutters from the parent and ignores its own. */
+  margin-block-start: var(--space-0-5);
   font-size: var(--font-size-2xl);
   font-weight: var(--font-weight-bold);
   line-height: var(--line-height-tight);
 }
 
 .stat-hint {
+  margin-block-start: var(--space-0-5);
   font-size: var(--font-size-sm);
   color: var(--color-text-secondary);
 }
@@ -4374,6 +4377,34 @@ html[data-theme="dark"] .theme-toggle-icon--dark {
   border-bottom-width: 0;
 }
 
+/* Sibling cards in one grid row share the header row and the body row. A
+   title that wraps to two lines in one card ("Find genes by health
+   condition") used to push that card's label and field a line lower than
+   the cards beside it, leaving the row ragged in the middle while the
+   buttons still lined up at the bottom. */
+.grid--aligned {
+  grid-template-rows: auto 1fr;
+}
+
+.grid--aligned > .card {
+  display: grid;
+  grid-row: span 2;
+  grid-template-rows: subgrid;
+}
+
+/* The shared header row is as tall as the tallest title, so a one-line
+   title starts at the top of it rather than floating in the middle: every
+   title's first line sits on the same baseline. */
+.grid--aligned > .card > .card-header {
+  align-items: start;
+}
+
+/* A subgridded axis takes its gutters from the parent, which tiles with
+   rules and no gutters, so the card's own header-to-body gap is a margin. */
+.grid--aligned > .card > .card-body {
+  margin-block-start: var(--space-2);
+}
+
 .grid-2 {
   grid-template-columns: repeat(2, 1fr);
 }
@@ -4391,9 +4422,18 @@ html[data-theme="dark"] .theme-toggle-icon--dark {
   display: grid;
   flex-shrink: 0;
   grid-template-columns: repeat(auto-fit, minmax(var(--table-col-md), 1fr));
+  /* Label, value and hint are three rows the whole row of tiles shares. A
+     label that wraps to two lines ("Trait associations") used to push its
+     own number down while a one-word label ("Genes") did not, so the
+     numbers sat on two different baselines. The tiles are subgrids of
+     these rows, so every number lines up whatever its label does. */
+  grid-template-rows: auto auto auto;
 }
 
 .stat-grid > .stat-card {
+  display: grid;
+  grid-row: span 3;
+  grid-template-rows: subgrid;
   border-width: 0 var(--border-width) var(--border-width) 0;
 }
 
@@ -4818,6 +4858,11 @@ html[data-theme="dark"] .theme-toggle-icon--dark {
   align-items: center;
   min-height: var(--space-5);
   padding: var(--space-0-5) var(--space-3);
+  /* A gene name is one unbroken word that can be longer than this column
+     (METHYLENETETRAHYDROFOLATE), and with nowhere to break it ran out past
+     the rule and was clipped mid-word. */
+  min-width: 0;
+  overflow-wrap: anywhere;
   font-family: var(--portal-subtab-family);
   font-size: var(--font-size-sm);
   font-weight: var(--portal-subtab-weight);
