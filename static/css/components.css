@@ -1292,6 +1292,44 @@ input[type="date"]::-webkit-calendar-picker-indicator {
   display: none;
 }
 
+/* TASK CARD (overview)
+   The overview leads with what somebody came to do, not with what the
+   database happens to contain, so these are the largest thing on the
+   page and the counts sit underneath them. */
+.task-card {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-1);
+  padding: var(--portal-card-padding) var(--portal-content-padding);
+  border: var(--portal-border);
+  color: inherit;
+  text-decoration: none;
+  transition: background var(--transition-faster);
+}
+
+a.task-card:hover {
+  background: var(--color-bg-hover);
+  text-decoration: none;
+}
+
+.task-card-title {
+  display: flex;
+  align-items: center;
+  gap: var(--icon-gap-md);
+  font-family: var(--font-family-mono);
+  font-size: var(--heading-card-font-size);
+  font-weight: var(--heading-card-font-weight);
+  letter-spacing: var(--heading-card-letter-spacing);
+  text-transform: var(--heading-text-transform);
+  color: var(--heading-card-color);
+}
+
+.task-card-hint {
+  font-size: var(--font-size-sm);
+  line-height: var(--line-height-relaxed);
+  color: var(--color-text-secondary);
+}
+
 /* ============================================
  * STAT CARD (overview) — the portal's stat-card tier
  * ============================================ */

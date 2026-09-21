@@ -5,7 +5,7 @@
 
 
 {% block page_title %}Summary{% endblock %}
-{% block page_description %}The short version: your key findings, in plain language.{% endblock %}
+{% block page_description %}{% if full %}The long version: every gene in your ledger, and what is known about each one.{% else %}The short version: your key findings, in plain language.{% endif %}{% endblock %}
 
 {% block content %}
 {% if ledger_empty %}
@@ -24,7 +24,16 @@
         <ul class="doc-nav-list" id="docNavList"></ul>
     </aside>
     <div class="doc-main">
-        <div class="doc-main-title">Document</div>
+        <div class="doc-main-title">
+            <span>Document</span>
+            {# One document at two lengths. The toggle is the whole reason
+               the full write-up no longer needs a page of its own. #}
+            {% if full %}
+            <a class="doc-length-toggle" href="{{ url_for('summary') }}">Show the short version</a>
+            {% else %}
+            <a class="doc-length-toggle" href="{{ url_for('summary', full='1') }}">Show everything</a>
+            {% endif %}
+        </div>
         <div class="summary-content" id="docBody">
             {{ summary_html|safe }}
         </div>

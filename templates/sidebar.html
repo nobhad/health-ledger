@@ -3,16 +3,26 @@
   wide screens, an icon rail in between, and an off-canvas drawer on phones
   opened from the top bar. static/js/sidebar.ts wires the toggles.
 #}
-{% set links = [
-    ('/', 'layout-dashboard', 'Overview'),
-    ('/query', 'search', 'Query'),
-    ('/summary', 'bar-chart-3', 'Summary'),
-    ('/profile', 'file-text', 'Profile'),
-    ('/metrics', 'activity', 'Metrics'),
-    ('/sources', 'folder-open', 'Sources'),
-    ('/import', 'upload', 'Import'),
-    ('/doctor-docs', 'stethoscope', 'Doctor Docs'),
-    ('/backup', 'download', 'Backup'),
+{# Nine equal choices is a list to read; three small groups is a shape to
+   recognise. The names are unchanged -- only the grouping is new. Overview
+   sits above them all, since it is where everything starts. #}
+{% set groups = [
+    (None, [
+        ('/', 'layout-dashboard', 'Overview'),
+    ]),
+    ('Your records', [
+        ('/import', 'upload', 'Import'),
+        ('/sources', 'folder-open', 'Sources'),
+        ('/metrics', 'activity', 'Metrics'),
+    ]),
+    ('Understanding them', [
+        ('/summary', 'bar-chart-3', 'Summary'),
+        ('/query', 'search', 'Query'),
+    ]),
+    ('Share and back up', [
+        ('/doctor-docs', 'stethoscope', 'Doctor Docs'),
+        ('/backup', 'download', 'Backup'),
+    ]),
 ] %}
 <aside class="sidebar" id="sidebar" aria-label="Main navigation">
     <a href="/" class="sidebar-brand" aria-label="Health Ledger, overview">
@@ -20,7 +30,9 @@
         <span class="sidebar-brand-name">Health Ledger</span>
     </a>
     <nav class="sidebar-nav">
-        <ul class="sidebar-buttons">
+        {% for heading, links in groups %}
+        {% if heading %}<p class="nav-group-heading">{{ heading }}</p>{% endif %}
+        <ul class="sidebar-buttons"{% if heading %} aria-label="{{ heading }}"{% endif %}>
             {% for href, icon, label in links %}
             <li>
                 <a href="{{ href }}" class="nav-btn{% if request.path == href %} is-active{% endif %}"{% if request.path == href %} aria-current="page"{% endif %} title="{{ label }}">
@@ -30,6 +42,7 @@
             </li>
             {% endfor %}
         </ul>
+        {% endfor %}
     </nav>
     <div class="sidebar-footer">
         <button type="button" class="nav-btn theme-toggle" id="themeToggle" aria-label="Switch to dark mode" title="Theme">

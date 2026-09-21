@@ -139,8 +139,22 @@ html[data-sidebar="collapsed"] .sidebar {
   padding: var(--space-2) 0;
 }
 
-/* Collapsed: icons centred on the rail, labels and wordmark gone. */
-html[data-sidebar="collapsed"] .sidebar :is(.nav-label, .sidebar-brand-name) {
+/* The group's name: quieter and smaller than the items under it, so it
+   reads as a label on the group rather than another thing to click. */
+.nav-group-heading {
+  margin: var(--space-3) 0 var(--space-1);
+  padding: 0 var(--space-3);
+  font-size: var(--label-font-size);
+  font-weight: var(--label-font-weight);
+  letter-spacing: var(--label-letter-spacing);
+  text-transform: uppercase;
+  color: var(--color-text-secondary);
+}
+
+/* Collapsed: icons centred on the rail, labels, headings and wordmark
+   gone. A heading with no items beside it is just a stray word, so on the
+   rail the groups fall back to being one list. */
+html[data-sidebar="collapsed"] .sidebar :is(.nav-label, .nav-group-heading, .sidebar-brand-name) {
   display: none;
 }
 
@@ -421,12 +435,12 @@ html[data-theme="dark"] .theme-toggle-icon--dark {
 
 /* Cells draw only their right and bottom rules; the last column drops the
    right one so the grid never doubles a rule or draws one at the edge. */
-.grid > :is(.card, .section, .stat-card) {
+.grid > :is(.card, .section, .stat-card, .task-card) {
   border-width: 0 var(--border-width) var(--border-width) 0;
 }
 
-.grid-2 > :is(.card, .section, .stat-card):nth-child(2n),
-.grid-3 > :is(.card, .section, .stat-card):nth-child(3n) {
+.grid-2 > :is(.card, .section, .stat-card, .task-card):nth-child(2n),
+.grid-3 > :is(.card, .section, .stat-card, .task-card):nth-child(3n) {
   border-right-width: 0;
 }
 
@@ -464,6 +478,10 @@ html[data-theme="dark"] .theme-toggle-icon--dark {
    rules and no gutters, so the card's own header-to-body gap is a margin. */
 .grid--aligned > .card > .card-body {
   margin-block-start: var(--space-2);
+}
+
+.task-grid {
+  flex-shrink: 0;
 }
 
 .grid-2 {
@@ -684,6 +702,11 @@ html[data-theme="dark"] .theme-toggle-icon--dark {
 
   html[data-sidebar="collapsed"] .sidebar .nav-label {
     display: inline;
+  }
+
+  /* The phone drawer is never a rail, so the groups stay. */
+  html[data-sidebar="collapsed"] .sidebar .nav-group-heading {
+    display: block;
   }
 
   html[data-sidebar="collapsed"] .sidebar .nav-btn {

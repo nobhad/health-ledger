@@ -75,7 +75,26 @@
 }
 
 .doc-main-title {
+  justify-content: space-between;
+  gap: var(--space-2);
   padding: 0 var(--portal-content-padding);
+}
+
+/* Switches the document between its two lengths. It sits in the band
+   rather than in the document so it is in the same place whichever
+   length is showing. */
+.doc-length-toggle {
+  font-size: var(--font-size-sm);
+  font-weight: var(--font-weight-regular);
+  letter-spacing: normal;
+  text-transform: none;
+  color: var(--color-brand-red);
+  text-decoration: none;
+  white-space: nowrap;
+}
+
+.doc-length-toggle:hover {
+  text-decoration: underline;
 }
 
 /* The same rhythm as the sidebar's list: the list's own top and bottom

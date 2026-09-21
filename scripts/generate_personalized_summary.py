@@ -111,7 +111,9 @@ def generate_summary_html(db: GeneticProfileDB = None) -> str:
     for trait, rows in f['by_trait'].items():
         h.append(f"<li><strong>{escape(trait)}</strong>: " + escape(", ".join(sorted({s for s, _ in rows}))) + "</li>")
     h.append("</ul>")
-    h.append("<p><em>For detailed information, see the full profile.</em></p>")
+    # The full write-up is the same page with "Show everything" pressed,
+    # not a separate one, since /profile was merged into /summary.
+    h.append("<p><em>For everything behind this, choose Show everything above.</em></p>")
     if owns_db:
         db.close()
     return "\n".join(h)

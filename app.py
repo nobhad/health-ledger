@@ -1019,80 +1019,52 @@ def _ledger_is_empty(db) -> bool:
 @app.route('/profile')
 def profile():
     """
-    Full genetic profile document page.
-    
-    Generates the complete genetic profile HTML from the database with all gene information,
-    trait associations, health conditions, and references.
-    
-    Returns:
-        str: Rendered HTML template with profile content
-    
-    Error Responses:
-        500: Error generating profile from database
-    
-    Example:
-        GET /profile -> Returns full profile page generated from database
+    The full document. Merged into /summary, which now carries both
+    lengths, because the two pages were the same document at two sizes and
+    nobody could tell from the names which one they wanted. Kept as a
+    redirect so older links and bookmarks still land somewhere sensible.
     """
-    app_logger.info("Generating full profile page from database")
-    
-    try:
-        db = get_db()
-        if _ledger_is_empty(db):
-            return render_template('profile.html', profile_html=None, ledger_empty=True)
-        app_logger.debug("Generating profile HTML from database")
-        profile_html = generate_profile_html(db)
-        
-        # Check if content is empty or missing
-        if not profile_html or len(profile_html.strip()) < 100:
-            app_logger.warning("Generated profile content appears to be empty or very short")
-            return "Profile content is missing. Please check database.", 500
-        
-        app_logger.info("Profile generated successfully from database")
-        return render_template('profile.html', profile_html=profile_html)
-    except Exception as e:
-        app_logger.error(f"Error generating profile from database: {e}", exc_info=True)
-        return f"Error generating profile: {str(e)}", 500
+    return redirect(url_for('summary', full='1'))
 
 
 @app.route('/summary')
 def summary():
     """
-    Personalized summary page.
-    
-    Generates a personalized summary from the database with key genetic findings, strengths,
-    sensitivities, medication metabolism, and clinical recommendations.
-    
+    What the ledger holds, short by default and complete on request.
+
+    ?full=1 gives the whole write-up (what /profile used to be); without it
+    the page is the key findings.
+
     Returns:
-        str: Rendered HTML template with summary content
-    
+        str: Rendered HTML template with the document
+
     Error Responses:
-        500: Error generating summary from database
-    
-    Example:
-        GET /summary -> Returns personalized summary page generated from database
+        500: Error generating the document from the database
     """
-    app_logger.info("Generating personalized summary from database")
-    
+    full = request.args.get('full') == '1'
+    app_logger.info("Generating %s from database", 'full profile' if full else 'summary')
+
     try:
         db = get_db()
         if _ledger_is_empty(db):
-            return render_template('summary.html', summary_html=None, ledger_empty=True)
-        app_logger.debug("Generating summary HTML from database")
-        
-        from scripts.generate_personalized_summary import generate_summary_html
-        
-        summary_html = generate_summary_html(db)
-        
+            return render_template('summary.html', summary_html=None,
+                                   ledger_empty=True, full=full)
+
+        if full:
+            document_html = generate_profile_html(db)
+        else:
+            from scripts.generate_personalized_summary import generate_summary_html
+            document_html = generate_summary_html(db)
+
         # Check if content is empty or missing
-        if not summary_html or len(summary_html.strip()) < 100:
-            app_logger.warning("Generated summary content appears to be empty or very short")
-            return "Summary content is missing. Please check database.", 500
-        
-        app_logger.info("Summary generated successfully from database")
-        return render_template('summary.html', summary_html=summary_html)
+        if not document_html or len(document_html.strip()) < 100:
+            app_logger.warning("Generated document appears to be empty or very short")
+            return "Document content is missing. Please check database.", 500
+
+        return render_template('summary.html', summary_html=document_html, full=full)
     except Exception as e:
-        app_logger.error(f"Error generating summary from database: {e}", exc_info=True)
-        return f"Error generating summary: {str(e)}", 500
+        app_logger.error(f"Error generating document from database: {e}", exc_info=True)
+        return f"Error generating document: {str(e)}", 500
 
 
 @app.route('/metrics')

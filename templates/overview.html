@@ -10,8 +10,46 @@
 {% if notice %}
 <div class="alert" role="status">{{ notice }}</div>
 {% endif %}
+
+{% if ledger_empty %}
+{# Nothing has been added, so there is exactly one useful thing to do and
+   the page should be that thing rather than six empty panels. #}
+<div class="card">
+    <div class="card-body">
+        <div class="empty-state">
+            <p>Your ledger is empty. Add a lab result, a visit note, a letter or a
+               DNA file: Health Ledger reads it, pulls out the numbers, and keeps
+               the original alongside them. Nothing leaves this computer.</p>
+            <a class="btn btn-primary" href="/import">Add your first record</a>
+            <p>Already have a Health Ledger database or a backup?
+               <a href="/setup">Import or restore it</a>.</p>
+        </div>
+    </div>
+</div>
+{% else %}
+
+{# What you came here to do, before what the database happens to contain. #}
+<div class="grid grid-2 task-grid">
+    <a class="task-card" href="/import">
+        <span class="task-card-title"><i data-lucide="upload"></i>Add a record</span>
+        <span class="task-card-hint">A lab result, a visit note, a letter, or your DNA file. It is read and shown to you before anything is saved.</span>
+    </a>
+    <a class="task-card" href="/doctor-docs">
+        <span class="task-card-title"><i data-lucide="stethoscope"></i>Get ready for an appointment</span>
+        <span class="task-card-hint">A document to hand your doctor, put together for one kind of specialist, with your current numbers.</span>
+    </a>
+    <a class="task-card" href="/summary">
+        <span class="task-card-title"><i data-lucide="bar-chart-3"></i>See what your records say</span>
+        <span class="task-card-hint">Key findings in plain language, with everything behind them one click away.</span>
+    </a>
+    <a class="task-card" href="/backup">
+        <span class="task-card-title"><i data-lucide="download"></i>Back up your records</span>
+        <span class="task-card-hint">{% if last_backup %}Last copy {{ last_backup.created[:10] }}. Keep one somewhere other than this computer.{% else %}No copy has ever been made. If this computer dies, your records die with it.{% endif %}</span>
+    </a>
+</div>
+
 <div class="stat-grid">
-    <a class="stat-card" href="/profile">
+    <a class="stat-card" href="/summary?full=1">
         <span class="stat-label">Genes</span>
         <span class="stat-value">{{ stats.genes }}</span>
         <span class="stat-hint">{{ stats.pharmacogenomic }} with drug-metabolism data</span>
@@ -52,73 +90,7 @@
     </a>
 </div>
 
-<div class="grid grid-3 grid--fill">
-    <div class="card">
-        <div class="card-header"><h3>Start here</h3></div>
-        <div class="card-body">
-            {% if ledger_empty %}
-            <a class="action-link" href="/setup">
-                <i data-lucide="upload"></i>
-                <span class="action-link-text">
-                    <span class="action-link-title">Import or restore</span>
-                    <span class="action-link-hint">The ledger is empty. Bring in a database file or a backup</span>
-                </span>
-            </a>
-            {% endif %}
-            <a class="action-link" href="/summary">
-                <i data-lucide="bar-chart-3"></i>
-                <span class="action-link-text">
-                    <span class="action-link-title">Read the summary</span>
-                    <span class="action-link-hint">Key findings, strengths and sensitivities in plain language</span>
-                </span>
-            </a>
-            <a class="action-link" href="/query">
-                <i data-lucide="search"></i>
-                <span class="action-link-text">
-                    <span class="action-link-title">Ask a question</span>
-                    <span class="action-link-hint">Which genes relate to a condition, trait or medication</span>
-                </span>
-            </a>
-            <a class="action-link" href="/doctor-docs">
-                <i data-lucide="stethoscope"></i>
-                <span class="action-link-text">
-                    <span class="action-link-title">Prepare for an appointment</span>
-                    <span class="action-link-hint">A PDF tailored to a specialty, with your current numbers</span>
-                </span>
-            </a>
-            <a class="action-link" href="/import">
-                <i data-lucide="upload"></i>
-                <span class="action-link-text">
-                    <span class="action-link-title">Add a record</span>
-                    <span class="action-link-hint">Your DNA raw-data file from 23andMe, AncestryDNA or MyHeritage</span>
-                </span>
-            </a>
-            <a class="action-link" href="/sources">
-                <i data-lucide="folder-open"></i>
-                <span class="action-link-text">
-                    <span class="action-link-title">Browse the records</span>
-                    <span class="action-link-hint">Every lab, scan and letter, with the text pulled out</span>
-                </span>
-            </a>
-            <a class="action-link" href="/backup">
-                <i data-lucide="download"></i>
-                <span class="action-link-text">
-                    <span class="action-link-title">Back up</span>
-                    <span class="action-link-hint">A timestamped copy of the database, yours to keep anywhere</span>
-                </span>
-            </a>
-            {% if not ledger_empty %}
-            <a class="action-link" href="/setup">
-                <i data-lucide="upload"></i>
-                <span class="action-link-text">
-                    <span class="action-link-title">Import or restore</span>
-                    <span class="action-link-hint">Bring in a database file or go back to a backup</span>
-                </span>
-            </a>
-            {% endif %}
-        </div>
-    </div>
-
+<div class="grid grid-2 grid--fill">
     <div class="card">
         <div class="card-header"><h3>Recent sources</h3></div>
         <div class="card-body">
@@ -163,4 +135,5 @@
         </div>
     </div>
 </div>
+{% endif %}
 {% endblock %}

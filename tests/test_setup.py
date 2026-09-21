@@ -337,18 +337,39 @@ class TestPlaceholderDatabase(SetupTestCase):
         self.assertTrue(self.placeholder.exists())
 
 
-class TestOverviewStartHere(SetupTestCase):
-    def test_empty_ledger_leads_with_import(self):
+class TestOverviewLeadsWithTheTask(SetupTestCase):
+    """
+    The overview is organised by what somebody came to do. With an empty
+    ledger there is exactly one useful thing to do, so the page is that;
+    with records in it the page offers the handful of real tasks before
+    the counts.
+    """
+
+    def test_an_empty_ledger_offers_only_the_one_useful_thing(self):
         self.client.post('/setup/start', data={'data_folder': str(self.tmp)})
         html = self.client.get('/').get_data(as_text=True)
-        self.assertIn('The ledger is empty. Bring in a database file or a backup', html)
-        self.assertLess(html.index('Import or restore'), html.index('Read the summary'))
+        self.assertIn('Your ledger is empty', html)
+        self.assertIn('Add your first record', html)
+        # None of the other tasks can be done yet, so none are offered.
+        self.assertNotIn('Get ready for an appointment', html)
+        self.assertNotIn('See what your records say', html)
+        # Bringing in an existing database is still reachable.
+        self.assertIn('/setup', html)
 
-    def test_ledger_with_content_lists_import_last(self):
+    def test_a_filled_ledger_leads_with_tasks_then_counts(self):
         self.make_ledger_db(self.db_path)
         html = self.client.get('/').get_data(as_text=True)
-        self.assertNotIn('The ledger is empty', html)
-        self.assertGreater(html.index('Import or restore'), html.index('Back up'))
+        self.assertNotIn('Your ledger is empty', html)
+        for task in ('Add a record', 'Get ready for an appointment',
+                     'See what your records say', 'Back up your records'):
+            self.assertIn(task, html)
+        # The tasks come before what the database happens to contain.
+        self.assertLess(html.index('Add a record'), html.index('stat-grid'))
+
+    def test_the_backup_task_says_when_there_has_never_been_one(self):
+        self.make_ledger_db(self.db_path)
+        html = self.client.get('/').get_data(as_text=True)
+        self.assertIn('No copy has ever been made', html)
 
 
 class TestSetupModule(unittest.TestCase):
