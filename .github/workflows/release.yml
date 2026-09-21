@@ -1,0 +1,102 @@
+name: release
+
+# Builds the downloadable apps and drafts a GitHub Release.
+#
+# A Mac cannot build the Windows executable and vice versa -- PyInstaller
+# bundles the host platform's own Python runtime -- so this is the only place
+# the pair gets built together.
+#
+# Free on a public repository. On a private one the macOS runner bills at ten
+# times the Linux rate, so keep releases here.
+on:
+  push:
+    tags: ['v*']
+  workflow_dispatch:
+    inputs:
+      version:
+        description: 'Version to build (for a dry run without a tag)'
+        required: false
+        default: 'dev'
+
+permissions:
+  contents: write
+
+jobs:
+  macos:
+    name: macOS (arm64)
+    runs-on: macos-14          # Apple Silicon
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+
+      - name: Build
+        run: packaging/build_macos.sh
+
+      - uses: actions/upload-artifact@v4
+        with:
+          name: macos-dmg
+          path: dist/*.dmg
+          if-no-files-found: error
+
+  windows:
+    name: Windows (x64)
+    runs-on: windows-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+
+      - name: Build
+        shell: pwsh
+        run: packaging\build_windows.ps1
+
+      - uses: actions/upload-artifact@v4
+        with:
+          name: windows-zip
+          path: dist/*.zip
+          if-no-files-found: error
+
+  draft:
+    name: Draft the release
+    needs: [macos, windows]
+    if: startsWith(github.ref, 'refs/tags/v')
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/download-artifact@v4
+        with:
+          path: artifacts
+          merge-multiple: true
+
+      - name: What was built
+        run: ls -lh artifacts
+
+      - uses: softprops/action-gh-release@v2
+        with:
+          draft: true            # look at it before the world does
+          generate_release_notes: true
+          files: artifacts/*
+          body: |
+            Health Ledger ${{ github.ref_name }}
+
+            **Mac:** download the `.dmg`, drag the app to Applications, then
+            **right-click the app and choose Open** the first time.
+
+            **Windows:** download the `.zip`, unzip it, run `HealthLedger.exe`,
+            and choose **More info → Run anyway** the first time.
+
+            Neither build is code-signed, which is what those warnings are
+            about. [INSTALL.md](INSTALL.md) explains them, and running from
+            source is always an option.
+
+            Your records stay on your own computer. Nothing is uploaded.
+            Health Ledger is not a medical device and is not a substitute for
+            professional medical advice.
+
+            See [CHANGELOG.md](CHANGELOG.md) for what changed.

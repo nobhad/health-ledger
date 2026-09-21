@@ -1,0 +1,69 @@
+name: tests
+
+# Free on a public repository. Keep it that way: on a private repo these
+# minutes are billed, and the macOS runner bills at ten times the Linux rate.
+on:
+  push:
+    branches: [main]
+  pull_request:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  python:
+    name: python ${{ matrix.python }}
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        python: ['3.10', '3.12']
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: ${{ matrix.python }}
+          cache: pip
+
+      - name: Install
+        run: |
+          python -m pip install --upgrade pip
+          # WeasyPrint's Pango libraries are not on the runner, and the app is
+          # built to degrade without them. tests/test_pdf_fallback.py covers
+          # exactly that path, so leaving it out is the more useful test.
+          grep -v -i '^weasyprint' requirements.txt > requirements-ci.txt
+          pip install -r requirements-ci.txt -r requirements-dev.txt
+
+      - name: Tests
+        run: python -m pytest -q
+
+      - name: No private data
+        run: python scripts/check_private_data.py
+
+  frontend:
+    name: lint and typecheck
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: npm
+
+      - run: npm ci
+      - run: npm run check
+
+      - name: The committed CSS bundle is up to date
+        run: |
+          npm run build:css
+          git diff --exit-code -- static/css/dist/health-ledger.css \
+            || { echo "::error::static/css/dist/health-ledger.css is stale. Run 'npm run build:css' and commit it."; exit 1; }
+
+      - name: The committed JS is up to date
+        run: |
+          npm run build 2>/dev/null || npx tsc
+          git diff --exit-code -- 'static/js/*.js' \
+            || { echo "::error::Compiled JS is stale. Run 'npm run build' and commit it."; exit 1; }
