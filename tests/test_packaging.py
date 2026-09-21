@@ -148,6 +148,27 @@ class TestTheSpecMatchesTheRepository(unittest.TestCase):
         and the app is built to degrade to the browser's print dialog."""
         self.assertIn("'weasyprint'", self.spec)
 
+    def test_the_committed_png_was_rendered_from_the_committed_svg(self):
+        """
+        icon.png is the master the build ships, and it is produced from
+        icon.svg by a browser. Nothing stops somebody editing the drawing and
+        committing without re-rendering, after which the released icon is not
+        the one in the repository. The digest beside it says which drawing it
+        came from; a mismatch means icon.png is stale.
+
+        This is checked by digest rather than by file times because a fresh
+        clone gets arbitrary mtimes, so a time-based check passes or fails by
+        luck on a build machine.
+        """
+        import hashlib
+        pkg = ROOT / 'packaging'
+        svg = (pkg / 'icon.svg').read_text(encoding='utf-8')
+        stamp = (pkg / 'icon.svg.sha256').read_text(encoding='utf-8').strip()
+        self.assertEqual(
+            hashlib.sha256(svg.encode('utf-8')).hexdigest(), stamp,
+            'icon.png is stale: icon.svg has changed since it was rendered. '
+            'Run packaging/make_icons.py and commit the result.')
+
     def test_the_icons_the_spec_names_are_committed(self):
         for name in ('icon.png', 'icon.icns', 'icon.ico'):
             self.assertTrue((ROOT / 'packaging' / name).is_file(),

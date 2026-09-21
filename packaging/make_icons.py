@@ -23,6 +23,7 @@ here, so if it is missing the PNG is left alone and only the sizes derived
 from it are rebuilt -- commit icon.png and a build without Chrome still works.
 """
 
+import hashlib
 import re
 import shutil
 import subprocess
@@ -60,6 +61,13 @@ HEART_PATH = (
 PULSE_PATH = 'M3.22 13H9.5l.5-1 2 4.5 2-7 1.5 3.5h5.27'
 
 CHROME = '/Applications/Google Chrome.app/Contents/MacOS/Google Chrome'
+
+# The digest of the icon.svg that the committed icon.png was rendered from.
+# A fresh clone gets whatever mtimes git felt like writing, so "is the PNG
+# newer than the SVG" is a coin flip on a build machine -- and losing it
+# means the icon in a release is whatever that runner's Chrome drew rather
+# than the drawing that was reviewed. The digest does not care about clocks.
+RENDER_STAMP_NAME = 'icon.svg.sha256'
 
 
 def avatar_paths() -> list:
@@ -137,17 +145,24 @@ def write_svg(path: Path) -> None:
     print(f'wrote {path.relative_to(ROOT)}')
 
 
+def svg_digest(svg_text: str) -> str:
+    return hashlib.sha256(svg_text.encode('utf-8')).hexdigest()
+
+
 def render_png(svg_path: Path, png_path: Path) -> bool:
     """
     Rasterise with headless Chrome. False when nothing was rendered.
 
-    Only when the drawing has actually changed. Every build runs this
-    script, and re-rendering each time would make the icon in a release
-    depend on whichever Chrome the build machine happens to have. The
-    committed PNG is the master; it is rebuilt when icon.svg is newer.
+    Only when the drawing has actually changed, judged by the digest of the
+    SVG rather than by file times: every build runs this script, and
+    re-rendering each time would make the icon in a release depend on
+    whichever Chrome the build machine happens to have.
     """
-    if png_path.is_file() and png_path.stat().st_mtime >= svg_path.stat().st_mtime:
-        print('icon.png is current (icon.svg has not changed since); keeping it')
+    stamp = svg_path.parent / RENDER_STAMP_NAME
+    digest = svg_digest(svg_path.read_text(encoding='utf-8'))
+    if (png_path.is_file() and stamp.is_file()
+            and stamp.read_text(encoding='utf-8').strip() == digest):
+        print('icon.png was rendered from this exact drawing; keeping it')
         return True
     if not Path(CHROME).exists():
         print('skipping icon.png (needs Google Chrome to rasterise the SVG); '
@@ -167,7 +182,8 @@ def render_png(svg_path: Path, png_path: Path) -> bool:
             '--virtual-time-budget=4000',
             f'--screenshot={png_path}', str(page),
         ], check=True, capture_output=True)
-    print(f'wrote {png_path.relative_to(ROOT)}')
+    stamp.write_text(digest + '\n', encoding='utf-8')
+    print(f'wrote {png_path.relative_to(ROOT)} and {stamp.relative_to(ROOT)}')
     return True
 
 
