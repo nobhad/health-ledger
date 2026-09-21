@@ -28,6 +28,7 @@ from datetime import datetime
 from typing import List, Dict, Optional, Tuple
 from pathlib import Path
 
+import config
 import variant_reference
 
 try:
@@ -116,7 +117,10 @@ class GeneticProfileDB:
             Schema initialization is idempotent - safe to call multiple times.
             Existing tables are not recreated.
         """
-        schema_file = Path(__file__).parent / "genetic_profile_db_schema.sql"
+        # config.DB_SCHEMA_PATH, not __file__: a packaged build runs this
+        # module out of the PyInstaller archive, while the .sql beside it is
+        # unpacked as a data file somewhere else entirely.
+        schema_file = config.DB_SCHEMA_PATH
         if schema_file.exists():
             try:
                 with open(schema_file, 'r') as f:

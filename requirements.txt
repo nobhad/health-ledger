@@ -10,3 +10,7 @@ requests>=2.31.0
 beautifulsoup4>=4.12.0
 pdfminer.six>=20221105
 Pillow>=10.0.0
+# The server the packaged app runs on: pure Python, so it travels inside the
+# bundle, and it does not print a development-server warning at somebody who
+# only wanted to open their records. desktop.py falls back to Werkzeug.
+waitress>=3.0.0

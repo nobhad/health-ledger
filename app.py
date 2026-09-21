@@ -48,7 +48,12 @@ from doctor_templates import get_available_specialties, DOCTOR_TEMPLATES
 logger = setup_logging(str(LOGS_DIR / 'app.log'))
 app_logger = get_logger('app')
 
-app = Flask(__name__)
+# Templates and static files come from the application resources: this
+# directory in a checkout, the unpacked bundle in a packaged copy. Flask
+# infers them from the module path, which a PyInstaller build gets wrong.
+app = Flask(__name__,
+            template_folder=str(config.BASE_DIR / 'templates'),
+            static_folder=str(config.BASE_DIR / 'static'))
 # No CORS. The pages and the API are served from the same origin, and a
 # permissive CORS policy would let any website open in the browser read this
 # medical data from http://127.0.0.1 while the server is running.

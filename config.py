@@ -19,14 +19,37 @@ DOCUMENT_DISCLAIMER = (
     "For personal record-keeping. Not a substitute for professional medical advice."
 )
 APP_VERSION = "1.0.0"
-DEBUG = True
-LOG_LEVEL = logging.DEBUG if DEBUG else logging.INFO
 
-# Project root. Every path below is anchored here so the app, the scripts and
-# the tests all find the same files no matter which directory they run from
-# (running `python3 app.py` from elsewhere used to create an empty database
-# in the current directory and serve nothing).
-BASE_DIR = Path(__file__).resolve().parent
+# A copy running from a PyInstaller bundle sees two different roots: the
+# read-only bundle it was unpacked into, and a writable folder of its own for
+# settings. Run from a checkout the two are the same directory, which is why
+# every path below is derived from one of these names rather than __file__.
+IS_FROZEN = bool(getattr(sys, 'frozen', False))
+
+# Read-only application resources: templates, static files, the schema.
+# PyInstaller unpacks them under sys._MEIPASS; a checkout has them beside
+# this file.
+BASE_DIR = Path(getattr(sys, '_MEIPASS', None) or Path(__file__).resolve().parent).resolve()
+
+# The folder the setup screen proposes when nothing has been chosen yet: a
+# plainly named folder in the person's home, never the app's own folder.
+DEFAULT_DATA_DIR_NAME = 'Health Ledger'
+
+
+def _user_config_dir() -> Path:
+    """The per-user folder a packaged copy keeps its settings in."""
+    if sys.platform == 'darwin':
+        return Path.home() / 'Library' / 'Application Support' / APP_NAME
+    if os.name == 'nt':
+        return Path(os.environ.get('APPDATA') or Path.home() / 'AppData' / 'Roaming') / APP_NAME
+    return Path(os.environ.get('XDG_CONFIG_HOME') or Path.home() / '.config') / 'health-ledger'
+
+
+# Where settings are written. A checkout keeps them in the checkout, in the
+# git-ignored .env. A packaged copy cannot: its bundle is read-only and is
+# replaced wholesale by the next version, so the choice would not survive.
+CONFIG_DIR = _user_config_dir() if IS_FROZEN else BASE_DIR
+ENV_PATH = CONFIG_DIR / '.env'
 
 
 def _load_dotenv(path: Path) -> None:
@@ -45,21 +68,37 @@ def _load_dotenv(path: Path) -> None:
             os.environ[key] = os.path.expanduser(value)
 
 
-_load_dotenv(BASE_DIR / '.env')
+_load_dotenv(ENV_PATH)
 
-# Where the person's records live. Everything private — the database, the
-# source documents, generated output, logs and backups — sits under this one
+
+def _env_flag(name: str, default: bool = False) -> bool:
+    raw = os.environ.get(name)
+    if raw is None:
+        return default
+    return raw.strip().lower() in ('1', 'true', 'yes', 'on')
+
+
+# Debug stays off unless HEALTH_LEDGER_DEBUG asks for it, and it must never
+# default on in a copy someone downloaded: Flask's debug mode serves the
+# Werkzeug interactive debugger, which will run arbitrary code for anything
+# that can reach the port.
+DEBUG = _env_flag('HEALTH_LEDGER_DEBUG')
+LOG_LEVEL = logging.DEBUG if DEBUG else logging.INFO
+
+# Where the person's records live. Everything private -- the database, the
+# source documents, generated output, logs and backups -- sits under this one
 # directory, and it should be OUTSIDE the repository so no checkout, sync or
 # commit can ever carry a record with it. HEALTH_LEDGER_DATA_DIR sets it (in
-# the environment or in ./.env); unset, it falls back to the project folder,
-# where those paths are git-ignored.
-ENV_PATH = BASE_DIR / '.env'
+# the environment or in the .env above).
 DATA_DIR_IS_CONFIGURED = bool(os.environ.get('HEALTH_LEDGER_DATA_DIR'))
-DATA_ROOT = Path(os.environ.get('HEALTH_LEDGER_DATA_DIR') or BASE_DIR).expanduser().resolve()
 
-# The folder the setup screen proposes when nothing has been chosen yet: a
-# plainly named folder in the person's home, never the app's own folder.
-DEFAULT_DATA_DIR_NAME = 'Health Ledger'
+# Unset, a checkout falls back to the checkout itself, where those paths are
+# git-ignored. A packaged copy must not: its BASE_DIR is a temporary unpack
+# directory that is deleted when the app quits, and the records would go with
+# it. It falls back to the same folder the setup screen proposes.
+_DATA_ROOT_FALLBACK = (Path.home() / DEFAULT_DATA_DIR_NAME) if IS_FROZEN else BASE_DIR
+DATA_ROOT = Path(os.environ.get('HEALTH_LEDGER_DATA_DIR')
+                 or _DATA_ROOT_FALLBACK).expanduser().resolve()
 
 DB_SCHEMA_PATH = BASE_DIR / 'genetic_profile_db_schema.sql'
 DOCS_DIR = BASE_DIR / 'docs'
@@ -113,6 +152,8 @@ def save_data_root(path) -> Path:
             lines = ['# Local settings for this machine. Git-ignored.',
                      '# All private data (database, primary_sources, output, logs, backups) lives here:']
         lines.append(line)
+    # A packaged copy writes this into a per-user folder that may not exist yet.
+    ENV_PATH.parent.mkdir(parents=True, exist_ok=True)
     ENV_PATH.write_text('\n'.join(lines) + '\n', encoding='utf-8')
     os.environ['HEALTH_LEDGER_DATA_DIR'] = value
     DATA_DIR_IS_CONFIGURED = True

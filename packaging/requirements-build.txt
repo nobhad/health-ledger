@@ -1,0 +1,10 @@
+# What building the packaged app needs, on top of requirements.txt.
+# Only the build machine installs these; they are not needed to run from a
+# checkout. See packaging/README.md.
+pyinstaller>=6.6.0
+
+# The menu-bar / system-tray icon that gives a double-clicked app a Quit.
+pystray>=0.19.5
+# pystray's macOS backend talks to NSStatusBar through PyObjC.
+pyobjc-framework-Cocoa>=10.1; sys_platform == 'darwin'
+pyobjc-framework-Quartz>=10.1; sys_platform == 'darwin'
