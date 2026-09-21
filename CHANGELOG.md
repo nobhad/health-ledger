@@ -40,9 +40,32 @@ published under a [source-available licence](LICENSE).
   records, never to the app's own directory.
 - Flask's template and static folders are pinned to `config.BASE_DIR`, which
   a packaged build otherwise infers wrongly from the module path.
+- A link styled as a button came out dark red on a near-black fill and could
+  barely be read: `pages.css` painted every `<a>` inside a `.card-body` brand
+  red from a later cascade layer than the button classes.
+- Query results were padded twice, sitting further in than anything else,
+  because `query.ts` wrapped them in a second `.results-container` inside the
+  one the page already provides.
 
 ### Changed
 
+- **The app was reworked for people who did not build it.** Every page
+  announced itself with a different name from the sidebar item that led
+  there, so titles now match what you clicked. Summary and Profile were the
+  same document at two lengths and are one page with a "Show everything"
+  toggle; `/profile` redirects to it. The overview leads with four things to
+  do rather than six counts. The sidebar's nine items are three named groups.
+  Setup hands straight over to adding a first record, skippably. Every page
+  reached before any records exist now says what is missing and offers the
+  one button that fixes it, instead of showing zeros, a blank document, or
+  (on the overview) an instruction to run extraction scripts in a terminal.
+- The first-run screen no longer opens with a filesystem path field. It names
+  the folder in a sentence, shows the path quietly, and offers the system
+  folder picker.
+- Alignment across the app: panels in a row share their heading and body
+  rows, so a title that wraps in one no longer pushes its fields out of line
+  with its neighbours; tables are full-bleed so a first column starts on the
+  same line as the heading above it; one content inset everywhere.
 - Developer material moved out of `README.md` into
   [`docs/DEVELOPMENT.md`](docs/DEVELOPMENT.md).
 - Eight stale status files removed from the repository root
