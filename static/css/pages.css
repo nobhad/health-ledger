@@ -185,12 +185,19 @@
   margin-bottom: 0;
 }
 
-:is(.profile-content, .summary-content, .card-body, .source-details, .preview-panel) a {
+/* A link in prose is red. A link wearing a button is a button, and this
+   rule sits in a later layer than the button classes, so without the
+   exemption it repainted the label brand red on the button's near-black
+   fill -- unreadable. Not every button carries the .btn base class, hence
+   the list. */
+:is(.profile-content, .summary-content, .card-body, .source-details, .preview-panel)
+  a:not(.btn, .btn-primary, .btn-secondary, .btn-danger) {
   color: var(--color-brand-red);
   text-decoration: none;
 }
 
-:is(.profile-content, .summary-content, .card-body, .source-details, .preview-panel) a:hover {
+:is(.profile-content, .summary-content, .card-body, .source-details, .preview-panel)
+  a:not(.btn, .btn-primary, .btn-secondary, .btn-danger):hover {
   text-decoration: underline;
 }
 

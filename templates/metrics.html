@@ -118,7 +118,15 @@
         <p class="table-note">Showing first 500 of {{ metrics|length }} metrics. Use filters to narrow results.</p>
         {% endif %}
         {% else %}
-        <p class="no-data">No metrics found. Try adjusting your filters.</p>
+        {% if metric_types %}
+        <p class="no-data">No readings match these filters. Widen the dates, or clear the filters.</p>
+        {% else %}
+        <div class="empty-state">
+            <p>No readings yet. Numbers like blood pressure, weight and lab
+               values are pulled out of the documents you add, and listed here.</p>
+            <a class="btn btn-primary" href="/import">Add your first record</a>
+        </div>
+        {% endif %}
         {% endif %}
     </div>
 </div>

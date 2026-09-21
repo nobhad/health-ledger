@@ -996,6 +996,19 @@ def all_traits():
         )
 
 
+def _ledger_is_empty(db) -> bool:
+    """
+    True when no genes have been recorded yet.
+
+    The profile and the summary are documents generated out of the gene
+    tables. With nothing in them they still render -- a title, a heading and
+    an empty table of contents -- which reads to somebody who has just
+    installed the app as though the page were broken. The pages say plainly
+    that nothing has been added instead.
+    """
+    return not db.conn.execute("SELECT COUNT(*) FROM genes").fetchone()[0]
+
+
 @app.route('/profile')
 def profile():
     """
@@ -1017,6 +1030,8 @@ def profile():
     
     try:
         db = get_db()
+        if _ledger_is_empty(db):
+            return render_template('profile.html', profile_html=None, ledger_empty=True)
         app_logger.debug("Generating profile HTML from database")
         profile_html = generate_profile_html(db)
         
@@ -1053,6 +1068,8 @@ def summary():
     
     try:
         db = get_db()
+        if _ledger_is_empty(db):
+            return render_template('summary.html', summary_html=None, ledger_empty=True)
         app_logger.debug("Generating summary HTML from database")
         
         from scripts.generate_personalized_summary import generate_summary_html

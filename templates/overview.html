@@ -134,7 +134,11 @@
                 {% endfor %}
             </ul>
             {% else %}
-            <p class="no-data">No records yet. <a href="/import">Add a DNA raw-data file</a>, <a href="/setup">import a database</a>, or add documents with the extraction scripts in <code>scripts/</code> (see the README).</p>
+            <div class="empty-state">
+                <p>No records yet. Add a lab result, a visit note, a letter or a DNA
+                   file and it will be listed here.</p>
+                <a class="btn btn-primary" href="/import">Add your first record</a>
+            </div>
             {% endif %}
         </div>
     </div>

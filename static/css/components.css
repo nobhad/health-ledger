@@ -611,6 +611,29 @@ input[type="date"]::-webkit-calendar-picker-indicator {
   padding: var(--space-5) var(--space-2);
 }
 
+/* NOTHING HERE YET
+   Every page can be opened before anything has been added, and a page
+   that only says "none found" leaves somebody who has just installed the
+   app with nowhere to go. An empty state says what is missing in plain
+   words and carries the one control that fixes it. */
+.empty-state {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: var(--space-2);
+  padding: var(--space-5) var(--space-2);
+  text-align: center;
+}
+
+.empty-state p {
+  max-width: var(--app-empty-state-width);
+  margin: 0;
+  font-size: var(--font-size-sm);
+  line-height: var(--line-height-relaxed);
+  color: var(--color-text-secondary);
+}
+
 /* ============================================
  * BADGES — coloured text, no fill
  * ============================================ */
@@ -1037,6 +1060,14 @@ input[type="date"]::-webkit-calendar-picker-indicator {
 
 .sources-list-item:hover {
   background: var(--color-bg-hover);
+}
+
+/* A row that is a message, not a record: it does not invite a click. */
+.sources-list-item.is-empty,
+.sources-list-item.is-empty:hover {
+  background: none;
+  cursor: default;
+  color: var(--color-text-secondary);
 }
 
 .sources-list-item.active {

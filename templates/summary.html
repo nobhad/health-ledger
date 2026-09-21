@@ -8,6 +8,16 @@
 {% block page_description %}A personalized summary of your genetic profile, highlighting key findings and recommendations.{% endblock %}
 
 {% block content %}
+{% if ledger_empty %}
+<div class="card">
+    <div class="card-body">
+        <div class="empty-state">
+            <p>The short version of what the ledger holds: key findings in plain language. It is built from the records you add, so there is nothing to show yet.</p>
+            <a class="btn btn-primary" href="/import">Add your first record</a>
+        </div>
+    </div>
+</div>
+{% else %}
 <div class="doc-layout">
     <aside class="doc-nav" id="docNav" hidden aria-label="Sections">
         <div class="doc-nav-title">Sections</div>
@@ -20,6 +30,7 @@
         </div>
     </div>
 </div>
+{% endif %}
 {% endblock %}
 
 {% block scripts %}

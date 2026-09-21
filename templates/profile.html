@@ -8,6 +8,16 @@
 {% block page_description %}Complete genetic profile document with detailed information about all genes, traits, and health associations.{% endblock %}
 
 {% block content %}
+{% if ledger_empty %}
+<div class="card">
+    <div class="card-body">
+        <div class="empty-state">
+            <p>A full write-up of every gene in the ledger, with what is known about each one. It is built from the records you add, so there is nothing to show yet.</p>
+            <a class="btn btn-primary" href="/import">Add your first record</a>
+        </div>
+    </div>
+</div>
+{% else %}
 <div class="doc-layout">
     <aside class="doc-nav" id="docNav" hidden aria-label="Sections">
         <div class="doc-nav-title">Sections</div>
@@ -20,6 +30,7 @@
         </div>
     </div>
 </div>
+{% endif %}
 {% endblock %}
 
 {% block scripts %}

@@ -2412,6 +2412,10 @@ body[data-page="ledger"] {
      to its own line. A path needs to be readable to be checkable. */
   --app-input-group-min: var(--aside-width-narrow);
 
+  /* How wide a line of explanatory text is allowed to run in an empty
+     state, so it reads as a sentence rather than a banner. */
+  --app-empty-state-width: var(--aside-width-wide);
+
   /* Scroll ceilings for long text blocks. */
   --app-results-max-height: 70vh;
   --app-source-text-max-height: 60vh;
@@ -3195,6 +3199,29 @@ input[type="date"]::-webkit-calendar-picker-indicator {
   padding: var(--space-5) var(--space-2);
 }
 
+/* NOTHING HERE YET
+   Every page can be opened before anything has been added, and a page
+   that only says "none found" leaves somebody who has just installed the
+   app with nowhere to go. An empty state says what is missing in plain
+   words and carries the one control that fixes it. */
+.empty-state {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: var(--space-2);
+  padding: var(--space-5) var(--space-2);
+  text-align: center;
+}
+
+.empty-state p {
+  max-width: var(--app-empty-state-width);
+  margin: 0;
+  font-size: var(--font-size-sm);
+  line-height: var(--line-height-relaxed);
+  color: var(--color-text-secondary);
+}
+
 /* ============================================
  * BADGES — coloured text, no fill
  * ============================================ */
@@ -3625,6 +3652,14 @@ input[type="date"]::-webkit-calendar-picker-indicator {
 
 .sources-list-item:hover {
   background: var(--color-bg-hover);
+}
+
+/* A row that is a message, not a record: it does not invite a click. */
+.sources-list-item.is-empty,
+.sources-list-item.is-empty:hover {
+  background: none;
+  cursor: default;
+  color: var(--color-text-secondary);
 }
 
 .sources-list-item.active {
@@ -5004,12 +5039,19 @@ html[data-theme="dark"] .theme-toggle-icon--dark {
   margin-bottom: 0;
 }
 
-:is(.profile-content, .summary-content, .card-body, .source-details, .preview-panel) a {
+/* A link in prose is red. A link wearing a button is a button, and this
+   rule sits in a later layer than the button classes, so without the
+   exemption it repainted the label brand red on the button's near-black
+   fill -- unreadable. Not every button carries the .btn base class, hence
+   the list. */
+:is(.profile-content, .summary-content, .card-body, .source-details, .preview-panel)
+  a:not(.btn, .btn-primary, .btn-secondary, .btn-danger) {
   color: var(--color-brand-red);
   text-decoration: none;
 }
 
-:is(.profile-content, .summary-content, .card-body, .source-details, .preview-panel) a:hover {
+:is(.profile-content, .summary-content, .card-body, .source-details, .preview-panel)
+  a:not(.btn, .btn-primary, .btn-secondary, .btn-danger):hover {
   text-decoration: underline;
 }
 

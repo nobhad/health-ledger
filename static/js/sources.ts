@@ -88,7 +88,17 @@ function displaySourcesList(sources: Source[]): void {
     if (!list) {return;}
     
     if (sources.length === 0) {
-        list.innerHTML = '<li class="sources-list-item">No sources found</li>';
+        // An empty list means two different things, and saying the wrong one
+        // sends somebody looking for a filter they never set.
+        const filtered = ['searchInput', 'typeFilter', 'startDate', 'endDate']
+            .some(id => (document.getElementById(id) as HTMLInputElement | null)?.value);
+        list.innerHTML = filtered
+            ? '<li class="sources-list-item is-empty">Nothing matches what you are looking for.</li>'
+            : '<li class="is-empty"><div class="empty-state">'
+              + '<p>No records yet. Lab results, visit notes, letters and DNA files '
+              + 'you add are listed here.</p>'
+              + '<a class="btn btn-primary" href="/import">Add your first record</a>'
+              + '</div></li>';
         return;
     }
     

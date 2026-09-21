@@ -54,6 +54,10 @@ body[data-page="ledger"] {
      to its own line. A path needs to be readable to be checkable. */
   --app-input-group-min: var(--aside-width-narrow);
 
+  /* How wide a line of explanatory text is allowed to run in an empty
+     state, so it reads as a sentence rather than a banner. */
+  --app-empty-state-width: var(--aside-width-wide);
+
   /* Scroll ceilings for long text blocks. */
   --app-results-max-height: 70vh;
   --app-source-text-max-height: 60vh;

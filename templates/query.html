@@ -30,7 +30,13 @@
 </div>
 
 {{ loading_spinner() }}
-{{ results_container() }}
+<div id="results" class="results-container">
+    <div class="empty-state">
+        <p>Results appear here. Pick a condition, a trait or a gene above and
+           press Search, or show everything the ledger holds with the two
+           buttons.</p>
+    </div>
+</div>
 {% endblock %}
 
 {% block scripts %}
