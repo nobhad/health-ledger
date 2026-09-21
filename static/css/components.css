@@ -307,12 +307,19 @@ select.form-input {
    button keeps its own. */
 .input-group {
   display: flex;
+  flex-wrap: wrap;
   gap: var(--space-1);
 }
 
+/* A button's label does not wrap, so the button does not shrink, and the
+   field beside it was giving up all the room instead -- an export path
+   showed as "backups/e" in a box a few characters wide, which is not
+   enough to check what you are about to overwrite. The field holds a
+   readable minimum; when the two no longer fit, the button takes its own
+   line rather than squeezing the field. */
 .input-group > .form-input {
-  flex: 1 1 auto;
-  min-width: 0;
+  flex: 1 1 var(--app-input-group-min);
+  min-width: min(100%, var(--app-input-group-min));
 }
 
 /* File input: the field is the same box as any other control; the browser's

@@ -50,6 +50,10 @@ body[data-page="ledger"] {
   --app-sources-findings-min-width: var(--aside-width-narrow);
   --app-sources-detail-min-width: var(--aside-width-wide);
 
+  /* How narrow a field beside a button may get before the button is sent
+     to its own line. A path needs to be readable to be checkable. */
+  --app-input-group-min: var(--aside-width-narrow);
+
   /* Scroll ceilings for long text blocks. */
   --app-results-max-height: 70vh;
   --app-source-text-max-height: 60vh;

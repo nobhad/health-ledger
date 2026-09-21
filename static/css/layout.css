@@ -568,12 +568,20 @@ html[data-theme="dark"] .theme-toggle-icon--dark {
 .form-row {
   display: grid;
   grid-template-columns: var(--detail-row-label-width) minmax(0, 1fr);
-  align-items: center;
+  /* Start, not centre: when a control wraps onto a second line the label
+     stays on the line of the first control instead of drifting into the
+     gap between the two. */
+  align-items: start;
   gap: var(--space-1-5);
   margin-bottom: var(--field-group-gap);
 }
 
+/* The label stands a control's height, so a row with one control still
+   reads as label and field centred on each other. */
 .form-row .field-label {
+  display: flex;
+  align-items: center;
+  min-height: var(--app-control-height);
   margin-bottom: 0;
 }
 

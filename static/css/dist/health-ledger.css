@@ -2408,6 +2408,10 @@ body[data-page="ledger"] {
   --app-sources-findings-min-width: var(--aside-width-narrow);
   --app-sources-detail-min-width: var(--aside-width-wide);
 
+  /* How narrow a field beside a button may get before the button is sent
+     to its own line. A path needs to be readable to be checkable. */
+  --app-input-group-min: var(--aside-width-narrow);
+
   /* Scroll ceilings for long text blocks. */
   --app-results-max-height: 70vh;
   --app-source-text-max-height: 60vh;
@@ -2885,12 +2889,19 @@ select.form-input {
    button keeps its own. */
 .input-group {
   display: flex;
+  flex-wrap: wrap;
   gap: var(--space-1);
 }
 
+/* A button's label does not wrap, so the button does not shrink, and the
+   field beside it was giving up all the room instead -- an export path
+   showed as "backups/e" in a box a few characters wide, which is not
+   enough to check what you are about to overwrite. The field holds a
+   readable minimum; when the two no longer fit, the button takes its own
+   line rather than squeezing the field. */
 .input-group > .form-input {
-  flex: 1 1 auto;
-  min-width: 0;
+  flex: 1 1 var(--app-input-group-min);
+  min-width: min(100%, var(--app-input-group-min));
 }
 
 /* File input: the field is the same box as any other control; the browser's
@@ -4523,12 +4534,20 @@ html[data-theme="dark"] .theme-toggle-icon--dark {
 .form-row {
   display: grid;
   grid-template-columns: var(--detail-row-label-width) minmax(0, 1fr);
-  align-items: center;
+  /* Start, not centre: when a control wraps onto a second line the label
+     stays on the line of the first control instead of drifting into the
+     gap between the two. */
+  align-items: start;
   gap: var(--space-1-5);
   margin-bottom: var(--field-group-gap);
 }
 
+/* The label stands a control's height, so a row with one control still
+   reads as label and field centred on each other. */
 .form-row .field-label {
+  display: flex;
+  align-items: center;
+  min-height: var(--app-control-height);
   margin-bottom: 0;
 }
 
