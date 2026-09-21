@@ -148,26 +148,38 @@ class TestTheSpecMatchesTheRepository(unittest.TestCase):
         and the app is built to degrade to the browser's print dialog."""
         self.assertIn("'weasyprint'", self.spec)
 
-    def test_the_committed_png_was_rendered_from_the_committed_svg(self):
+    def test_the_committed_icon_files_agree_with_each_other(self):
         """
-        icon.png is the master the build ships, and it is produced from
-        icon.svg by a browser. Nothing stops somebody editing the drawing and
-        committing without re-rendering, after which the released icon is not
-        the one in the repository. The digest beside it says which drawing it
-        came from; a mismatch means icon.png is stale.
+        icon.png is the master the build ships, produced from icon.svg by a
+        browser. Two ways they can disagree, and the stamp records a digest
+        for each:
 
-        This is checked by digest rather than by file times because a fresh
-        clone gets arbitrary mtimes, so a time-based check passes or fails by
-        luck on a build machine.
+          - the drawing was edited and nobody re-rendered, so the shipped
+            raster is not what the repository says it is;
+          - the raster was replaced by hand, which the SVG's digest alone
+            would never notice, leaving every check green.
+
+        Digests rather than file times: a fresh clone gets arbitrary mtimes,
+        so a time-based check passes or fails by luck on a build machine.
         """
         import hashlib
         pkg = ROOT / 'packaging'
-        svg = (pkg / 'icon.svg').read_text(encoding='utf-8')
-        stamp = (pkg / 'icon.svg.sha256').read_text(encoding='utf-8').strip()
-        self.assertEqual(
-            hashlib.sha256(svg.encode('utf-8')).hexdigest(), stamp,
-            'icon.png is stale: icon.svg has changed since it was rendered. '
-            'Run packaging/make_icons.py and commit the result.')
+        stamp = {}
+        for line in (pkg / 'icon.sha256').read_text(encoding='utf-8').splitlines():
+            parts = line.split()
+            if len(parts) == 2:
+                stamp[parts[0]] = parts[1]
+
+        svg_sha = hashlib.sha256(
+            (pkg / 'icon.svg').read_text(encoding='utf-8').encode('utf-8')).hexdigest()
+        self.assertEqual(stamp.get('icon.svg'), svg_sha,
+                         'icon.svg has changed since icon.png was rendered. '
+                         'Run packaging/make_icons.py and commit the result.')
+
+        png_sha = hashlib.sha256((pkg / 'icon.png').read_bytes()).hexdigest()
+        self.assertEqual(stamp.get('icon.png'), png_sha,
+                         'icon.png is not the render this drawing produced. '
+                         'Run packaging/make_icons.py and commit the result.')
 
     def test_the_icons_the_spec_names_are_committed(self):
         for name in ('icon.png', 'icon.icns', 'icon.ico'):

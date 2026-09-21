@@ -62,12 +62,33 @@ PULSE_PATH = 'M3.22 13H9.5l.5-1 2 4.5 2-7 1.5 3.5h5.27'
 
 CHROME = '/Applications/Google Chrome.app/Contents/MacOS/Google Chrome'
 
-# The digest of the icon.svg that the committed icon.png was rendered from.
+# Digests of the drawing and of the raster it produced.
+#
 # A fresh clone gets whatever mtimes git felt like writing, so "is the PNG
 # newer than the SVG" is a coin flip on a build machine -- and losing it
 # means the icon in a release is whatever that runner's Chrome drew rather
-# than the drawing that was reviewed. The digest does not care about clocks.
-RENDER_STAMP_NAME = 'icon.svg.sha256'
+# than the drawing that was reviewed. Digests do not care about clocks.
+#
+# Both are recorded, not just the SVG's. The SVG digest catches a drawing
+# that was edited without re-rendering; the PNG digest catches the other
+# direction, a raster replaced by hand, which would otherwise leave every
+# check green while the shipped icon is not what the drawing says.
+RENDER_STAMP_NAME = 'icon.sha256'
+
+
+def file_digest(path: Path) -> str:
+    return hashlib.sha256(path.read_bytes()).hexdigest()
+
+
+def read_stamp(path: Path) -> dict:
+    if not path.is_file():
+        return {}
+    pairs = (line.split() for line in path.read_text(encoding='utf-8').splitlines())
+    return {parts[0]: parts[1] for parts in pairs if len(parts) == 2}
+
+
+def write_stamp(path: Path, svg_sha: str, png_sha: str) -> None:
+    path.write_text(f'icon.svg  {svg_sha}\nicon.png  {png_sha}\n', encoding='utf-8')
 
 
 def avatar_paths() -> list:
@@ -158,10 +179,13 @@ def render_png(svg_path: Path, png_path: Path) -> bool:
     re-rendering each time would make the icon in a release depend on
     whichever Chrome the build machine happens to have.
     """
-    stamp = svg_path.parent / RENDER_STAMP_NAME
+    stamp_path = svg_path.parent / RENDER_STAMP_NAME
     digest = svg_digest(svg_path.read_text(encoding='utf-8'))
-    if (png_path.is_file() and stamp.is_file()
-            and stamp.read_text(encoding='utf-8').strip() == digest):
+    stamp = read_stamp(stamp_path)
+    # Re-render if either side has drifted: the drawing changed, or the
+    # raster is not the one this drawing produced.
+    if (png_path.is_file() and stamp.get('icon.svg') == digest
+            and stamp.get('icon.png') == file_digest(png_path)):
         print('icon.png was rendered from this exact drawing; keeping it')
         return True
     if not Path(CHROME).exists():
@@ -182,8 +206,8 @@ def render_png(svg_path: Path, png_path: Path) -> bool:
             '--virtual-time-budget=4000',
             f'--screenshot={png_path}', str(page),
         ], check=True, capture_output=True)
-    stamp.write_text(digest + '\n', encoding='utf-8')
-    print(f'wrote {png_path.relative_to(ROOT)} and {stamp.relative_to(ROOT)}')
+    write_stamp(stamp_path, digest, file_digest(png_path))
+    print(f'wrote {png_path.relative_to(ROOT)} and {stamp_path.relative_to(ROOT)}')
     return True
 
 

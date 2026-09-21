@@ -52,6 +52,17 @@ jobs:
           echo "::error::the packaged app never answered on 127.0.0.1:5099"
           kill $pid 2>/dev/null; exit 1
 
+      # The .icns inside the bundle is built on the runner. This proves it
+      # still carries the drawing that was reviewed, by pixels rather than by
+      # container bytes, which vary between macOS versions for identical
+      # images.
+      - name: The shipped icon is the committed one
+        run: |
+          python -m pip install --quiet pillow
+          python packaging/verify_icon.py \
+            "dist/Health Ledger.app/Contents/Resources/icon.icns" \
+            packaging/icon.png
+
       - uses: actions/upload-artifact@v4
         with:
           name: macos-dmg
