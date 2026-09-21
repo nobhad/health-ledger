@@ -80,6 +80,12 @@
   padding: 0 var(--portal-content-padding);
 }
 
+.doc-actions {
+  display: flex;
+  align-items: center;
+  gap: var(--space-3);
+}
+
 /* Switches the document between its two lengths. It sits in the band
    rather than in the document so it is in the same place whichever
    length is showing. */

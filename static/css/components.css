@@ -1104,6 +1104,11 @@ input[type="date"]::-webkit-calendar-picker-indicator {
   line-height: var(--line-height-relaxed);
 }
 
+/* The extracted text, set off from the source's own details above it. */
+.source-extract {
+  margin-top: var(--space-3);
+}
+
 .source-text {
   max-height: var(--app-source-text-max-height);
   overflow-y: auto;

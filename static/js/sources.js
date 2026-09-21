@@ -89,10 +89,8 @@ function displaySourcesList(sources) {
         const date = formatDate(source.document_date, 'No date');
         return `
             <li class="sources-list-item" data-source-id="${source.id}">
-                <div style="font-weight: 500;">${escapeHtmlSource(source.source_name)}</div>
-                <div style="font-size: 0.85em; color: #666; margin-top: 4px;">
-                    ${escapeHtmlSource(source.source_type)} | ${date}
-                </div>
+                <span class="list-item-title">${escapeHtmlSource(source.source_name)}</span>
+                <span class="list-item-meta">${escapeHtmlSource(source.source_type)} &middot; ${date}</span>
             </li>
         `;
     }).join('');
@@ -137,16 +135,22 @@ function displaySourceDetails(source) {
         return;
     }
     const date = formatDate(source.document_date, 'Not specified');
+    const pdfAvailable = document.getElementById('sourcesContainer')
+        ?.dataset.pdfAvailable === 'true';
     detailsDiv.innerHTML = `
         <h3>${escapeHtmlSource(source.source_name)}</h3>
         <p><strong>Type:</strong> ${escapeHtmlSource(source.source_type)}</p>
         ${source.institution ? `<p><strong>Institution:</strong> ${escapeHtmlSource(source.institution)}</p>` : ''}
         <p><strong>Date:</strong> ${date}</p>
         ${source.file_name ? `<p><strong>File:</strong> ${escapeHtmlSource(source.file_name)}</p>` : ''}
-        <div style="margin-top: 20px;">
+        <div class="source-extract">
             <h4>Extracted Text</h4>
             <div class="source-text">${escapeHtmlSource(source.extracted_text || 'No text extracted')}</div>
         </div>
+        ${pdfAvailable ? `
+        <div class="card-actions">
+            <a class="btn btn-secondary" href="/api/pdf/source/${source.id}">Save this record as a PDF</a>
+        </div>` : ''}
     `;
 }
 function loadSourceFindings(sourceId) {
@@ -174,9 +178,7 @@ function displayFindings(findings) {
         return;
     }
     findingsPanel.innerHTML = `
-        <p style="font-size: 0.9em; color: #666; margin-bottom: 12px;">
-            ${findings.length} finding(s)
-        </p>
+        <p class="note">${findings.length} finding${findings.length === 1 ? '' : 's'}</p>
         <ul class="findings-list">
             ${findings.map(finding => `
                 <li class="finding-item">

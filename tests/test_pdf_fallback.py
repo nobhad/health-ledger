@@ -4,6 +4,7 @@ PDFs degrade to the browser's print dialog when WeasyPrint cannot load.
 """
 
 import os
+import re
 import sys
 import tempfile
 import unittest
@@ -98,6 +99,36 @@ class TestPdfFallback(unittest.TestCase):
             ok = pdf_generator.generate_pdf_from_html('<p>x</p>', os.path.join(
                 tempfile.gettempdir(), 'health-ledger-test-never-written.pdf'))
         self.assertFalse(ok)
+
+
+class TestEveryPdfRouteIsReachable(unittest.TestCase):
+    """
+    Three of the four PDF routes had no button anywhere in the app: they
+    were written, tested, and unreachable, which is the kind of thing that
+    survives for a year because nothing fails. A route nobody can get to is
+    either dead code or a missing control, and both are worth knowing about.
+    """
+
+    def test_no_pdf_route_is_orphaned(self):
+        root = Path(__file__).resolve().parent.parent
+        # A page may reach a route by its path or through url_for() on the
+        # endpoint's name, so collect both for each one.
+        routes = re.findall(r"@app\.route\('(/api/pdf/[^']+)'[^)]*\)\s*\ndef (\w+)",
+                            (root / 'app.py').read_text())
+        self.assertTrue(routes, 'no PDF routes found; has app.py moved?')
+
+        surfaces = list((root / 'templates').rglob('*.html'))
+        surfaces += [p for p in (root / 'static' / 'js').glob('*.ts')]
+        blob = '\n'.join(p.read_text() for p in surfaces)
+
+        orphans = []
+        for route, endpoint in routes:
+            # Strip the <int:source_id>/<specialty> parts; the caller builds
+            # those, so match on the stem.
+            stem = route.split('<')[0].rstrip('/')
+            if stem not in blob and f"'{endpoint}'" not in blob:
+                orphans.append(route)
+        self.assertEqual(orphans, [], 'PDF routes no page can reach: ' + ', '.join(orphans))
 
 
 if __name__ == '__main__':

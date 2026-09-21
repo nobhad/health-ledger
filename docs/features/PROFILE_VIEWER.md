@@ -1,6 +1,12 @@
 # Profile Viewer Feature
 
-**Last Updated**: December 7, 2025
+**Last Updated**: 2026-09-20
+
+> The full write-up no longer has a page of its own. Summary and Profile were
+> the same document at two lengths, so they were merged: it is `/summary`
+> with **Show everything** pressed (`?full=1`), and `/profile` redirects
+> there. Everything below about how the document is generated, its citations
+> and its section nav still holds.
 
 ## Overview
 
@@ -30,18 +36,18 @@ The Profile Viewer displays the complete genetic profile document with all gene 
 
 ## Route
 
-### GET /profile
+### GET /summary?full=1
 
 **Purpose**: Display the full genetic profile HTML document.
 
-**Handler**: `app.profile()`
+**Handler**: `app.summary()`. `/profile` redirects here.
 
 **Process**:
 
 1. **Queries database** for all genes, traits, conditions, and citations
 2. **Generates HTML dynamically** from database using `profile_generator.py`
-3. Renders with `templates/profile.html`
-4. Includes header navigation
+3. Renders with `templates/summary.html`, which carries both lengths
+4. Includes the section nav and the length toggle
 
 **Error Handling**:
 
@@ -51,7 +57,7 @@ The Profile Viewer displays the complete genetic profile document with all gene 
 **Example Request**:
 
 ```text
-GET /profile
+GET /summary?full=1
 ```
 
 **Response**: HTML page with full profile content
@@ -68,7 +74,7 @@ The profile HTML is **generated dynamically from the database** using `profile_g
 2. **Build Document Structure**: Organizes data by gene sections
 3. **Format Citations**: Transforms citation numbers to clickable links
 4. **Generate HTML**: Creates HTML markup with proper structure
-5. **Render Template**: Wraps content in `templates/profile.html` with navigation
+5. **Render Template**: Wraps content in `templates/summary.html` with navigation
 
 ### Citation Conversion
 
@@ -143,17 +149,24 @@ ol > li[id^="ref-"] {
 {% extends "base.html" %}
 ```
 
-### Profile Template
+### Document Template
+
+The page title and description come from `base.html` blocks, and the body is
+whichever length was asked for.
 
 ```html
-{% block content %}
-<div class="page-header">
-    <h2>Full Genetic Profile</h2>
-    <p class="page-description">Complete genetic profile document...</p>
-</div>
+{% block page_title %}Summary{% endblock %}
 
-<div class="profile-content">
-    {{ profile_html|safe }}
+{% block content %}
+<div class="doc-layout">
+    <aside class="doc-nav" id="docNav" hidden aria-label="Sections">...</aside>
+    <div class="doc-main">
+        <div class="doc-main-title">
+            <span>Document</span>
+            <a class="doc-length-toggle" href="...">Show everything</a>
+        </div>
+        <div class="summary-content" id="docBody">{{ summary_html|safe }}</div>
+    </div>
 </div>
 {% endblock %}
 ```
@@ -275,7 +288,7 @@ python3 scripts/import_from_markdown.py
 ### Templates
 
 - `templates/base.html` - Base template with header/footer
-- `templates/profile.html` - Profile page template
+- `templates/summary.html` - the document page, both lengths
 
 ### Scripts
 

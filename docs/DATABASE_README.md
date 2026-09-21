@@ -12,23 +12,23 @@ This database system stores genetic profile data including genes, SNPs, genotype
 **Core Genetic Data:**
 
 - **Genes** fully documented
-- **36 SNPs** associated with genes
-- **20 genotypes** recorded (duplicates removed)
-- **2,115 trait associations** with gene and citation links
-- **1,193 health condition associations** with gene and citation links
-- **174 citations/references** properly linked
-- **10 gene-gene interactions** imported
+- **SNPs** associated with genes
+- **Genotypes** recorded per gene
+- **Trait associations** with gene and citation links
+- **Health condition associations** with gene and citation links
+- **Citations** linked to what they support
+- **Gene-gene interactions**
 
 **Relationships:**
 
-- **2,276+ trait-citation links** (comprehensive linking)
-- **1,241+ health-citation links** (comprehensive linking)
+- **trait to citation** links
+- **health to citation** links
 
 **Medical Data:**
 
 - **21 primary sources** integrated
 - **104 primary source findings** extracted
-- **6,104 health metrics** from medical records
+- **Health metrics** read out of imported documents
 
 **Pharmacogenomic:**
 
@@ -244,8 +244,8 @@ export_to_json("export.json")
 
 - **0 orphaned trait associations**
 - **0 orphaned health conditions**
-- **2,010 trait-citation links** properly connected
-- **1,097 health-citation links** properly connected
+- **trait to citation** links
+- **health to citation** links
 - **All genes** have associated data (traits, conditions, SNPs)
 
 ## Notes

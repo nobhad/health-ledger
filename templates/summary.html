@@ -28,11 +28,19 @@
             <span>Document</span>
             {# One document at two lengths. The toggle is the whole reason
                the full write-up no longer needs a page of its own. #}
-            {% if full %}
-            <a class="doc-length-toggle" href="{{ url_for('summary') }}">Show the short version</a>
-            {% else %}
-            <a class="doc-length-toggle" href="{{ url_for('summary', full='1') }}">Show everything</a>
-            {% endif %}
+            <span class="doc-actions">
+                {% if full %}
+                <a class="doc-length-toggle" href="{{ url_for('summary') }}">Show the short version</a>
+                {% else %}
+                <a class="doc-length-toggle" href="{{ url_for('summary', full='1') }}">Show everything</a>
+                {% endif %}
+                {# Hidden when WeasyPrint's libraries are missing, as they are
+                   in the packaged app; the browser's own print dialog still
+                   saves this page as a PDF. #}
+                {% if not pdf_reason %}
+                <a class="doc-length-toggle" href="{{ url_for('api_pdf_profile' if full else 'api_pdf_summary') }}">Save as PDF</a>
+                {% endif %}
+            </span>
         </div>
         <div class="summary-content" id="docBody">
             {{ summary_html|safe }}

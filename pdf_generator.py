@@ -86,8 +86,10 @@ def wrap_pdf_document(title: str, body_html: str) -> str:
     """
     Wrap a body fragment in the full document the PDF stylesheets expect.
 
-    Mirrors templates/pdf_base.html (pdf.css + print.css) for callers that
-    run outside a Flask request context.
+    The one definition of that shell. It used to be mirrored in a
+    templates/pdf_base.html that nothing ever rendered, so the copy that
+    was actually used and the copy that was maintained could drift apart;
+    the template is gone and this is it.
     """
     return f"""<!DOCTYPE html>
 <html lang="en">

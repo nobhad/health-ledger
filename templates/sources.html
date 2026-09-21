@@ -7,7 +7,9 @@
 {% block page_description %}Every document you have added, with the text pulled out of it.{% endblock %}
 
 {% block content %}
-<div class="panel-container" id="sourcesContainer">
+{# The PDF link on a source is hidden when WeasyPrint's libraries are
+   missing, which is the case in the packaged app. #}
+<div class="panel-container" id="sourcesContainer" data-pdf-available="{{ 'false' if pdf_reason else 'true' }}">
     <!-- Left Panel: Source List with Filters -->
     <div class="panel sources-panel-left">
         <div class="panel-header">Sources</div>

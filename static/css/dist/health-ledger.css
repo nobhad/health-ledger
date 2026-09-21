@@ -3696,6 +3696,11 @@ input[type="date"]::-webkit-calendar-picker-indicator {
   line-height: var(--line-height-relaxed);
 }
 
+/* The extracted text, set off from the source's own details above it. */
+.source-extract {
+  margin-top: var(--space-3);
+}
+
 .source-text {
   max-height: var(--app-source-text-max-height);
   overflow-y: auto;
@@ -4973,6 +4978,12 @@ html[data-theme="dark"] .theme-toggle-icon--dark {
   justify-content: space-between;
   gap: var(--space-2);
   padding: 0 var(--portal-content-padding);
+}
+
+.doc-actions {
+  display: flex;
+  align-items: center;
+  gap: var(--space-3);
 }
 
 /* Switches the document between its two lengths. It sits in the band

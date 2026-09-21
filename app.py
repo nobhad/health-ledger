@@ -1071,7 +1071,8 @@ def summary():
             app_logger.warning("Generated document appears to be empty or very short")
             return "Document content is missing. Please check database.", 500
 
-        return render_template('summary.html', summary_html=document_html, full=full)
+        return render_template('summary.html', summary_html=document_html, full=full,
+                               pdf_reason=pdf_generator.pdf_unavailable_reason())
     except Exception as e:
         app_logger.error(f"Error generating document from database: {e}", exc_info=True)
         return f"Error generating document: {str(e)}", 500
@@ -1145,7 +1146,8 @@ def metrics():
 def sources():
     """Primary source browser page"""
     try:
-        return render_template('sources.html')
+        return render_template('sources.html',
+                               pdf_reason=pdf_generator.pdf_unavailable_reason())
     except Exception as e:
         app_logger.error(f"Error rendering sources page: {e}", exc_info=True)
         return f"Error loading sources page: {str(e)}", 500

@@ -9,7 +9,7 @@
 ## Table of Contents
 
 1. [Overview](#overview)
-2. [Database Statistics](#database-statistics)
+2. [What the database holds](#what-the-database-holds)
 3. [Complete Schema Reference](#complete-schema-reference)
 4. [All Tables](#all-tables)
 5. [Indexes](#indexes)
@@ -50,27 +50,40 @@ The Genetic Profile Database is a comprehensive SQLite database system designed 
 
 ---
 
-## Database Statistics
+## What the database holds
 
-**Last Verified:** December 7, 2025
+A ledger holds whatever its owner has put in it, so a table of row counts
+describes one person's medical records rather than the software. What every
+ledger has in common is the shape:
 
-### Current Data Counts
+| Table | Holds |
+| --- | --- |
+| `genes` | one row per gene the ledger tracks |
+| `snps` | the variants belonging to those genes |
+| `genotypes` | the call recorded for a gene |
+| `snp_genotypes` | every variant a DNA raw-data file called |
+| `dna_imports` | one row per raw-data file imported |
+| `trait_associations` | what a gene is associated with, non-clinical |
+| `health_condition_associations` | what a gene is associated with, clinical |
+| `gene_gene_interactions` | how two genes are known to interact |
+| `pharmacogenomic_data` | a gene's drug-metabolism phenotype |
+| `gene_pharmacogenomic_drugs` | the medications a gene is known to affect |
+| `medication_interactions` | a report's own medication guidance |
+| `citations` | the source of a claim |
+| `gene_trait_citations`, `gene_health_citations` | which citation supports which association |
+| `research_findings`, `research_references`, `research_finding_citations` | literature kept against a gene |
+| `primary_sources` | a document that was imported, with its extracted text |
+| `primary_source_findings` | what was read out of one of those documents |
+| `health_metrics` | a dated reading: a lab value, a vital sign |
+| `database_sources` | where a piece of reference data came from |
+| `app_settings` | the ledger's own settings, including the patient details |
 
-| Category | Count | Status |
-| ---------- | ------- | -------- |
-| **Genes** | 17 | ✅ Complete |
-| **Citations/References** | 174 | ✅ Complete |
-| **Trait Associations** | 2,115 | ✅ Complete |
-| **Health Condition Associations** | 1,193 | ✅ Complete |
-| **SNPs** | 36 | ✅ Complete |
-| **Genotypes** | 20 | ✅ Complete (duplicates removed) |
-| **Gene-Gene Interactions** | 10 | ✅ Complete |
-| **Primary Sources** | 21 | ✅ Complete |
-| **Primary Source Findings** | 104 | ✅ Complete |
-| **Health Metrics** | 6,104 | ✅ Complete |
-| **Research Findings** | 16 | ✅ Complete |
-| **Trait-Citation Links** | 2,808 | ✅ Complete |
-| **Health-Citation Links** | 1,529 | ✅ Complete |
+`genetic_profile_db_schema.sql` is the authority; it creates all of the above
+and is applied on first connection.
+
+> Counts from a real ledger are that person's data, not documentation. Keep
+> figures out of this file: `scripts/check_private_data.py` will not catch a
+> row count, so it is on whoever edits this.
 
 ### Data Coverage
 
@@ -120,7 +133,6 @@ The Genetic Profile Database is a comprehensive SQLite database system designed 
 | `created_at` | TIMESTAMP | DEFAULT CURRENT_TIMESTAMP | Creation timestamp |
 | `updated_at` | TIMESTAMP | DEFAULT CURRENT_TIMESTAMP | Last update timestamp |
 
-**Current Records:** 17  
 **Indexes:** `idx_genes_symbol` on `gene_symbol`
 
 **Example:**
@@ -145,7 +157,6 @@ SELECT * FROM genes WHERE gene_symbol = 'COMT';
 | `alternate_allele` | TEXT | | Alternate allele |
 | `created_at` | TIMESTAMP | DEFAULT CURRENT_TIMESTAMP | Creation timestamp |
 
-**Current Records:** 36  
 **Indexes:**
 
 - `idx_snps_rs_number` on `rs_number`
@@ -174,7 +185,6 @@ WHERE g.gene_symbol = 'COMT';
 | `phenotype` | TEXT | | Phenotype description |
 | `created_at` | TIMESTAMP | DEFAULT CURRENT_TIMESTAMP | Creation timestamp |
 
-**Current Records:** 195  
 **Indexes:** `idx_genotypes_gene_id` on `gene_id`
 
 **Example:**
@@ -201,7 +211,6 @@ WHERE g.gene_symbol = 'COMT';
 | `notes` | TEXT | | Additional notes |
 | `created_at` | TIMESTAMP | DEFAULT CURRENT_TIMESTAMP | Creation timestamp |
 
-**Current Records:** 1,515  
 **Indexes:** `idx_trait_associations_gene_id` on `gene_id`
 
 **Example:**
@@ -228,7 +237,6 @@ WHERE ta.trait_name LIKE '%ADHD%';
 | `notes` | TEXT | | Additional notes |
 | `created_at` | TIMESTAMP | DEFAULT CURRENT_TIMESTAMP | Creation timestamp |
 
-**Current Records:** 857  
 **Indexes:** `idx_health_condition_associations_gene_id` on `gene_id`
 
 **Example:**
@@ -263,7 +271,6 @@ WHERE hca.condition_name LIKE '%anxiety%';
 | `created_at` | TIMESTAMP | DEFAULT CURRENT_TIMESTAMP | Creation timestamp |
 | `updated_at` | TIMESTAMP | DEFAULT CURRENT_TIMESTAMP | Last update timestamp |
 
-**Current Records:** 174  
 **Indexes:**
 
 - `idx_citations_citation_number` on `citation_number`
@@ -288,8 +295,6 @@ SELECT * FROM citations WHERE pubmed_id IS NOT NULL ORDER BY year DESC;
 | `citation_id` | INTEGER | NOT NULL, FOREIGN KEY → citations.id | Citation reference |
 | `created_at` | TIMESTAMP | DEFAULT CURRENT_TIMESTAMP | Creation timestamp |
 
-**Current Records:** 2,010
-
 **Example:**
 
 ```sql
@@ -312,8 +317,6 @@ WHERE ta.trait_name LIKE '%ADHD%';
 | `health_condition_association_id` | INTEGER | FOREIGN KEY → health_condition_associations.id | Health condition |
 | `citation_id` | INTEGER | NOT NULL, FOREIGN KEY → citations.id | Citation reference |
 | `created_at` | TIMESTAMP | DEFAULT CURRENT_TIMESTAMP | Creation timestamp |
-
-**Current Records:** 1,097
 
 **Example:**
 
@@ -338,8 +341,6 @@ WHERE hca.condition_name LIKE '%anxiety%';
 | `gene2_id` | INTEGER | NOT NULL, FOREIGN KEY → genes.id | Second gene |
 | `interaction_description` | TEXT | | Description of interaction |
 | `created_at` | TIMESTAMP | DEFAULT CURRENT_TIMESTAMP | Creation timestamp |
-
-**Current Records:** 0 (structure ready for import)
 
 **Example:**
 
@@ -367,8 +368,6 @@ JOIN genes g2 ON ggi.gene2_id = g2.id;
 | `finding_text` | TEXT | NOT NULL | Finding text/content |
 | `created_at` | TIMESTAMP | DEFAULT CURRENT_TIMESTAMP | Creation timestamp |
 
-**Current Records:** 16
-
 **Example:**
 
 ```sql
@@ -391,8 +390,6 @@ WHERE g.gene_symbol = 'COMT';
 | `citation_id` | INTEGER | NOT NULL, FOREIGN KEY → citations.id | Citation reference |
 | `created_at` | TIMESTAMP | DEFAULT CURRENT_TIMESTAMP | Creation timestamp |
 
-**Current Records:** 16
-
 ---
 
 ### 12. database_sources
@@ -407,8 +404,6 @@ WHERE g.gene_symbol = 'COMT';
 | `source_url` | TEXT | | URL to source |
 | `key_information` | TEXT | | Key information from source |
 | `created_at` | TIMESTAMP | DEFAULT CURRENT_TIMESTAMP | Creation timestamp |
-
-**Current Records:** 0
 
 **Indexes:**
 
@@ -439,8 +434,6 @@ WHERE g.gene_symbol = 'COMT';
 | `created_at` | TIMESTAMP | DEFAULT CURRENT_TIMESTAMP | Creation timestamp |
 | `updated_at` | TIMESTAMP | DEFAULT CURRENT_TIMESTAMP | Last update timestamp |
 
-**Current Records:** 0
-
 **Indexes:**
 
 - `idx_research_references_reference_number` on `reference_number`
@@ -467,8 +460,6 @@ WHERE g.gene_symbol = 'COMT';
 | `created_at` | TIMESTAMP | DEFAULT CURRENT_TIMESTAMP | Creation timestamp |
 | `updated_at` | TIMESTAMP | DEFAULT CURRENT_TIMESTAMP | Last update timestamp |
 
-**Current Records:** 21
-
 **Indexes:**
 
 - `idx_primary_sources_source_type` on `source_type`
@@ -491,8 +482,6 @@ WHERE g.gene_symbol = 'COMT';
 | `related_condition` | TEXT | | Related health condition |
 | `notes` | TEXT | | Additional notes |
 | `created_at` | TIMESTAMP | DEFAULT CURRENT_TIMESTAMP | Creation timestamp |
-
-**Current Records:** 104
 
 **Indexes:**
 
@@ -524,8 +513,6 @@ WHERE g.gene_symbol = 'COMT';
 | `normal_range_max` | REAL | | Upper bound of normal range |
 | `notes` | TEXT | | Additional notes |
 | `created_at` | TIMESTAMP | DEFAULT CURRENT_TIMESTAMP | Creation timestamp |
-
-**Current Records:** 6,104
 
 **Indexes:**
 
@@ -563,8 +550,6 @@ WHERE metric_type = 'blood_pressure'
 | `created_at` | TIMESTAMP | DEFAULT CURRENT_TIMESTAMP | Creation timestamp |
 | `updated_at` | TIMESTAMP | DEFAULT CURRENT_TIMESTAMP | Last update timestamp |
 
-**Current Records:** 0 (structure ready)
-
 **Indexes:** `idx_pharmacogenomic_data_gene_id` on `gene_id`
 
 ---
@@ -579,8 +564,6 @@ WHERE metric_type = 'blood_pressure'
 | `pharmacogenomic_data_id` | INTEGER | NOT NULL, FOREIGN KEY → pharmacogenomic_data.id | Pharmacogenomic data |
 | `drug_name` | TEXT | NOT NULL | Drug name |
 | `created_at` | TIMESTAMP | DEFAULT CURRENT_TIMESTAMP | Creation timestamp |
-
-**Current Records:** 0 (structure ready)
 
 **Indexes:** `idx_gene_pharmacogenomic_drugs_pg_id` on `pharmacogenomic_data_id`
 
@@ -1686,7 +1669,7 @@ PRAGMA foreign_key_check;
 - ✅ **174 citations** properly linked
 - ✅ **1,515 trait associations** with citations
 - ✅ **857 health conditions** with citations
-- ✅ **6,104 health metrics** from medical records
+- ✅ Health metrics read out of imported documents
 - ✅ **21 primary sources** integrated
 - ✅ **104 findings** extracted
 

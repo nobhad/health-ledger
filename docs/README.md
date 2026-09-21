@@ -124,13 +124,13 @@ python3 scripts/import_from_markdown.py
 
 - **Genes** fully documented
 - **SNPs** associated with genes
-- **20 genotypes** recorded (duplicates removed)
-- **2,115 trait associations** with gene and citation links
-- **1,193 health condition associations** with gene and citation links
-- **174 citations/references** properly linked
-- **10 gene-gene interactions** imported
+- **Genotypes** recorded per gene
+- **Trait associations** with gene and citation links
+- **Health condition associations** with gene and citation links
+- **Citations** linked to what they support
+- **Gene-gene interactions**
 - **21 primary sources** integrated
-- **6,104 health metrics** from medical records
+- **Health metrics** read out of imported documents
 
 **Database Quality:** ⭐⭐⭐⭐⭐ (5/5) - Excellent
 
