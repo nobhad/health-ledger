@@ -2414,10 +2414,6 @@ body[data-page="ledger"] {
 
   /* Measure for a rendered document (profile, summary). */
 
-  /* Accent edge that marks a row or block (abnormal metric, active source).
-     The portal's own highlight pattern: an inset edge, not a fill. */
-  --app-edge-mark: inset var(--border-width-thick) 0 0;
-
   /* Arrow, the site's avatar, as the brand mark: the portal masks the same
      file with the current text colour so it follows the theme. */
   --app-brand-mark: url("/static/images/avatar_small_sidebar.svg");
@@ -3073,10 +3069,16 @@ input[type="date"]::-webkit-calendar-picker-indicator {
 /* ============================================
  * TABLES — the portal's .data-table
  * ============================================ */
+/* A table is full-bleed in its panel: it gives back the panel's own
+   horizontal padding and the outer columns carry that inset as cell
+   padding instead. The first column then starts on the same line as the
+   heading above it, and a row's rule and its hover run the full width of
+   the panel rather than stopping short of both edges. */
 .table-container,
 .table-responsive,
 .results-table-wrapper {
-  width: 100%;
+  width: calc(100% + 2 * var(--portal-content-padding));
+  margin-inline: calc(-1 * var(--portal-content-padding));
   overflow-x: auto;
 }
 
@@ -3136,8 +3138,14 @@ input[type="date"]::-webkit-calendar-picker-indicator {
   background: var(--color-bg-hover);
 }
 
-:is(.data-table, .table, .results-table) tbody tr.abnormal td:first-child {
-  box-shadow: var(--app-edge-mark) var(--color-error);
+/* See the full-bleed note above: the outer columns replace the padding the
+   wrapper gave back, so the first column lines up with the headings. */
+:is(.data-table, .table, .results-table) :is(th, td):first-child {
+  padding-left: var(--portal-content-padding);
+}
+
+:is(.data-table, .table, .results-table) :is(th, td):last-child {
+  padding-right: var(--portal-content-padding);
 }
 
 :is(.data-table, .table, .results-table) thead {
@@ -3518,14 +3526,22 @@ input[type="date"]::-webkit-calendar-picker-indicator {
 
 .panel-header {
   flex-shrink: 0;
-  padding: var(--space-1-5) var(--content-gutter);
+  /* The same horizontal inset as every other page's content, so moving
+     between pages does not shift the left edge of what you are reading. */
+  padding: var(--space-1-5) var(--portal-content-padding);
   border-bottom: var(--portal-border);
 }
 
+/* The column pads its rows, not its box, so a row's rule and its hover
+   run the full width of the column. */
 .panel-content {
   flex: 1;
   overflow-y: auto;
-  padding: var(--content-gutter);
+  padding: var(--space-2) 0;
+}
+
+.panel-content > :not(.sources-list) {
+  padding-inline: var(--portal-content-padding);
 }
 
 .panel-splitter {
@@ -3573,7 +3589,7 @@ input[type="date"]::-webkit-calendar-picker-indicator {
   display: flex;
   flex-direction: column;
   gap: var(--field-group-gap);
-  padding: var(--content-gutter);
+  padding: var(--space-2) var(--portal-content-padding);
   border-bottom: var(--portal-border);
 }
 
@@ -3588,7 +3604,7 @@ input[type="date"]::-webkit-calendar-picker-indicator {
 }
 
 .sources-list-item {
-  padding: var(--space-1) var(--space-1-5);
+  padding: var(--space-1) var(--portal-content-padding);
   overflow-wrap: anywhere;
   border-bottom: var(--border-width-thin) solid var(--portal-alpha-white-10);
   font-size: var(--font-size-sm);
@@ -4824,19 +4840,42 @@ html[data-theme="dark"] .theme-toggle-icon--dark {
   border-right: var(--portal-border);
 }
 
+/* The document column, so its heading band and the nav's are siblings of
+   the same height. */
+.doc-main {
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+  min-height: 0;
+}
+
 /* The same band as the sidebar's first row: the nav's top padding plus a
    nav button's height plus the same padding below, with the label centred,
-   so "Sections" sits on the line of "Overview" across the rule. */
-.doc-nav-title {
+   so "Sections" sits on the line of "Overview" across the rule.
+   .doc-main-title shares it so the two columns' first rule is one line
+   across the page instead of two at different heights -- the same shape
+   the sources workspace has. */
+.doc-nav-title,
+.doc-main-title {
   display: flex;
   align-items: center;
+  flex-shrink: 0;
   height: calc(var(--space-2) + var(--space-5) + var(--space-2));
-  padding: 0 var(--space-3);
   border-bottom: var(--portal-border);
   font-size: var(--heading-section-font-size);
   font-weight: var(--heading-section-font-weight);
   letter-spacing: var(--heading-section-letter-spacing);
   text-transform: var(--heading-text-transform);
+}
+
+/* The nav is a nav: it keeps the main sidebar's inset. The document is
+   content, so it takes the content inset every other page uses. */
+.doc-nav-title {
+  padding: 0 var(--space-3);
+}
+
+.doc-main-title {
+  padding: 0 var(--portal-content-padding);
 }
 
 /* The same rhythm as the sidebar's list: the list's own top and bottom
@@ -4887,6 +4926,7 @@ html[data-theme="dark"] .theme-toggle-icon--dark {
    full width of the column. */
 .profile-content,
 .summary-content {
+  flex: 1 1 auto;
   min-width: 0;
   min-height: 0;
   overflow-y: auto;

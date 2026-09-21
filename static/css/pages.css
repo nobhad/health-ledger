@@ -40,19 +40,42 @@
   border-right: var(--portal-border);
 }
 
+/* The document column, so its heading band and the nav's are siblings of
+   the same height. */
+.doc-main {
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+  min-height: 0;
+}
+
 /* The same band as the sidebar's first row: the nav's top padding plus a
    nav button's height plus the same padding below, with the label centred,
-   so "Sections" sits on the line of "Overview" across the rule. */
-.doc-nav-title {
+   so "Sections" sits on the line of "Overview" across the rule.
+   .doc-main-title shares it so the two columns' first rule is one line
+   across the page instead of two at different heights -- the same shape
+   the sources workspace has. */
+.doc-nav-title,
+.doc-main-title {
   display: flex;
   align-items: center;
+  flex-shrink: 0;
   height: calc(var(--space-2) + var(--space-5) + var(--space-2));
-  padding: 0 var(--space-3);
   border-bottom: var(--portal-border);
   font-size: var(--heading-section-font-size);
   font-weight: var(--heading-section-font-weight);
   letter-spacing: var(--heading-section-letter-spacing);
   text-transform: var(--heading-text-transform);
+}
+
+/* The nav is a nav: it keeps the main sidebar's inset. The document is
+   content, so it takes the content inset every other page uses. */
+.doc-nav-title {
+  padding: 0 var(--space-3);
+}
+
+.doc-main-title {
+  padding: 0 var(--portal-content-padding);
 }
 
 /* The same rhythm as the sidebar's list: the list's own top and bottom
@@ -103,6 +126,7 @@
    full width of the column. */
 .profile-content,
 .summary-content {
+  flex: 1 1 auto;
   min-width: 0;
   min-height: 0;
   overflow-y: auto;

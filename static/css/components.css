@@ -489,10 +489,16 @@ input[type="date"]::-webkit-calendar-picker-indicator {
 /* ============================================
  * TABLES — the portal's .data-table
  * ============================================ */
+/* A table is full-bleed in its panel: it gives back the panel's own
+   horizontal padding and the outer columns carry that inset as cell
+   padding instead. The first column then starts on the same line as the
+   heading above it, and a row's rule and its hover run the full width of
+   the panel rather than stopping short of both edges. */
 .table-container,
 .table-responsive,
 .results-table-wrapper {
-  width: 100%;
+  width: calc(100% + 2 * var(--portal-content-padding));
+  margin-inline: calc(-1 * var(--portal-content-padding));
   overflow-x: auto;
 }
 
@@ -552,8 +558,14 @@ input[type="date"]::-webkit-calendar-picker-indicator {
   background: var(--color-bg-hover);
 }
 
-:is(.data-table, .table, .results-table) tbody tr.abnormal td:first-child {
-  box-shadow: var(--app-edge-mark) var(--color-error);
+/* See the full-bleed note above: the outer columns replace the padding the
+   wrapper gave back, so the first column lines up with the headings. */
+:is(.data-table, .table, .results-table) :is(th, td):first-child {
+  padding-left: var(--portal-content-padding);
+}
+
+:is(.data-table, .table, .results-table) :is(th, td):last-child {
+  padding-right: var(--portal-content-padding);
 }
 
 :is(.data-table, .table, .results-table) thead {
@@ -932,14 +944,22 @@ input[type="date"]::-webkit-calendar-picker-indicator {
 
 .panel-header {
   flex-shrink: 0;
-  padding: var(--space-1-5) var(--content-gutter);
+  /* The same horizontal inset as every other page's content, so moving
+     between pages does not shift the left edge of what you are reading. */
+  padding: var(--space-1-5) var(--portal-content-padding);
   border-bottom: var(--portal-border);
 }
 
+/* The column pads its rows, not its box, so a row's rule and its hover
+   run the full width of the column. */
 .panel-content {
   flex: 1;
   overflow-y: auto;
-  padding: var(--content-gutter);
+  padding: var(--space-2) 0;
+}
+
+.panel-content > :not(.sources-list) {
+  padding-inline: var(--portal-content-padding);
 }
 
 .panel-splitter {
@@ -985,7 +1005,7 @@ input[type="date"]::-webkit-calendar-picker-indicator {
   display: flex;
   flex-direction: column;
   gap: var(--field-group-gap);
-  padding: var(--content-gutter);
+  padding: var(--space-2) var(--portal-content-padding);
   border-bottom: var(--portal-border);
 }
 
@@ -1000,7 +1020,7 @@ input[type="date"]::-webkit-calendar-picker-indicator {
 }
 
 .sources-list-item {
-  padding: var(--space-1) var(--space-1-5);
+  padding: var(--space-1) var(--portal-content-padding);
   overflow-wrap: anywhere;
   border-bottom: var(--border-width-thin) solid var(--portal-alpha-white-10);
   font-size: var(--font-size-sm);

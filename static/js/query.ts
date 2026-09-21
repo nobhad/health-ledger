@@ -445,9 +445,11 @@ function showResults(data: QueryResultItem[] | { error: string }, title: string)
     });
     const keys = Array.from(allKeys).sort();
     
-    // Build unified filterable table
-    let html = '<div class="results-container">';
-    html += '<div class="results-header">';
+    // Build unified filterable table. No wrapper of its own: resultsEl is
+    // already .results-container and pads itself, and a second one inside
+    // it padded the results twice, so they sat 40px further in than the
+    // content on every other page.
+    let html = '<div class="results-header">';
     html += '<h2>' + escapeHtml(title) + '</h2>';
     html += '<div class="results-controls">';
     html += '<input type="text" id="resultsFilter" placeholder="Filter results..." class="filter-input" onkeyup="filterResults()">';
@@ -495,7 +497,6 @@ function showResults(data: QueryResultItem[] | { error: string }, title: string)
         html += '</tr>';
     });
     html += '</tbody></table>';
-    html += '</div>';
     html += '</div>';
     
     resultsEl.innerHTML = html;

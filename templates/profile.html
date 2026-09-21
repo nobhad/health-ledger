@@ -13,8 +13,11 @@
         <div class="doc-nav-title">Sections</div>
         <ul class="doc-nav-list" id="docNavList"></ul>
     </aside>
-    <div class="profile-content" id="docBody">
-        {{ profile_html|safe }}
+    <div class="doc-main">
+        <div class="doc-main-title">Document</div>
+        <div class="profile-content" id="docBody">
+            {{ profile_html|safe }}
+        </div>
     </div>
 </div>
 {% endblock %}
