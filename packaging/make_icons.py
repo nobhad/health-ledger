@@ -121,7 +121,19 @@ def build_svg(size: int = MASTER_SIZE) -> str:
 
 
 def write_svg(path: Path) -> None:
-    path.write_text(build_svg(), encoding='utf-8')
+    """
+    Write the drawing, but only when it has actually changed.
+
+    Rewriting an identical file still moves its mtime, and render_png skips
+    the Chrome pass by comparing icon.svg's mtime against icon.png's. Writing
+    unconditionally here made the SVG newer on every single run, so the skip
+    could never fire and every build re-rendered the icon.
+    """
+    svg = build_svg()
+    if path.is_file() and path.read_text(encoding='utf-8') == svg:
+        print(f'{path.relative_to(ROOT)} unchanged')
+        return
+    path.write_text(svg, encoding='utf-8')
     print(f'wrote {path.relative_to(ROOT)}')
 
 
