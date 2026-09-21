@@ -63,6 +63,7 @@ LOG_LEVEL = logging.INFO
 ### 1. Database Connection Errors
 
 **Symptoms:**
+
 - "SQLite objects created in a thread can only be used in that same thread"
 - Database locked errors
 - Connection timeout errors
@@ -70,18 +71,21 @@ LOG_LEVEL = logging.INFO
 **Solutions:**
 
 1. **Check thread-local storage:**
+
    ```python
    # In app.py, verify get_db() is using thread-local storage
    _local = threading.local()
    ```
 
 2. **Verify database file permissions:**
+
    ```bash
    ls -la genetic_profile.db
    # Should be readable/writable
    ```
 
 3. **Check for database locks:**
+
    ```bash
    # Close any other connections
    # Remove lock files if safe
@@ -91,6 +95,7 @@ LOG_LEVEL = logging.INFO
 ### 2. API Endpoint Errors
 
 **Symptoms:**
+
 - 500 Internal Server Error
 - Empty responses
 - Timeout errors
@@ -98,23 +103,27 @@ LOG_LEVEL = logging.INFO
 **Debugging Steps:**
 
 1. **Check server logs:**
+
    ```bash
    tail -f logs/app.log
    ```
 
 2. **Test endpoint directly:**
+
    ```bash
    curl http://localhost:5001/api/test
    curl http://localhost:5001/api/all-genes
    ```
 
 3. **Check request parameters:**
+
    ```bash
    # With parameters
    curl "http://localhost:5001/api/genes-by-condition?condition=ADHD"
    ```
 
 4. **Enable debug mode:**
+
    ```python
    # In config.py
    DEBUG = True
@@ -123,6 +132,7 @@ LOG_LEVEL = logging.INFO
 ### 3. Template Rendering Errors
 
 **Symptoms:**
+
 - Template not found errors
 - Template syntax errors
 - Missing variables
@@ -130,11 +140,13 @@ LOG_LEVEL = logging.INFO
 **Solutions:**
 
 1. **Verify template files exist:**
+
    ```bash
    ls -la templates/
    ```
 
 2. **Check template syntax:**
+
    ```python
    from jinja2 import Environment, FileSystemLoader
    env = Environment(loader=FileSystemLoader('templates'))
@@ -148,6 +160,7 @@ LOG_LEVEL = logging.INFO
 ### 4. JavaScript Errors
 
 **Symptoms:**
+
 - Multiselect dropdowns not working
 - API calls failing
 - Console errors
@@ -160,6 +173,7 @@ LOG_LEVEL = logging.INFO
    - Safari: Cmd+Option+C
 
 2. **Check for errors:**
+
    ```javascript
    // Common issues:
    // - CORS errors (check Flask CORS configuration)
@@ -168,6 +182,7 @@ LOG_LEVEL = logging.INFO
    ```
 
 3. **Test API endpoints:**
+
    ```javascript
    // In browser console
    fetch('/api/all-genes')
@@ -249,6 +264,7 @@ curl "http://localhost:5001/api/gene-info?gene=COMT"
 ### Enable Detailed Error Responses
 
 In `config.py`:
+
 ```python
 DEBUG = True  # Returns traceback in error responses
 ```
@@ -267,6 +283,7 @@ def log_request():
 ### Multiselect Component Issues
 
 **Check JavaScript console for:**
+
 - `multiselectState is not defined`
 - `Cannot read property 'selected' of undefined`
 - API response errors
@@ -274,11 +291,13 @@ def log_request():
 **Debug steps:**
 
 1. **Verify state initialization:**
+
    ```javascript
    console.log(multiselectState);
    ```
 
 2. **Check API responses:**
+
    ```javascript
    fetch('/api/all-genes')
      .then(r => r.json())
@@ -289,6 +308,7 @@ def log_request():
    ```
 
 3. **Verify DOM elements:**
+
    ```javascript
    console.log(document.getElementById('geneInput'));
    console.log(document.getElementById('geneDropdown'));
@@ -297,11 +317,13 @@ def log_request():
 ### CSS Issues
 
 **Check browser developer tools:**
+
 - Inspect element to see computed styles
 - Check for CSS conflicts
 - Verify media queries
 
 **Common issues:**
+
 - Z-index conflicts (multiselect dropdowns)
 - Flexbox/grid layout issues
 - Responsive design breakpoints
@@ -368,6 +390,7 @@ toolbar = DebugToolbarExtension(app)
 ### Database Browser
 
 Use SQLite browser tools:
+
 - DB Browser for SQLite (GUI)
 - `sqlite3` command-line tool
 
@@ -398,4 +421,3 @@ SELECT * FROM genes LIMIT 5;
 - [ ] Test with minimal data
 - [ ] Check for recent code changes
 - [ ] Review error messages carefully
-

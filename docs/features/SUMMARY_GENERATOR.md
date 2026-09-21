@@ -38,6 +38,7 @@ The Summary Generator creates a personalized summary of the genetic profile, syn
 ### Purpose
 
 Generates a personalized summary document that:
+
 - Highlights key genetic findings
 - Summarizes medication metabolism status
 - Identifies gene-gene interactions
@@ -65,6 +66,7 @@ db = GeneticProfileDB()
 ### Step 2: Gather Data
 
 The script collects:
+
 - All genes and their information
 - Trait associations
 - Health condition associations
@@ -82,6 +84,7 @@ The script collects:
 ### Step 4: Generate Markdown
 
 Creates structured markdown with:
+
 - Executive summary
 - Key findings
 - Strengths and sensitivities
@@ -102,11 +105,13 @@ Converts markdown to HTML for web display.
 **Purpose**: High-level overview of genetic profile
 
 **Content**:
+
 - Total genes analyzed
 - Key genetic patterns
 - Overall health implications
 
 **Example**:
+
 ```markdown
 ## Executive Summary
 
@@ -119,11 +124,13 @@ to mental health, pain sensitivity, and medication metabolism...
 **Purpose**: Highlight most important genetic variants
 
 **Content**:
+
 - Significant genotypes
 - Notable trait associations
 - Important health condition links
 
 **Example**:
+
 ```markdown
 ### Key Findings
 
@@ -137,11 +144,13 @@ to mental health, pain sensitivity, and medication metabolism...
 **Purpose**: Identify genetic advantages and vulnerabilities
 
 **Content**:
+
 - Genetic strengths (protective variants)
 - Sensitivities (increased risk variants)
 - Balanced presentation
 
 **Example**:
+
 ```markdown
 ### Strengths
 
@@ -159,11 +168,13 @@ to mental health, pain sensitivity, and medication metabolism...
 **Purpose**: Summarize pharmacogenomic findings
 
 **Content**:
+
 - Metabolism status by gene
 - Affected medications
 - Dosing considerations
 
 **Example**:
+
 ```markdown
 ### Medication Metabolism Overview
 
@@ -180,11 +191,13 @@ to mental health, pain sensitivity, and medication metabolism...
 **Purpose**: Highlight important genetic interactions
 
 **Content**:
+
 - Interaction networks
 - Combined effects
 - Clinical significance
 
 **Example**:
+
 ```markdown
 ### Key Interactions
 
@@ -202,12 +215,14 @@ to mental health, pain sensitivity, and medication metabolism...
 **Purpose**: Actionable guidance based on genetic profile
 
 **Content**:
+
 - Medication considerations
 - Lifestyle recommendations
 - Monitoring suggestions
 - Healthcare provider guidance
 
 **Example**:
+
 ```markdown
 ### Recommendations
 
@@ -231,6 +246,7 @@ to mental health, pain sensitivity, and medication metabolism...
 ### Database Queries
 
 The script queries:
+
 - `get_all_genes()` - All genes
 - `get_trait_associations_for_gene()` - Trait data
 - `get_health_conditions_for_gene()` - Condition data
@@ -240,6 +256,7 @@ The script queries:
 ### Primary Sources
 
 Integrates findings from:
+
 - Pharmacogenomic test reports
 - Genetics consultation letters
 - Clinical health records
@@ -253,6 +270,7 @@ Integrates findings from:
 **Location**: `Your_Genetic_Profile_Summary.md`
 
 **Structure**:
+
 ```markdown
 # Your Genetic Profile Summary
 
@@ -357,16 +375,20 @@ pharm_genes = ['CYP2D6', 'CYP2C19', 'CYP1A2']
 ## Related Files
 
 ### Scripts
+
 - `scripts/generate_personalized_summary.py` - Main generation script
 
 ### Output
+
 - `Your_Genetic_Profile_Summary.md` - Markdown source
 - `output/Your_Genetic_Profile_Summary.html` - HTML output
 
 ### Templates
+
 - `templates/summary.html` - Summary page template
 
 ### Python
+
 - `app.py` - Summary route handler
 - `database_manager.py` - Data access
 
@@ -377,6 +399,7 @@ pharm_genes = ['CYP2D6', 'CYP2C19', 'CYP1A2']
 ### Summary Not Generating
 
 1. **Check database connection**:
+
    ```python
    from database_manager import GeneticProfileDB
    db = GeneticProfileDB()
@@ -385,6 +408,7 @@ pharm_genes = ['CYP2D6', 'CYP2C19', 'CYP1A2']
    ```
 
 2. **Verify data exists**:
+
    ```python
    # Check for required data
    db = GeneticProfileDB()
@@ -394,6 +418,7 @@ pharm_genes = ['CYP2D6', 'CYP2C19', 'CYP1A2']
    ```
 
 3. **Check file permissions**:
+
    ```bash
    ls -la Your_Genetic_Profile_Summary.md
    chmod 644 Your_Genetic_Profile_Summary.md
@@ -414,6 +439,7 @@ pharm_genes = ['CYP2D6', 'CYP2C19', 'CYP1A2']
 ### HTML Not Rendering
 
 1. **Regenerate HTML**:
+
    ```bash
    # Summary is generated automatically from database
    # Access via web interface at /summary route
@@ -436,4 +462,3 @@ pharm_genes = ['CYP2D6', 'CYP2C19', 'CYP1A2']
 - [ ] Export to PDF
 - [ ] Shareable summary links
 - [ ] Version history tracking
-

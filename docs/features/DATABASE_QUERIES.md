@@ -318,12 +318,14 @@ Returns: Pharmacogenomic data with affected medications.
 
 ### Common Exceptions
 
-**sqlite3.OperationalError**
+#### sqlite3.OperationalError
+
 - Database locked: Another process is using the database
 - No such table: Schema not initialized
 - Solution: Check database file permissions and schema
 
-**sqlite3.IntegrityError**
+#### sqlite3.IntegrityError
+
 - UNIQUE constraint failed: Duplicate entry
 - FOREIGN KEY constraint failed: Invalid reference
 - Solution: Check data before insertion
@@ -388,6 +390,7 @@ except:
 ### Index Usage
 
 The schema includes indexes on frequently queried columns:
+
 - `gene_symbol` (unique index)
 - `trait_name`
 - `condition_name`
@@ -398,10 +401,12 @@ The schema includes indexes on frequently queried columns:
 ## Related Files
 
 ### Python
+
 - `database_manager.py` - Main database interface class
 - `genetic_profile_db_schema.sql` - Database schema definition
 
 ### Documentation
+
 - `docs/DATABASE_README.md` - Database architecture documentation
 - `docs/DEBUGGING_GUIDE.md` - Debugging database issues
 
@@ -483,4 +488,3 @@ columns = cursor.fetchall()
 for col in columns:
     print(f"{col[1]} ({col[2]})")
 ```
-

@@ -29,6 +29,7 @@ The Genetic Profile Database is a Flask-based web application that manages and q
 **Purpose**: HTTP server and request handling
 
 **Components:**
+
 - Route handlers for web pages
 - API endpoints for data access
 - Template rendering
@@ -41,12 +42,14 @@ The Genetic Profile Database is a Flask-based web application that manages and q
 **Purpose**: Data persistence and querying
 
 **Components:**
+
 - SQLite database
 - Database manager class
 - Schema definitions
 - Query methods
 
-**Files**: 
+**Files**:
+
 - `database_manager.py`
 - `genetic_profile_db_schema.sql`
 
@@ -55,12 +58,14 @@ The Genetic Profile Database is a Flask-based web application that manages and q
 **Purpose**: User interface
 
 **Components:**
+
 - HTML templates
 - CSS styling
 - JavaScript for interactivity
 - Multiselect components
 
 **Files**:
+
 - `templates/`
 - `static/css/`
 - `static/js/`
@@ -70,6 +75,7 @@ The Genetic Profile Database is a Flask-based web application that manages and q
 **Purpose**: Data import and transformation
 
 **Components:**
+
 - Markdown import
 - Citation management
 - HTML generation
@@ -108,7 +114,7 @@ The Genetic Profile Database is a Flask-based web application that manages and q
 
 ### Request Flow
 
-```
+```text
 Browser Request
     ↓
 Flask App (app.py)
@@ -126,7 +132,7 @@ Browser
 
 ### Data Import Flow
 
-```
+```text
 Markdown Document
     ↓
 Import Script (scripts/import_from_markdown.py)
@@ -140,7 +146,7 @@ SQLite Database
 
 ### HTML Generation Flow
 
-```
+```text
 Markdown Document
     ↓
 Generate HTML Script (scripts/generate_html.py)
@@ -161,12 +167,14 @@ HTML File (output/)
 **SQLite** - File-based relational database
 
 **Advantages:**
+
 - No server required
 - Easy backup (copy file)
 - ACID compliant
 - Good for single-user/small-scale applications
 
 **Configuration:**
+
 - WAL mode enabled for better concurrency
 - Thread-safe connections
 - Foreign key constraints enabled
@@ -174,6 +182,7 @@ HTML File (output/)
 ### Schema Design
 
 **Core Tables:**
+
 - `genes` - Gene information
 - `snps` - Single nucleotide polymorphisms
 - `genotypes` - User genotypes
@@ -181,24 +190,29 @@ HTML File (output/)
 - `research_references` - Enhanced research references
 
 **Association Tables:**
+
 - `trait_associations` - Gene-trait relationships
 - `health_condition_associations` - Gene-condition relationships
 - `gene_gene_interactions` - Gene interaction network
 
 **Linking Tables:**
+
 - `gene_trait_citations` - Citations for traits
 - `gene_health_citations` - Citations for conditions
 - `research_finding_citations` - Citations for findings
 
 **Pharmacogenomic Tables:**
+
 - `pharmacogenomic_data` - Drug metabolism data
 - `gene_pharmacogenomic_drugs` - Medication associations
 
 **Primary Source Tables:**
+
 - `primary_sources` - Source documents
 - `primary_source_findings` - Findings from sources
 
 **Views:**
+
 - `gene_summary` - Gene overview
 - `gene_trait_view` - Trait associations
 - `gene_health_view` - Health condition associations
@@ -207,7 +221,7 @@ HTML File (output/)
 
 ### Relationships
 
-```
+```text
 genes (1) ──→ (many) snps
 genes (1) ──→ (many) genotypes
 genes (1) ──→ (many) trait_associations
@@ -226,7 +240,7 @@ citations (many) ←──→ (many) research_findings
 
 ### Directory Layout
 
-```
+```text
 genetic_profile/
 ├── app.py                    # Flask application
 ├── database_manager.py       # Database interface
@@ -268,18 +282,21 @@ genetic_profile/
 ### Module Organization
 
 **app.py**:
+
 - Flask application setup
 - Route definitions
 - Request handling
 - Error handling
 
 **database_manager.py**:
+
 - Database connection management
 - CRUD operations
 - Query methods
 - Relationship management
 
 **config.py**:
+
 - Application configuration
 - Logging setup
 - Path definitions
@@ -334,7 +351,7 @@ For production deployment:
 
 ### Development
 
-```
+```text
 Local Machine
     ↓
 Flask Development Server (localhost:5001)
@@ -346,7 +363,7 @@ Browser (localhost:5001)
 
 ### Production (Recommended)
 
-```
+```text
 Web Server (Nginx/Apache)
     ↓
 WSGI Server (Gunicorn/uWSGI)
@@ -360,7 +377,7 @@ Static Files (CDN optional)
 
 ### Alternative: Container Deployment
 
-```
+```text
 Docker Container
     ├── Flask Application
     ├── SQLite Database
@@ -376,11 +393,13 @@ Container Orchestration (Docker Compose/Kubernetes)
 ### Database Connections
 
 **Thread-Local Storage:**
+
 - Each Flask request thread gets its own database connection
 - Connections stored in thread-local storage
 - Automatically closed after request
 
 **Implementation:**
+
 ```python
 _local = threading.local()
 
@@ -420,6 +439,7 @@ def get_db():
 **Current**: No caching implemented
 
 **Recommendations**:
+
 - Cache frequently accessed data
 - Cache API responses
 - Use Redis for distributed caching
@@ -427,10 +447,12 @@ def get_db():
 ### Scalability
 
 **Current Limitations**:
+
 - SQLite: Single-writer limitation
 - File-based: Not suitable for high concurrency
 
 **Scaling Options**:
+
 - Migrate to PostgreSQL for multi-user
 - Add read replicas
 - Implement connection pooling
@@ -445,6 +467,7 @@ def get_db():
 **Location**: `logs/app.log`
 
 **Log Levels**:
+
 - DEBUG: Detailed diagnostic information
 - INFO: General informational messages
 - WARNING: Warning messages
@@ -456,6 +479,7 @@ def get_db():
 **Current**: File-based logging
 
 **Recommendations**:
+
 - Application performance monitoring (APM)
 - Error tracking (Sentry)
 - Health check endpoints
@@ -466,11 +490,13 @@ def get_db():
 ## Related Files
 
 ### Documentation
+
 - `docs/DEBUGGING_GUIDE.md` - Debugging instructions
 - `docs/DATABASE_README.md` - Database documentation
 - `docs/features/` - Feature documentation
 
 ### Configuration
+
 - `config.py` - Application configuration
 - `.gitignore` - Version control exclusions
 
@@ -486,4 +512,3 @@ def get_db():
 - [ ] Event-driven architecture
 - [ ] Real-time updates (WebSockets)
 - [ ] Search engine integration (Elasticsearch)
-

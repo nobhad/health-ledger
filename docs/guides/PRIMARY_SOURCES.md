@@ -23,6 +23,7 @@ python3 scripts/extract_all_primary_sources.py
 ```
 
 This script:
+
 1. **First Pass**: Extracts lab results and test data for cross-referencing
 2. **Second Pass**: Processes all documents and adds them to the database
 3. **Cross-References**: Health logs are analyzed against lab results and test results to determine if entries were for sick visits
@@ -30,6 +31,7 @@ This script:
 ### What Gets Extracted
 
 For each primary source:
+
 - Document metadata (date, institution, type)
 - Full text content (up to 50,000 characters)
 - Key findings and observations
@@ -38,6 +40,7 @@ For each primary source:
 ### Health Log Processing
 
 Health logs are parsed into individual entries, and each entry is analyzed to determine if it was a sick visit by:
+
 - Checking for sick visit keywords (symptoms, pain, illness, etc.)
 - Cross-referencing with lab results from the same time period
 - Checking for abnormal test values
@@ -76,6 +79,7 @@ This creates a structured record that can be cross-referenced with other documen
 ## Viewing Extracted Data
 
 View all primary sources:
+
 ```python
 from database_manager import GeneticProfileDB
 
@@ -90,6 +94,7 @@ for source in sources:
 ## Integration
 
 The extracted data integrates with:
+
 - Gene associations (if genes are mentioned)
 - Health condition associations
 - Research findings
@@ -100,4 +105,3 @@ The extracted data integrates with:
 1. Run `extract_all_primary_sources.py` to process all existing documents
 2. Use `add_healthcare_summary.py` after each appointment
 3. The system will automatically cross-reference new documents with existing data
-

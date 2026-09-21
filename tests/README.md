@@ -11,6 +11,7 @@ This directory contains unit and integration tests for the Genetic Profile Datab
 ## Running Tests
 
 ### Using unittest (built-in)
+
 ```bash
 # Run all tests
 python3 -m unittest discover tests
@@ -23,6 +24,7 @@ python3 -m unittest tests.test_validation.TestGeneSymbolValidation
 ```
 
 ### Using pytest (recommended)
+
 ```bash
 # Install pytest
 pip3 install pytest pytest-cov
@@ -43,6 +45,7 @@ pytest tests/ -v
 ## Test Coverage
 
 Current test coverage includes:
+
 - ✅ Input validation (gene symbols, conditions, traits)
 - ✅ Database CRUD operations
 - ✅ API endpoint validation
@@ -51,6 +54,7 @@ Current test coverage includes:
 ## Adding New Tests
 
 When adding new features:
+
 1. Create test file in `tests/` directory
 2. Follow naming convention: `test_*.py`
 3. Use descriptive test method names: `test_feature_name`
@@ -68,4 +72,3 @@ class TestMyFeature(unittest.TestCase):
         is_valid, error = validate_gene_symbol('COMT')
         self.assertTrue(is_valid)
 ```
-

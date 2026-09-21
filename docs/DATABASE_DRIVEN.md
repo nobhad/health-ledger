@@ -18,16 +18,19 @@
 ## Routes
 
 ### `/profile`
+
 - **Source:** Database (via `profile_generator.py`)
 - **Generates:** Complete genetic profile HTML
 - **Updates:** Automatically reflects database changes
 
 ### `/summary`
+
 - **Source:** Database (via `generate_personalized_summary.py`)
 - **Generates:** Personalized summary HTML
 - **Updates:** Automatically reflects database changes
 
 ### `/api/*`
+
 - **Source:** Database (direct queries)
 - **Returns:** JSON data
 - **Updates:** Real-time database queries
@@ -37,11 +40,13 @@
 ## No Static Files
 
 ❌ **DO NOT USE:**
+
 - `output/genetic_profile.html` - Not used by web app
 - `output/Your_Genetic_Profile_Summary.html` - Not used by web app
 - `scripts/generate_html.py` - Legacy script, not used by web app
 
 ✅ **USE INSTEAD:**
+
 - `profile_generator.py` - Generates profile from database
 - `scripts/generate_personalized_summary.py` - Generates summary from database
 - Database queries via `database_manager.py`
@@ -69,4 +74,3 @@ To update displayed content:
 ---
 
 **Status:** ✅ Fully Database-Driven
-

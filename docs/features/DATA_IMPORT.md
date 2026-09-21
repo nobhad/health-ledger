@@ -39,6 +39,7 @@ The Data Import system allows importing genetic profile data from markdown docum
 ### Purpose
 
 Imports genetic profile data from markdown format into the database, including:
+
 - Genes and their information
 - SNPs and genotypes
 - Trait associations
@@ -62,6 +63,7 @@ from pathlib import Path
 ### 1. Genes
 
 **Format in Markdown:**
+
 ```markdown
 ### ADRA2A - Adrenergic Alpha-2A Receptor
 
@@ -70,6 +72,7 @@ from pathlib import Path
 ```
 
 **Imported Fields:**
+
 - `gene_symbol` (e.g., "ADRA2A")
 - `gene_name` (e.g., "Adrenergic Alpha-2A Receptor")
 - `chromosome` (e.g., "10")
@@ -77,6 +80,7 @@ from pathlib import Path
 ### 2. SNPs
 
 **Format in Markdown:**
+
 ```markdown
 **SNP:** rs1800544
 **Position:** chr10:112835292
@@ -85,6 +89,7 @@ from pathlib import Path
 ```
 
 **Imported Fields:**
+
 - `rs_number` (e.g., "rs1800544")
 - `position`
 - `reference_allele`
@@ -93,18 +98,21 @@ from pathlib import Path
 ### 3. Genotypes
 
 **Format in Markdown:**
+
 ```markdown
 **Genotype:** C/G
 **Phenotype:** Heterozygous
 ```
 
 **Imported Fields:**
+
 - `genotype` (e.g., "C/G")
 - `phenotype` (e.g., "Heterozygous")
 
 ### 4. Trait Associations
 
 **Format in Markdown:**
+
 ```markdown
 #### Trait Associations
 
@@ -114,6 +122,7 @@ from pathlib import Path
 ```
 
 **Imported Fields:**
+
 - `trait_name`
 - `association_direction`
 - `notes`
@@ -122,6 +131,7 @@ from pathlib import Path
 ### 5. Health Condition Associations
 
 **Format in Markdown:**
+
 ```markdown
 #### Health Condition Associations
 
@@ -131,6 +141,7 @@ from pathlib import Path
 ```
 
 **Imported Fields:**
+
 - `condition_name`
 - `association_type`
 - `notes`
@@ -139,6 +150,7 @@ from pathlib import Path
 ### 6. Citations
 
 **Format in Markdown:**
+
 ```markdown
 ## References
 
@@ -147,6 +159,7 @@ from pathlib import Path
 ```
 
 **Imported Fields:**
+
 - `citation_number`
 - `authors`
 - `year`
@@ -160,6 +173,7 @@ from pathlib import Path
 ### 7. Gene-Gene Interactions
 
 **Format in Markdown:**
+
 ```markdown
 #### Gene-Gene Interactions
 
@@ -169,6 +183,7 @@ from pathlib import Path
 ```
 
 **Imported Fields:**
+
 - `interacting_gene_symbol`
 - `interaction_description`
 - `notes`
@@ -176,6 +191,7 @@ from pathlib import Path
 ### 8. Research Findings
 
 **Format in Markdown:**
+
 ```markdown
 #### Research Findings
 
@@ -184,6 +200,7 @@ from pathlib import Path
 ```
 
 **Imported Fields:**
+
 - `finding_title`
 - `finding_text`
 - `reference_ids` (linked citations)
@@ -208,6 +225,7 @@ with open('Genetic_Profile_Non_Pharmacogenomic_Corrected.md', 'r') as f:
 ### Step 3: Parse Document Structure
 
 The script identifies:
+
 - Gene sections (headers starting with `###`)
 - Reference sections
 - Trait and condition lists
@@ -216,6 +234,7 @@ The script identifies:
 ### Step 4: Extract and Import Data
 
 For each gene section:
+
 1. Extract gene information
 2. Add gene to database
 3. Extract and add SNPs
@@ -403,6 +422,7 @@ def validate_gene(gene_symbol, gene_name):
 ### Import Statistics
 
 The import script successfully processes:
+
 - All gene sections from the markdown document
 - SNP information with proper gene associations
 - Genotype data with phenotype descriptions
@@ -415,12 +435,15 @@ The import script successfully processes:
 ## Related Files
 
 ### Scripts
+
 - `scripts/import_from_markdown.py` - Main import script
 
 ### Source Files
+
 - `docs/Genetic_Profile_Non_Pharmacogenomic_Corrected.md` - Source markdown
 
 ### Python
+
 - `database_manager.py` - Database operations
 - `config.py` - Configuration and logging
 
@@ -431,12 +454,14 @@ The import script successfully processes:
 ### Import Fails
 
 1. **Check markdown format**:
+
    ```bash
    # Verify file structure
    head -50 docs/Genetic_Profile_Non_Pharmacogenomic_Corrected.md
    ```
 
 2. **Check database connection**:
+
    ```python
    from database_manager import GeneticProfileDB
    db = GeneticProfileDB()
@@ -444,6 +469,7 @@ The import script successfully processes:
    ```
 
 3. **Check logs**:
+
    ```bash
    tail -f logs/app.log
    ```
@@ -455,6 +481,7 @@ The import script successfully processes:
    - Test with sample text
 
 2. **Check database**:
+
    ```python
    db = GeneticProfileDB()
    genes = db.get_all_genes()
@@ -464,12 +491,14 @@ The import script successfully processes:
 ### Citation Linking Issues
 
 1. **Verify citation numbers**:
+
    ```python
    citations = db.get_all_citations()
    print(f"Total citations: {len(citations)}")
    ```
 
 2. **Check citation links**:
+
    ```python
    gene = db.get_gene_by_symbol("COMT")
    traits = db.get_trait_associations_for_gene(gene['id'])
@@ -488,4 +517,3 @@ The import script successfully processes:
 - [ ] Rollback on error
 - [ ] Import statistics and reports
 - [ ] Conflict resolution for duplicates
-

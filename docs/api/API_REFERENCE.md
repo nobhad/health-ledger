@@ -29,6 +29,7 @@ Complete reference for all API endpoints in the Genetic Profile Database applica
 Simple health check endpoint to verify server is running.
 
 **Response:**
+
 ```json
 {
     "status": "ok",
@@ -38,6 +39,7 @@ Simple health check endpoint to verify server is running.
 ```
 
 **Example:**
+
 ```bash
 curl http://localhost:5001/test
 ```
@@ -51,6 +53,7 @@ curl http://localhost:5001/test
 Get all genes in the database.
 
 **Response:**
+
 ```json
 [
     {
@@ -69,6 +72,7 @@ Get all genes in the database.
 ```
 
 **Example:**
+
 ```bash
 curl http://localhost:5001/api/all-genes
 ```
@@ -78,9 +82,11 @@ curl http://localhost:5001/api/all-genes
 Get comprehensive information about a specific gene.
 
 **Query Parameters:**
+
 - `gene` (required): Gene symbol (e.g., "COMT", "ADRA2A")
 
 **Response:**
+
 ```json
 {
     "gene_symbol": "COMT",
@@ -107,11 +113,13 @@ Get comprehensive information about a specific gene.
 ```
 
 **Example:**
+
 ```bash
 curl "http://localhost:5001/api/gene-info?gene=COMT"
 ```
 
 **Error Responses:**
+
 - `400`: Missing gene parameter
 - `404`: Gene not found
 - `500`: Server error
@@ -125,6 +133,7 @@ curl "http://localhost:5001/api/gene-info?gene=COMT"
 Get all unique traits in the database.
 
 **Response:**
+
 ```json
 [
     "pain sensitivity",
@@ -134,6 +143,7 @@ Get all unique traits in the database.
 ```
 
 **Example:**
+
 ```bash
 curl http://localhost:5001/api/all-traits
 ```
@@ -143,9 +153,11 @@ curl http://localhost:5001/api/all-traits
 Get genes associated with a specific trait.
 
 **Query Parameters:**
+
 - `trait` (required): Trait name (e.g., "pain sensitivity")
 
 **Response:**
+
 ```json
 [
     {
@@ -158,11 +170,13 @@ Get genes associated with a specific trait.
 ```
 
 **Example:**
+
 ```bash
 curl "http://localhost:5001/api/genes-by-trait?trait=pain+sensitivity"
 ```
 
 **Error Responses:**
+
 - `400`: Missing trait parameter
 - `500`: Server error
 
@@ -175,6 +189,7 @@ curl "http://localhost:5001/api/genes-by-trait?trait=pain+sensitivity"
 Get all unique health conditions in the database.
 
 **Response:**
+
 ```json
 [
     "ADHD",
@@ -185,6 +200,7 @@ Get all unique health conditions in the database.
 ```
 
 **Example:**
+
 ```bash
 curl http://localhost:5001/api/all-conditions
 ```
@@ -194,9 +210,11 @@ curl http://localhost:5001/api/all-conditions
 Get genes associated with a specific health condition.
 
 **Query Parameters:**
+
 - `condition` (required): Condition name (e.g., "ADHD")
 
 **Response:**
+
 ```json
 [
     {
@@ -209,11 +227,13 @@ Get genes associated with a specific health condition.
 ```
 
 **Example:**
+
 ```bash
 curl "http://localhost:5001/api/genes-by-condition?condition=ADHD"
 ```
 
 **Error Responses:**
+
 - `400`: Missing condition parameter
 - `500`: Server error
 
@@ -226,6 +246,7 @@ curl "http://localhost:5001/api/genes-by-condition?condition=ADHD"
 Get all pharmacogenomic data.
 
 **Response:**
+
 ```json
 [
     {
@@ -246,6 +267,7 @@ Get all pharmacogenomic data.
 ```
 
 **Example:**
+
 ```bash
 curl http://localhost:5001/api/pharmacogenomic
 ```
@@ -280,18 +302,21 @@ All errors return JSON in this format:
 All API endpoints validate input parameters:
 
 **Gene Symbols:**
+
 - Must be alphanumeric with dashes/underscores
 - Maximum 20 characters
 - Case-insensitive (automatically converted to uppercase)
 - Examples: `COMT`, `ADRA2A`, `CYP2D6`
 
 **Condition/Trait Names:**
+
 - Must be strings
 - Maximum 200 characters
 - Cannot contain HTML tags (`<`, `>`)
 - Examples: `ADHD`, `pain sensitivity`, `stress response`
 
 **List Parameters:**
+
 - Can be single string or array
 - Maximum 50 items per query
 - Each item validated individually
@@ -300,6 +325,7 @@ All API endpoints validate input parameters:
 ### Example Error Responses
 
 **Missing Parameter:**
+
 ```json
 {
     "error": "Missing required parameter: condition",
@@ -308,6 +334,7 @@ All API endpoints validate input parameters:
 ```
 
 **Invalid Parameter:**
+
 ```json
 {
     "error": "Invalid gene symbol: Gene symbol must be a string",
@@ -316,6 +343,7 @@ All API endpoints validate input parameters:
 ```
 
 **Not Found:**
+
 ```json
 {
     "error": "Gene COMTX not found",
@@ -324,6 +352,7 @@ All API endpoints validate input parameters:
 ```
 
 **Server Error:**
+
 ```json
 {
     "error": "Internal server error",
@@ -335,6 +364,7 @@ All API endpoints validate input parameters:
 ```
 
 **Validation Error:**
+
 ```json
 {
     "error": "Invalid condition: Condition name contains invalid characters",
@@ -382,7 +412,8 @@ Missing or null values are represented as `null`:
 All endpoints support CORS (Cross-Origin Resource Sharing) for browser-based requests.
 
 **Headers:**
-```
+
+```text
 Access-Control-Allow-Origin: *
 Access-Control-Allow-Methods: GET, POST, OPTIONS
 Access-Control-Allow-Headers: Content-Type
@@ -393,6 +424,7 @@ Access-Control-Allow-Headers: Content-Type
 ## Rate Limiting
 
 Currently no rate limiting is implemented. For production, consider:
+
 - Request rate limiting
 - API key authentication
 - Request throttling
@@ -402,6 +434,7 @@ Currently no rate limiting is implemented. For production, consider:
 ## Logging
 
 All API requests are logged with:
+
 - Request method and path
 - Query parameters
 - Response status
@@ -472,6 +505,7 @@ fetch('/api/gene-info?gene=COMT')
 ## Future Endpoints
 
 Planned endpoints:
+
 - `POST /api/query` - Advanced query endpoint
 - `GET /api/citations` - Get all citations
 - `GET /api/interactions` - Get gene-gene interactions
@@ -483,10 +517,11 @@ Planned endpoints:
 ## Related Files
 
 ### Python
+
 - `app.py` - All route handlers
 - `database_manager.py` - Database operations
 
 ### Documentation
+
 - `docs/DEBUGGING_GUIDE.md` - Debugging API issues
 - `docs/features/QUERY_INTERFACE.md` - Query interface using API
-

@@ -30,12 +30,14 @@ window.GENETIC_PROFILE_DEBUG.enabled = false;
 The error you're seeing (`content_script.js:1`) is from a browser extension, not our code. To filter it:
 
 **Chrome DevTools:**
+
 1. Open Console
 2. Click filter icon
 3. Add filter: `-content_script.js`
 4. Or use: `Hide network messages` to reduce noise
 
 **Or use console filter:**
+
 ```javascript
 // In console, filter out extension errors
 console.log = (function(originalLog) {
@@ -61,13 +63,15 @@ console.log = (function(originalLog) {
 ### Log Format
 
 All logs include:
+
 - Timestamp (ISO format)
 - Log level prefix
 - Message
 - Additional data (if provided)
 
 **Example:**
-```
+
+```text
 [2025-12-07T21:15:00.123Z DEBUG] loadGenes() called
 [2025-12-07T21:15:00.456Z DEBUG] Fetching /api/all-genes
 [2025-12-07T21:15:00.789Z INFO] Received 12 genes
@@ -146,6 +150,7 @@ apiLog('GET', '/api/all-genes', null, responseData);
 ### 1. API Calls Not Working
 
 **Check logs:**
+
 ```javascript
 // Look for these in console:
 [DEBUG] Fetching /api/all-genes
@@ -154,6 +159,7 @@ apiLog('GET', '/api/all-genes', null, responseData);
 ```
 
 **Debug steps:**
+
 1. Check network tab for failed requests
 2. Verify API endpoint is correct
 3. Check response status code
@@ -162,6 +168,7 @@ apiLog('GET', '/api/all-genes', null, responseData);
 ### 2. Multiselect Not Showing Options
 
 **Check logs:**
+
 ```javascript
 [DEBUG] initMultiselect() called { type: 'gene', ... }
 [DEBUG] Elements found { input: true, dropdown: true, tags: true }
@@ -170,6 +177,7 @@ apiLog('GET', '/api/all-genes', null, responseData);
 ```
 
 **Debug steps:**
+
 1. Verify `loadGenes()` completed successfully
 2. Check `multiselectState.genes.options` has data
 3. Verify DOM elements exist
@@ -178,6 +186,7 @@ apiLog('GET', '/api/all-genes', null, responseData);
 ### 3. Results Not Displaying
 
 **Check logs:**
+
 ```javascript
 [DEBUG] showResults() called { title: '...', dataLength: 5 }
 [DEBUG] Displaying 5 results
@@ -185,6 +194,7 @@ apiLog('GET', '/api/all-genes', null, responseData);
 ```
 
 **Debug steps:**
+
 1. Verify `results` element exists in DOM
 2. Check data format (should be array)
 3. Verify `showResults()` is called
@@ -197,11 +207,13 @@ apiLog('GET', '/api/all-genes', null, responseData);
 ### Browser Console
 
 **Access:**
+
 - Chrome/Edge: F12 → Console
 - Firefox: F12 → Console
 - Safari: Cmd+Option+C
 
 **Useful Commands:**
+
 ```javascript
 // Check multiselect state
 console.log(multiselectState);
@@ -224,6 +236,7 @@ console.log('Selected genes:', multiselectState.genes.selected);
 ### Network Tab
 
 **Check:**
+
 - API requests (status codes, response data)
 - Request/response headers
 - Timing information
@@ -232,6 +245,7 @@ console.log('Selected genes:', multiselectState.genes.selected);
 ### Elements Tab
 
 **Inspect:**
+
 - Multiselect DOM structure
 - CSS classes and styles
 - Event listeners
@@ -252,7 +266,8 @@ perfLog('loadGenes', start);
 ### Monitor API Response Times
 
 All API calls are automatically logged with timing:
-```
+
+```text
 [DEBUG] loadGenes() called
 [DEBUG] loadGenes() completed in 123.45ms
 ```
@@ -260,7 +275,8 @@ All API calls are automatically logged with timing:
 ### Check for Slow Operations
 
 Look for logs with high duration:
-```
+
+```text
 [PERF] loadGenes: 5000.00ms  // ⚠️ Slow!
 ```
 
@@ -338,6 +354,7 @@ window.GENETIC_PROFILE_DEBUG.enabled = false;
 ### Filter by Prefix
 
 **Chrome DevTools:**
+
 1. Console → Filter icon
 2. Enter: `[DEBUG]` or `[ERROR]`
 3. Only matching logs shown
@@ -345,12 +362,14 @@ window.GENETIC_PROFILE_DEBUG.enabled = false;
 ### Filter Out Extension Errors
 
 **Add to console filter:**
-```
+
+```text
 -content_script.js -installHook.js
 ```
 
 **Or use negative filter:**
-```
+
+```text
 -[extension]
 ```
 
@@ -397,6 +416,7 @@ When debugging an issue:
 **Cause**: Object/array not initialized
 
 **Solution**: Check initialization:
+
 ```javascript
 // Verify state exists
 if (!multiselectState[type]) {
@@ -409,6 +429,7 @@ if (!multiselectState[type]) {
 **Cause**: API returned error object instead of array
 
 **Solution**: Check response:
+
 ```javascript
 const data = await response.json();
 if (!Array.isArray(data)) {
@@ -422,6 +443,7 @@ if (!Array.isArray(data)) {
 **Cause**: DOM element doesn't exist or wrong ID
 
 **Solution**: Verify element exists:
+
 ```javascript
 const element = document.getElementById('geneInput');
 if (!element) {
@@ -435,11 +457,13 @@ if (!element) {
 ## Related Files
 
 ### JavaScript
+
 - `static/js/debug.js` - Debug utilities
 - `static/js/query.js` - Query functions with logging
 - `static/js/multiselect.js` - Multiselect with logging
 
 ### Documentation
+
 - `docs/DEBUGGING_GUIDE.md` - General debugging guide
 - `docs/features/QUERY_INTERFACE.md` - Query interface docs
 
@@ -477,4 +501,3 @@ fetch('/api/all-genes')
         console.error('❌ API error:', err);
     });
 ```
-

@@ -37,11 +37,13 @@ Citations are numbered sequentially starting from 1. Each citation has a unique 
 ### Citation Format
 
 **In-Text Citations:**
+
 ```markdown
 This finding is supported by research [1,2,3].
 ```
 
 **Reference List:**
+
 ```markdown
 ## References
 
@@ -53,6 +55,7 @@ This finding is supported by research [1,2,3].
 ### Citation Standards
 
 **Allowed Sources:**
+
 - ✅ PubMed peer-reviewed journals
 - ✅ NCBI databases (GTR, Bookshelf, MedlinePlus Genetics)
 - ✅ SNPedia
@@ -60,6 +63,7 @@ This finding is supported by research [1,2,3].
 - ✅ Primary source documents (GeneSight, Center for Human Genetics)
 
 **Not Allowed:**
+
 - ❌ Wikipedia
 - ❌ Commercial genetics blogs
 - ❌ Non-peer-reviewed sources
@@ -72,6 +76,7 @@ This finding is supported by research [1,2,3].
 ### 1. Journal Articles
 
 **Format:**
+
 ```python
 db.add_reference(
     citation_number=1,
@@ -90,6 +95,7 @@ db.add_reference(
 ### 2. Websites
 
 **Format:**
+
 ```python
 db.add_reference(
     citation_number=163,
@@ -104,6 +110,7 @@ db.add_reference(
 ### 3. Database Entries
 
 **Format:**
+
 ```python
 db.add_reference(
     citation_number=50,
@@ -117,6 +124,7 @@ db.add_reference(
 ### 4. Primary Sources
 
 **Format:**
+
 ```python
 db.add_reference(
     citation_number=164,
@@ -392,14 +400,17 @@ def check_duplicate(citation_data):
 ## Related Files
 
 ### Scripts
+
 - `scripts/citation_overhaul.py` - Citation deduplication and renumbering
 - `scripts/add_primary_sources.py` - Add primary source citations
 
 ### Python
+
 - `database_manager.py` - Citation database operations
 - `generate_html.py` - Citation link generation
 
 ### Documentation
+
 - `docs/CITATION_OVERHAUL_SUMMARY.md` - Citation overhaul details
 
 ---
@@ -409,6 +420,7 @@ def check_duplicate(citation_data):
 ### Citation Number Conflicts
 
 1. **Check for duplicates**:
+
    ```python
    db = GeneticProfileDB()
    citations = db.get_all_citations()
@@ -418,6 +430,7 @@ def check_duplicate(citation_data):
    ```
 
 2. **Get max citation number**:
+
    ```python
    max_citation = db.get_max_citation_number()
    print(f"Max citation number: {max_citation}")
@@ -426,6 +439,7 @@ def check_duplicate(citation_data):
 ### Missing Citation Links
 
 1. **Check trait associations**:
+
    ```python
    traits = db.get_trait_associations_for_gene(gene_id)
    for trait in traits:
@@ -433,6 +447,7 @@ def check_duplicate(citation_data):
    ```
 
 2. **Verify linking tables**:
+
    ```sql
    SELECT * FROM gene_trait_citations WHERE trait_association_id = ?;
    ```
@@ -440,6 +455,7 @@ def check_duplicate(citation_data):
 ### Citation Format Issues
 
 1. **Check citation format**:
+
    ```python
    citation = db.get_citation_by_number(1)
    print(f"Title: {citation['title']}")
@@ -463,4 +479,3 @@ def check_duplicate(citation_data):
 - [ ] Duplicate detection algorithms
 - [ ] Citation network visualization
 - [ ] Automated reference checking
-

@@ -39,6 +39,7 @@ While the application runs locally, you can export your data for cloud backup:
 
 1. Use the Backup interface in the web application (`/backup`)
 2. Or use the command-line script:
+
    ```bash
    python3 scripts/backup_database.py --backup
    ```
@@ -48,11 +49,13 @@ While the application runs locally, you can export your data for cloud backup:
 Export your database to a file for cloud storage sync:
 
 1. **SQLite Database Export:**
+
    ```bash
    python3 scripts/backup_database.py --export backups/my_backup.db
    ```
 
 2. **JSON Export:**
+
    ```bash
    python3 scripts/backup_database.py --json backups/my_backup.json
    ```
@@ -109,4 +112,3 @@ Your health data:
 - Can be exported and backed up at your discretion
 
 The application is designed to give you complete control over your health data.
-

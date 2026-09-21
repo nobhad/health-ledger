@@ -13,6 +13,7 @@ python3 scripts/add_healthcare_summary.py
 ```
 
 The script will prompt you for:
+
 - Visit date
 - Doctor/Provider name
 - Institution/Clinic
@@ -36,26 +37,31 @@ python3 scripts/add_healthcare_summary.py --quick "2025-01-15" "Dr. Smith" "Head
 ### Viewing Healthcare Summaries
 
 View all summaries:
+
 ```bash
 python3 scripts/view_healthcare_summaries.py
 ```
 
 View only sick visits:
+
 ```bash
 python3 scripts/view_healthcare_summaries.py --sick
 ```
 
 View only routine visits:
+
 ```bash
 python3 scripts/view_healthcare_summaries.py --routine
 ```
 
 View recent summaries (last 5):
+
 ```bash
 python3 scripts/view_healthcare_summaries.py --limit 5
 ```
 
 View by date range:
+
 ```bash
 python3 scripts/view_healthcare_summaries.py --start "2024-01-01" --end "2024-12-31"
 ```
@@ -63,6 +69,7 @@ python3 scripts/view_healthcare_summaries.py --start "2024-01-01" --end "2024-12
 ## Visit Types
 
 The system categorizes visits as:
+
 - **sick_visit**: Illness, symptoms, acute issues
 - **routine_visit**: Checkups, follow-ups, preventive care
 - **emergency_visit**: Emergency room visits
@@ -72,6 +79,7 @@ The system categorizes visits as:
 ## Cross-Referencing
 
 The system automatically cross-references healthcare summaries with:
+
 - Lab results from the same time period
 - Test results and imaging
 - Other medical records
@@ -81,10 +89,12 @@ This helps determine if a health log entry was for a sick visit by checking if t
 ## Database Structure
 
 Healthcare summaries are stored in:
+
 - **primary_sources** table: Main summary information
 - **primary_source_findings** table: Individual findings (symptoms, diagnoses, treatments, etc.)
 
 Each summary can have multiple findings, making it easy to track:
+
 - Symptoms
 - Diagnoses
 - Treatments
@@ -100,6 +110,7 @@ Each summary can have multiple findings, making it easy to track:
 ## Integration with Other Documents
 
 The system can automatically:
+
 - Link lab results to visits
 - Cross-reference test results with symptoms
 - Track medication changes over time
@@ -127,4 +138,3 @@ python3 scripts/view_healthcare_summaries.py --sick --start "2025-01-01"
 2. **Include all details**: The more information you add, the better the cross-referencing works
 3. **Link documents**: When prompted, provide paths to lab/test result files for automatic linking
 4. **Review regularly**: Use the view script to review your medical history and identify patterns
-

@@ -10,6 +10,7 @@ This database system stores genetic profile data including genes, SNPs, genotype
 ### Current Database Statistics (Updated: December 7, 2025)
 
 **Core Genetic Data:**
+
 - **Genes** fully documented
 - **36 SNPs** associated with genes
 - **20 genotypes** recorded (duplicates removed)
@@ -19,18 +20,22 @@ This database system stores genetic profile data including genes, SNPs, genotype
 - **10 gene-gene interactions** imported
 
 **Relationships:**
+
 - **2,276+ trait-citation links** (comprehensive linking)
 - **1,241+ health-citation links** (comprehensive linking)
 
 **Medical Data:**
+
 - **21 primary sources** integrated
 - **104 primary source findings** extracted
 - **6,104 health metrics** from medical records
 
 **Pharmacogenomic:**
+
 - **0 pharmacogenomic records** (structure ready, can be imported separately)
 
 **Database Quality:**
+
 - **Database size:** 1.82 MB
 - **Database integrity:** ✅ Verified OK (0 orphaned records)
 - **Data quality:** ✅ Excellent (duplicates removed, relationships intact)
@@ -155,6 +160,7 @@ db.close()
 ### Example Queries
 
 Run example queries:
+
 ```bash
 python3 query_examples.py
 ```
@@ -162,11 +168,13 @@ python3 query_examples.py
 ### Citation Overhaul
 
 Fix and deduplicate citations in markdown document:
+
 ```bash
 python3 citation_overhaul.py
 ```
 
 This will:
+
 1. Extract all references from the markdown
 2. Deduplicate based on content
 3. Renumber citations sequentially
@@ -186,27 +194,32 @@ This will:
 ## Query Examples
 
 ### Get all genes
+
 ```python
 genes = db.get_all_genes()
 ```
 
 ### Get trait associations for a gene
+
 ```python
 gene = db.get_gene_by_symbol("COMT")
 traits = db.get_trait_associations_for_gene(gene['id'])
 ```
 
 ### Search for traits
+
 ```python
 results = db.search_traits("anxiety")
 ```
 
 ### Get all references
+
 ```python
 refs = db.get_all_references()
 ```
 
 ### Export to JSON
+
 ```python
 from query_examples import export_to_json
 export_to_json("export.json")
@@ -244,4 +257,3 @@ export_to_json("export.json")
 - The `citations` table was renamed from `references` because "references" is a SQL reserved keyword
 
 **Database Status:** ✅ EXCELLENT - Fully operational and production-ready
-

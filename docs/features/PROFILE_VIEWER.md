@@ -37,17 +37,20 @@ The Profile Viewer displays the complete genetic profile document with all gene 
 **Handler**: `app.profile()`
 
 **Process**:
+
 1. **Queries database** for all genes, traits, conditions, and citations
 2. **Generates HTML dynamically** from database using `profile_generator.py`
 3. Renders with `templates/profile.html`
 4. Includes header navigation
 
 **Error Handling**:
+
 - 500 if database query fails
 - 500 if HTML generation fails
 
 **Example Request**:
-```
+
+```text
 GET /profile
 ```
 
@@ -249,7 +252,7 @@ Flask will catch template rendering errors and return 500 with error details (in
 
 ## Data Updates
 
-The profile is **always up-to-date** because it's generated directly from the database. 
+The profile is **always up-to-date** because it's generated directly from the database.
 
 ### Updating Profile Content
 
@@ -270,17 +273,21 @@ python3 scripts/import_from_markdown.py
 ## Related Files
 
 ### Templates
+
 - `templates/base.html` - Base template with header/footer
 - `templates/profile.html` - Profile page template
 
 ### Scripts
+
 - `scripts/generate_html.py` - HTML generation script
 
 ### Source Files
+
 - `genetic_profile.db` - Database (source of all data)
 - `profile_generator.py` - Database-to-HTML generator
 
 ### Python
+
 - `app.py` - Profile route handler
 
 ---
@@ -290,16 +297,19 @@ python3 scripts/import_from_markdown.py
 ### Profile Not Displaying
 
 1. **Check file exists**:
+
    ```bash
    ls -la output/genetic_profile.html
    ```
 
 2. **Regenerate HTML**:
+
    ```bash
    python3 scripts/generate_html.py
    ```
 
 3. **Check server logs**:
+
    ```bash
    tail -f logs/app.log
    ```
@@ -332,4 +342,3 @@ python3 scripts/import_from_markdown.py
 - [ ] Copy citation links
 - [ ] Share specific sections
 - [ ] Dark mode support
-

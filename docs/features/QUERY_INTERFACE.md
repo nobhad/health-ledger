@@ -49,6 +49,7 @@ Each search field uses a custom multiselect component that supports:
 - **Keyboard navigation**: Arrow keys, Enter, Escape support
 
 **Example:**
+
 ```html
 <div class="multiselect-wrapper" id="conditionMultiselect">
     <div class="multiselect-tags" id="conditionTags"></div>
@@ -127,11 +128,13 @@ function updateMultiselectDropdown(type, filter = '') {
 **Purpose**: Find all genes associated with one or more health conditions.
 
 **Usage:**
+
 1. Select one or more health conditions from the dropdown
 2. Click "Search" button
 3. Results show genes associated with selected conditions
 
 **Example Query:**
+
 ```javascript
 queryByCondition() {
     const selected = ['ADHD', 'Anxiety'];
@@ -142,6 +145,7 @@ queryByCondition() {
 ```
 
 **Response Format:**
+
 ```json
 [
     {
@@ -157,11 +161,13 @@ queryByCondition() {
 **Purpose**: Find all genes associated with one or more traits.
 
 **Usage:**
+
 1. Select one or more traits from the dropdown
 2. Click "Search" button
 3. Results show genes associated with selected traits
 
 **Example Query:**
+
 ```javascript
 queryByTrait() {
     const selected = ['pain sensitivity', 'stress response'];
@@ -176,11 +182,13 @@ queryByTrait() {
 **Purpose**: Get comprehensive information about specific genes.
 
 **Usage:**
+
 1. Select one or more genes from the dropdown
 2. Click "Get Gene Info" button
 3. Results show detailed information for each gene
 
 **Response Format:**
+
 ```json
 {
     "gene_symbol": "COMT",
@@ -200,10 +208,12 @@ queryByTrait() {
 ### 4. Quick Actions
 
 **Show All Genes:**
+
 - Displays all genes in the database
 - Endpoint: `/api/all-genes`
 
 **Show Medication Metabolism:**
+
 - Displays pharmacogenomic data for all genes
 - Endpoint: `/api/pharmacogenomic`
 
@@ -216,6 +226,7 @@ queryByTrait() {
 Returns all genes in the database.
 
 **Response:**
+
 ```json
 [
     {
@@ -232,6 +243,7 @@ Returns all genes in the database.
 Returns all unique health conditions.
 
 **Response:**
+
 ```json
 ["ADHD", "Anxiety", "Depression", ...]
 ```
@@ -241,6 +253,7 @@ Returns all unique health conditions.
 Returns all unique traits.
 
 **Response:**
+
 ```json
 ["pain sensitivity", "stress response", ...]
 ```
@@ -248,9 +261,11 @@ Returns all unique traits.
 ### GET /api/genes-by-condition
 
 **Query Parameters:**
+
 - `condition` (required): Health condition name
 
 **Response:**
+
 ```json
 [
     {
@@ -264,9 +279,11 @@ Returns all unique traits.
 ### GET /api/genes-by-trait
 
 **Query Parameters:**
+
 - `trait` (required): Trait name
 
 **Response:**
+
 ```json
 [
     {
@@ -280,6 +297,7 @@ Returns all unique traits.
 ### GET /api/gene-info
 
 **Query Parameters:**
+
 - `gene` (required): Gene symbol (e.g., "COMT")
 
 **Response:**
@@ -301,22 +319,26 @@ const multiselectState = {
 
 ### Key Functions
 
-**initMultiselect(type, inputId, dropdownId, tagsId)**
+#### initMultiselect(type, inputId, dropdownId, tagsId)
+
 - Initializes a multiselect component
 - Sets up event listeners
 - Configures dropdown behavior
 
-**updateMultiselectDropdown(type, filter)**
+#### updateMultiselectDropdown(type, filter)
+
 - Updates dropdown with filtered options
 - Handles selection state
 - Limits display to 50 items for performance
 
-**toggleMultiselectOption(type, value)**
+#### toggleMultiselectOption(type, value)
+
 - Toggles selection of an option
 - Updates tags display
 - Refreshes dropdown
 
-**showResults(data, title)**
+#### showResults(data, title)
+
 - Displays query results in a table
 - Handles empty results
 - Formats data for display
@@ -357,6 +379,7 @@ All API endpoints return consistent error format:
 ```
 
 **Error Codes:**
+
 - `400`: Bad Request (missing/invalid parameters)
 - `404`: Not Found (gene/condition/trait not found)
 - `500`: Internal Server Error (server/database error)
@@ -384,17 +407,21 @@ All API endpoints return consistent error format:
 ## Related Files
 
 ### Templates
+
 - `templates/query.html` - Main query interface template
 - `templates/components.html` - Reusable UI components
 
 ### JavaScript
+
 - `static/js/multiselect.js` - Multiselect component logic
 - `static/js/query.js` - Query functions and API calls
 
 ### CSS
+
 - `static/css/style.css` - Styling for query interface
 
 ### Python
+
 - `app.py` - API route handlers
 - `database_manager.py` - Database query methods
 
@@ -444,4 +471,3 @@ fetch('/api/all-genes')
 - [ ] Query history
 - [ ] Result comparison tools
 - [ ] Visualization charts for gene relationships
-

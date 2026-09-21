@@ -54,6 +54,7 @@ CREATE TABLE gene_pharmacogenomic_drugs (
 ### Data Structure
 
 Each pharmacogenomic record includes:
+
 - **Gene**: The gene being tested
 - **Metabolism Status**: How the gene affects drug metabolism
 - **Genotype/Phenotype**: Specific genetic variant
@@ -117,17 +118,20 @@ Each pharmacogenomic record includes:
 ### Common Genotypes
 
 **CYP2D6:**
+
 - `*1/*1` - Normal Metabolizer
 - `*1/*4` - Intermediate Metabolizer
 - `*4/*4` - Poor Metabolizer
 - `*1/*1xN` - Ultrarapid Metabolizer
 
 **CYP2C19:**
+
 - `*1/*1` - Normal Metabolizer
 - `*1/*2` - Intermediate Metabolizer
 - `*2/*2` - Poor Metabolizer
 
 **COMT:**
+
 - `Val/Val` - Fast COMT activity
 - `Val/Met` - Intermediate activity
 - `Met/Met` - Slow COMT activity
@@ -181,15 +185,19 @@ GENOTYPE_PHENOTYPE_MAP = {
 ### Gene-Medication Associations
 
 **CYP2D6:**
+
 - Citalopram, Venlafaxine, Codeine, Tramadol, Risperidone
 
 **CYP2C19:**
+
 - Citalopram, Escitalopram, Clopidogrel, Omeprazole
 
 **CYP2C9:**
+
 - Warfarin, Phenytoin, Ibuprofen
 
 **CYP1A2:**
+
 - Clozapine, Olanzapine, Theophylline
 
 ---
@@ -208,6 +216,7 @@ GENOTYPE_PHENOTYPE_MAP = {
    - Identify affected medications
 
 2. **Add to Database**
+
    ```python
    # Add pharmacogenomic data
    pharm_id = db.add_pharmacogenomic_data(
@@ -292,16 +301,19 @@ curl http://localhost:5001/api/gene-info?gene=CYP2D6
 ### Dosing Considerations
 
 **Intermediate Metabolizer:**
+
 - Start with lower doses
 - Monitor for side effects
 - May need dose adjustments
 
 **Poor Metabolizer:**
+
 - Use lower starting doses
 - Consider alternative medications
 - Close monitoring required
 
 **Rapid/Ultrarapid Metabolizer:**
+
 - May need higher doses
 - Monitor for treatment failure
 - Consider alternative medications
@@ -309,7 +321,8 @@ curl http://localhost:5001/api/gene-info?gene=CYP2D6
 ### Example Recommendations
 
 **CYP2D6 Intermediate Metabolizer:**
-```
+
+```text
 For medications metabolized by CYP2D6:
 - Start with 50% of standard dose
 - Monitor for side effects
@@ -318,7 +331,8 @@ For medications metabolized by CYP2D6:
 ```
 
 **CYP2C19 Poor Metabolizer:**
-```
+
+```text
 For clopidogrel:
 - Consider alternative antiplatelet therapy
 - If using clopidogrel, may need higher doses
@@ -330,14 +344,17 @@ For clopidogrel:
 ## Related Files
 
 ### Scripts
+
 - `scripts/add_pharmacogenomic.py` - Import pharmacogenomic data
 - `scripts/add_pharmacogenomic_to_document.py` - Add to markdown document
 
 ### Python
+
 - `database_manager.py` - Pharmacogenomic database operations
 - `app.py` - API endpoints for pharmacogenomic data
 
 ### Source Data
+
 - `primary_sources/<LastFirst>_GeneticTesting_Genesight_<date>.pdf` - GeneSight report
 
 ---
@@ -347,6 +364,7 @@ For clopidogrel:
 ### Missing Pharmacogenomic Data
 
 1. **Check gene exists**:
+
    ```python
    gene = db.get_gene_by_symbol("CYP2D6")
    if not gene:
@@ -354,6 +372,7 @@ For clopidogrel:
    ```
 
 2. **Check pharmacogenomic data**:
+
    ```python
    pharm = db.get_pharmacogenomic_data_for_gene(gene['id'])
    if not pharm:
@@ -363,6 +382,7 @@ For clopidogrel:
 ### Medication Not Listed
 
 1. **Check medication associations**:
+
    ```python
    medications = db.get_medications_for_gene(gene_id)
    if "Citalopram" not in medications:
@@ -370,6 +390,7 @@ For clopidogrel:
    ```
 
 2. **Add missing medication**:
+
    ```python
    db.add_gene_pharmacogenomic_drug(
        pharmacogenomic_data_id=pharm_id,
@@ -380,6 +401,7 @@ For clopidogrel:
 ### Incorrect Metabolism Status
 
 1. **Verify genotype-phenotype mapping**:
+
    ```python
    pharm = db.get_pharmacogenomic_data_for_gene(gene_id)
    print(f"Genotype: {pharm['genotype_phenotype']}")
@@ -400,4 +422,3 @@ For clopidogrel:
 - [ ] Alert system for significant findings
 - [ ] Export medication list
 - [ ] Medication history tracking
-

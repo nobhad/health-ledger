@@ -57,7 +57,7 @@ The Genetic Profile Database is a comprehensive SQLite database system designed 
 ### Current Data Counts
 
 | Category | Count | Status |
-|----------|-------|--------|
+| ---------- | ------- | -------- |
 | **Genes** | 17 | ✅ Complete |
 | **Citations/References** | 174 | ✅ Complete |
 | **Trait Associations** | 1,515 | ✅ Complete |
@@ -111,7 +111,7 @@ The Genetic Profile Database is a comprehensive SQLite database system designed 
 **Purpose:** Core gene information
 
 | Column | Type | Constraints | Description |
-|--------|------|-------------|-------------|
+| -------- | ------ | ------------- | ------------- |
 | `id` | INTEGER | PRIMARY KEY, AUTOINCREMENT | Unique gene identifier |
 | `gene_symbol` | TEXT | UNIQUE, NOT NULL | Gene symbol (e.g., "COMT") |
 | `gene_name` | TEXT | NOT NULL | Full gene name |
@@ -123,6 +123,7 @@ The Genetic Profile Database is a comprehensive SQLite database system designed 
 **Indexes:** `idx_genes_symbol` on `gene_symbol`
 
 **Example:**
+
 ```sql
 SELECT * FROM genes WHERE gene_symbol = 'COMT';
 ```
@@ -134,7 +135,7 @@ SELECT * FROM genes WHERE gene_symbol = 'COMT';
 **Purpose:** Single nucleotide polymorphisms
 
 | Column | Type | Constraints | Description |
-|--------|------|-------------|-------------|
+| -------- | ------ | ------------- | ------------- |
 | `id` | INTEGER | PRIMARY KEY, AUTOINCREMENT | Unique SNP identifier |
 | `rs_number` | TEXT | UNIQUE, NOT NULL | dbSNP reference number |
 | `gene_id` | INTEGER | NOT NULL, FOREIGN KEY → genes.id | Associated gene |
@@ -144,11 +145,13 @@ SELECT * FROM genes WHERE gene_symbol = 'COMT';
 | `created_at` | TIMESTAMP | DEFAULT CURRENT_TIMESTAMP | Creation timestamp |
 
 **Current Records:** 36  
-**Indexes:** 
+**Indexes:**
+
 - `idx_snps_rs_number` on `rs_number`
 - `idx_snps_gene_id` on `gene_id`
 
 **Example:**
+
 ```sql
 SELECT s.*, g.gene_symbol 
 FROM snps s 
@@ -163,7 +166,7 @@ WHERE g.gene_symbol = 'COMT';
 **Purpose:** User-specific genotype information
 
 | Column | Type | Constraints | Description |
-|--------|------|-------------|-------------|
+| -------- | ------ | ------------- | ------------- |
 | `id` | INTEGER | PRIMARY KEY, AUTOINCREMENT | Unique genotype identifier |
 | `gene_id` | INTEGER | NOT NULL, FOREIGN KEY → genes.id | Associated gene |
 | `genotype` | TEXT | NOT NULL | Genotype (e.g., "C/G", "Val/Met") |
@@ -174,6 +177,7 @@ WHERE g.gene_symbol = 'COMT';
 **Indexes:** `idx_genotypes_gene_id` on `gene_id`
 
 **Example:**
+
 ```sql
 SELECT g.gene_symbol, gt.genotype, gt.phenotype
 FROM genotypes gt
@@ -188,7 +192,7 @@ WHERE g.gene_symbol = 'COMT';
 **Purpose:** Genetic trait associations
 
 | Column | Type | Constraints | Description |
-|--------|------|-------------|-------------|
+| -------- | ------ | ------------- | ------------- |
 | `id` | INTEGER | PRIMARY KEY, AUTOINCREMENT | Unique trait association identifier |
 | `gene_id` | INTEGER | NOT NULL, FOREIGN KEY → genes.id | Associated gene |
 | `trait_name` | TEXT | NOT NULL | Trait name (e.g., "ADHD susceptibility") |
@@ -200,6 +204,7 @@ WHERE g.gene_symbol = 'COMT';
 **Indexes:** `idx_trait_associations_gene_id` on `gene_id`
 
 **Example:**
+
 ```sql
 SELECT ta.*, g.gene_symbol
 FROM trait_associations ta
@@ -214,7 +219,7 @@ WHERE ta.trait_name LIKE '%ADHD%';
 **Purpose:** Health condition associations
 
 | Column | Type | Constraints | Description |
-|--------|------|-------------|-------------|
+| -------- | ------ | ------------- | ------------- |
 | `id` | INTEGER | PRIMARY KEY, AUTOINCREMENT | Unique condition association identifier |
 | `gene_id` | INTEGER | NOT NULL, FOREIGN KEY → genes.id | Associated gene |
 | `condition_name` | TEXT | NOT NULL | Condition name (e.g., "Type 2 diabetes") |
@@ -226,6 +231,7 @@ WHERE ta.trait_name LIKE '%ADHD%';
 **Indexes:** `idx_health_condition_associations_gene_id` on `gene_id`
 
 **Example:**
+
 ```sql
 SELECT hca.*, g.gene_symbol
 FROM health_condition_associations hca
@@ -240,7 +246,7 @@ WHERE hca.condition_name LIKE '%anxiety%';
 **Purpose:** Reference citations (renamed from "references" - SQL reserved keyword)
 
 | Column | Type | Constraints | Description |
-|--------|------|-------------|-------------|
+| -------- | ------ | ------------- | ------------- |
 | `id` | INTEGER | PRIMARY KEY, AUTOINCREMENT | Unique citation identifier |
 | `citation_number` | INTEGER | UNIQUE | Sequential citation number |
 | `authors` | TEXT | | Author names |
@@ -257,11 +263,13 @@ WHERE hca.condition_name LIKE '%anxiety%';
 | `updated_at` | TIMESTAMP | DEFAULT CURRENT_TIMESTAMP | Last update timestamp |
 
 **Current Records:** 174  
-**Indexes:** 
+**Indexes:**
+
 - `idx_citations_citation_number` on `citation_number`
 - `idx_citations_pubmed_id` on `pubmed_id`
 
 **Example:**
+
 ```sql
 SELECT * FROM citations WHERE pubmed_id IS NOT NULL ORDER BY year DESC;
 ```
@@ -273,7 +281,7 @@ SELECT * FROM citations WHERE pubmed_id IS NOT NULL ORDER BY year DESC;
 **Purpose:** Junction table linking trait associations to citations (many-to-many)
 
 | Column | Type | Constraints | Description |
-|--------|------|-------------|-------------|
+| -------- | ------ | ------------- | ------------- |
 | `id` | INTEGER | PRIMARY KEY, AUTOINCREMENT | Unique link identifier |
 | `trait_association_id` | INTEGER | FOREIGN KEY → trait_associations.id | Trait association |
 | `citation_id` | INTEGER | NOT NULL, FOREIGN KEY → citations.id | Citation reference |
@@ -282,6 +290,7 @@ SELECT * FROM citations WHERE pubmed_id IS NOT NULL ORDER BY year DESC;
 **Current Records:** 2,010
 
 **Example:**
+
 ```sql
 SELECT ta.trait_name, c.citation_number, c.authors, c.year
 FROM gene_trait_citations gtc
@@ -297,7 +306,7 @@ WHERE ta.trait_name LIKE '%ADHD%';
 **Purpose:** Junction table linking health conditions to citations (many-to-many)
 
 | Column | Type | Constraints | Description |
-|--------|------|-------------|-------------|
+| -------- | ------ | ------------- | ------------- |
 | `id` | INTEGER | PRIMARY KEY, AUTOINCREMENT | Unique link identifier |
 | `health_condition_association_id` | INTEGER | FOREIGN KEY → health_condition_associations.id | Health condition |
 | `citation_id` | INTEGER | NOT NULL, FOREIGN KEY → citations.id | Citation reference |
@@ -306,6 +315,7 @@ WHERE ta.trait_name LIKE '%ADHD%';
 **Current Records:** 1,097
 
 **Example:**
+
 ```sql
 SELECT hca.condition_name, c.citation_number, c.authors, c.year
 FROM gene_health_citations ghc
@@ -321,7 +331,7 @@ WHERE hca.condition_name LIKE '%anxiety%';
 **Purpose:** Gene-gene interaction relationships
 
 | Column | Type | Constraints | Description |
-|--------|------|-------------|-------------|
+| -------- | ------ | ------------- | ------------- |
 | `id` | INTEGER | PRIMARY KEY, AUTOINCREMENT | Unique interaction identifier |
 | `gene1_id` | INTEGER | NOT NULL, FOREIGN KEY → genes.id | First gene |
 | `gene2_id` | INTEGER | NOT NULL, FOREIGN KEY → genes.id | Second gene |
@@ -331,6 +341,7 @@ WHERE hca.condition_name LIKE '%anxiety%';
 **Current Records:** 0 (structure ready for import)
 
 **Example:**
+
 ```sql
 SELECT 
     g1.gene_symbol as gene1,
@@ -348,7 +359,7 @@ JOIN genes g2 ON ggi.gene2_id = g2.id;
 **Purpose:** Research findings for genes
 
 | Column | Type | Constraints | Description |
-|--------|------|-------------|-------------|
+| -------- | ------ | ------------- | ------------- |
 | `id` | INTEGER | PRIMARY KEY, AUTOINCREMENT | Unique finding identifier |
 | `gene_id` | INTEGER | NOT NULL, FOREIGN KEY → genes.id | Associated gene |
 | `finding_title` | TEXT | | Finding title |
@@ -358,6 +369,7 @@ JOIN genes g2 ON ggi.gene2_id = g2.id;
 **Current Records:** 16
 
 **Example:**
+
 ```sql
 SELECT rf.*, g.gene_symbol
 FROM research_findings rf
@@ -372,7 +384,7 @@ WHERE g.gene_symbol = 'COMT';
 **Purpose:** Junction table linking research findings to citations
 
 | Column | Type | Constraints | Description |
-|--------|------|-------------|-------------|
+| -------- | ------ | ------------- | ------------- |
 | `id` | INTEGER | PRIMARY KEY, AUTOINCREMENT | Unique link identifier |
 | `research_finding_id` | INTEGER | NOT NULL, FOREIGN KEY → research_findings.id | Research finding |
 | `citation_id` | INTEGER | NOT NULL, FOREIGN KEY → citations.id | Citation reference |
@@ -387,7 +399,7 @@ WHERE g.gene_symbol = 'COMT';
 **Purpose:** External database sources (SNPedia, GWAS Catalog, GTR, PubMed)
 
 | Column | Type | Constraints | Description |
-|--------|------|-------------|-------------|
+| -------- | ------ | ------------- | ------------- |
 | `id` | INTEGER | PRIMARY KEY, AUTOINCREMENT | Unique source identifier |
 | `gene_id` | INTEGER | NOT NULL, FOREIGN KEY → genes.id | Associated gene |
 | `source_type` | TEXT | NOT NULL | Source type: "SNPedia", "GWAS Catalog", "GTR", "PubMed" |
@@ -397,7 +409,8 @@ WHERE g.gene_symbol = 'COMT';
 
 **Current Records:** 0
 
-**Indexes:** 
+**Indexes:**
+
 - `idx_database_sources_gene_id` on `gene_id`
 
 ---
@@ -407,7 +420,7 @@ WHERE g.gene_symbol = 'COMT';
 **Purpose:** Research paper references (separate from citations)
 
 | Column | Type | Constraints | Description |
-|--------|------|-------------|-------------|
+| -------- | ------ | ------------- | ------------- |
 | `id` | INTEGER | PRIMARY KEY, AUTOINCREMENT | Unique reference identifier |
 | `reference_number` | INTEGER | UNIQUE | Sequential reference number |
 | `authors` | TEXT | | Author names |
@@ -428,6 +441,7 @@ WHERE g.gene_symbol = 'COMT';
 **Current Records:** 0
 
 **Indexes:**
+
 - `idx_research_references_reference_number` on `reference_number`
 - `idx_research_references_pubmed_id` on `pubmed_id`
 
@@ -438,7 +452,7 @@ WHERE g.gene_symbol = 'COMT';
 **Purpose:** Primary source documents (medical records, test results, etc.)
 
 | Column | Type | Constraints | Description |
-|--------|------|-------------|-------------|
+| -------- | ------ | ------------- | ------------- |
 | `id` | INTEGER | PRIMARY KEY, AUTOINCREMENT | Unique source identifier |
 | `source_name` | TEXT | NOT NULL | Source name/identifier |
 | `source_type` | TEXT | NOT NULL | Type: "health_log", "health_issue", "lab_result", "medical_record", "test_report" |
@@ -455,6 +469,7 @@ WHERE g.gene_symbol = 'COMT';
 **Current Records:** 21
 
 **Indexes:**
+
 - `idx_primary_sources_source_type` on `source_type`
 - `idx_primary_sources_document_date` on `document_date`
 
@@ -465,7 +480,7 @@ WHERE g.gene_symbol = 'COMT';
 **Purpose:** Findings extracted from primary source documents
 
 | Column | Type | Constraints | Description |
-|--------|------|-------------|-------------|
+| -------- | ------ | ------------- | ------------- |
 | `id` | INTEGER | PRIMARY KEY, AUTOINCREMENT | Unique finding identifier |
 | `primary_source_id` | INTEGER | NOT NULL, FOREIGN KEY → primary_sources.id | Source document |
 | `finding_type` | TEXT | NOT NULL | Type: "diagnosis", "symptom", "test_result", "medication", "visit" |
@@ -479,6 +494,7 @@ WHERE g.gene_symbol = 'COMT';
 **Current Records:** 104
 
 **Indexes:**
+
 - `idx_primary_source_findings_source_id` on `primary_source_id`
 - `idx_primary_source_findings_gene_id` on `related_gene_id`
 - `idx_primary_source_findings_type` on `finding_type`
@@ -490,7 +506,7 @@ WHERE g.gene_symbol = 'COMT';
 **Purpose:** Health metrics (vitals, measurements, lab values)
 
 | Column | Type | Constraints | Description |
-|--------|------|-------------|-------------|
+| -------- | ------ | ------------- | ------------- |
 | `id` | INTEGER | PRIMARY KEY, AUTOINCREMENT | Unique metric identifier |
 | `primary_source_id` | INTEGER | NOT NULL, FOREIGN KEY → primary_sources.id | Source document |
 | `finding_id` | INTEGER | FOREIGN KEY → primary_source_findings.id | Related finding |
@@ -511,12 +527,14 @@ WHERE g.gene_symbol = 'COMT';
 **Current Records:** 6,104
 
 **Indexes:**
+
 - `idx_health_metrics_source_id` on `primary_source_id`
 - `idx_health_metrics_type` on `metric_type`
 - `idx_health_metrics_date` on `collection_date`
 - `idx_health_metrics_visit_type` on `visit_type`
 
 **Example:**
+
 ```sql
 -- Get average blood pressure (routine visits only)
 SELECT 
@@ -535,7 +553,7 @@ WHERE metric_type = 'blood_pressure'
 **Purpose:** Pharmacogenomic drug metabolism data
 
 | Column | Type | Constraints | Description |
-|--------|------|-------------|-------------|
+| -------- | ------ | ------------- | ------------- |
 | `id` | INTEGER | PRIMARY KEY, AUTOINCREMENT | Unique pharmacogenomic identifier |
 | `gene_id` | INTEGER | NOT NULL, UNIQUE, FOREIGN KEY → genes.id | Associated gene (one-to-one) |
 | `metabolism_status` | TEXT | NOT NULL | Status: "Normal", "Intermediate", "Poor", "Ultra-Rapid" |
@@ -555,7 +573,7 @@ WHERE metric_type = 'blood_pressure'
 **Purpose:** Medications affected by pharmacogenomic data
 
 | Column | Type | Constraints | Description |
-|--------|------|-------------|-------------|
+| -------- | ------ | ------------- | ------------- |
 | `id` | INTEGER | PRIMARY KEY, AUTOINCREMENT | Unique drug identifier |
 | `pharmacogenomic_data_id` | INTEGER | NOT NULL, FOREIGN KEY → pharmacogenomic_data.id | Pharmacogenomic data |
 | `drug_name` | TEXT | NOT NULL | Drug name |
@@ -580,48 +598,60 @@ WHERE metric_type = 'blood_pressure'
 The database has **22 indexes** for optimal query performance:
 
 ### Gene Indexes
+
 - `idx_genes_symbol` on `genes(gene_symbol)`
 
 ### SNP Indexes
+
 - `idx_snps_rs_number` on `snps(rs_number)`
 - `idx_snps_gene_id` on `snps(gene_id)`
 
 ### Genotype Indexes
+
 - `idx_genotypes_gene_id` on `genotypes(gene_id)`
 
 ### Trait Indexes
+
 - `idx_trait_associations_gene_id` on `trait_associations(gene_id)`
 
 ### Health Condition Indexes
+
 - `idx_health_condition_associations_gene_id` on `health_condition_associations(gene_id)`
 
 ### Citation Indexes
+
 - `idx_citations_citation_number` on `citations(citation_number)`
 - `idx_citations_pubmed_id` on `citations(pubmed_id)`
 
 ### Database Source Indexes
+
 - `idx_database_sources_gene_id` on `database_sources(gene_id)`
 
 ### Research Reference Indexes
+
 - `idx_research_references_reference_number` on `research_references(reference_number)`
 - `idx_research_references_pubmed_id` on `research_references(pubmed_id)`
 
 ### Primary Source Indexes
+
 - `idx_primary_sources_source_type` on `primary_sources(source_type)`
 - `idx_primary_sources_document_date` on `primary_sources(document_date)`
 
 ### Primary Source Finding Indexes
+
 - `idx_primary_source_findings_source_id` on `primary_source_findings(primary_source_id)`
 - `idx_primary_source_findings_gene_id` on `primary_source_findings(related_gene_id)`
 - `idx_primary_source_findings_type` on `primary_source_findings(finding_type)`
 
 ### Health Metric Indexes
+
 - `idx_health_metrics_source_id` on `health_metrics(primary_source_id)`
 - `idx_health_metrics_type` on `health_metrics(metric_type)`
 - `idx_health_metrics_date` on `health_metrics(collection_date)`
 - `idx_health_metrics_visit_type` on `health_metrics(visit_type)`
 
 ### Pharmacogenomic Indexes
+
 - `idx_pharmacogenomic_data_gene_id` on `pharmacogenomic_data(gene_id)`
 - `idx_gene_pharmacogenomic_drugs_pg_id` on `gene_pharmacogenomic_drugs(pharmacogenomic_data_id)`
 
@@ -753,9 +783,11 @@ db.close()
 ### Gene Methods
 
 #### `add_gene(gene_symbol, gene_name, chromosome=None) -> int`
+
 Add a new gene to the database.
 
 **Parameters:**
+
 - `gene_symbol` (str): Gene symbol (e.g., "COMT")
 - `gene_name` (str): Full gene name
 - `chromosome` (str, optional): Chromosome location
@@ -763,16 +795,19 @@ Add a new gene to the database.
 **Returns:** Gene ID
 
 **Example:**
+
 ```python
 gene_id = db.add_gene("COMT", "Catechol-O-Methyltransferase", "22")
 ```
 
 #### `get_all_genes() -> List[Dict]`
+
 Get all genes from the database.
 
 **Returns:** List of gene dictionaries
 
 **Example:**
+
 ```python
 genes = db.get_all_genes()
 for gene in genes:
@@ -780,14 +815,17 @@ for gene in genes:
 ```
 
 #### `get_gene_by_symbol(gene_symbol: str) -> Optional[Dict]`
+
 Get a gene by its symbol.
 
 **Parameters:**
+
 - `gene_symbol` (str): Gene symbol to search for
 
 **Returns:** Gene dictionary or None if not found
 
 **Example:**
+
 ```python
 gene = db.get_gene_by_symbol("COMT")
 if gene:
@@ -797,9 +835,11 @@ if gene:
 ### SNP Methods
 
 #### `add_snp(rs_number, gene_id, position=None, reference_allele=None, alternate_allele=None) -> int`
+
 Add an SNP to the database.
 
 **Parameters:**
+
 - `rs_number` (str): dbSNP reference number
 - `gene_id` (int): Associated gene ID
 - `position` (str, optional): Genomic position
@@ -809,6 +849,7 @@ Add an SNP to the database.
 **Returns:** SNP ID
 
 **Example:**
+
 ```python
 snp_id = db.add_snp("rs4680", gene_id)
 ```
@@ -816,9 +857,11 @@ snp_id = db.add_snp("rs4680", gene_id)
 ### Genotype Methods
 
 #### `add_genotype(gene_id, genotype, phenotype=None) -> int`
+
 Add a genotype for a gene.
 
 **Parameters:**
+
 - `gene_id` (int): Associated gene ID
 - `genotype` (str): Genotype (e.g., "C/G")
 - `phenotype` (str, optional): Phenotype description
@@ -826,6 +869,7 @@ Add a genotype for a gene.
 **Returns:** Genotype ID
 
 **Example:**
+
 ```python
 genotype_id = db.add_genotype(gene_id, "Val/Met", "Heterozygous")
 ```
@@ -833,9 +877,11 @@ genotype_id = db.add_genotype(gene_id, "Val/Met", "Heterozygous")
 ### Trait Association Methods
 
 #### `add_trait_association(gene_id, trait_name, association_direction=None, notes=None, reference_ids=None) -> int`
+
 Add a trait association for a gene.
 
 **Parameters:**
+
 - `gene_id` (int): Associated gene ID
 - `trait_name` (str): Trait name
 - `association_direction` (str, optional): "increased", "decreased", "moderate"
@@ -845,6 +891,7 @@ Add a trait association for a gene.
 **Returns:** Trait association ID
 
 **Example:**
+
 ```python
 trait_id = db.add_trait_association(
     gene_id=gene_id,
@@ -855,14 +902,17 @@ trait_id = db.add_trait_association(
 ```
 
 #### `get_trait_associations_for_gene(gene_id: int) -> List[Dict]`
+
 Get all trait associations for a gene.
 
 **Parameters:**
+
 - `gene_id` (int): Gene ID
 
 **Returns:** List of trait association dictionaries
 
 **Example:**
+
 ```python
 traits = db.get_trait_associations_for_gene(gene_id)
 for trait in traits:
@@ -870,14 +920,17 @@ for trait in traits:
 ```
 
 #### `get_genes_by_trait(trait_name: str) -> List[Dict]`
+
 Get all genes associated with a specific trait.
 
 **Parameters:**
+
 - `trait_name` (str): Trait name to search for
 
 **Returns:** List of gene dictionaries with trait information
 
 **Example:**
+
 ```python
 genes = db.get_genes_by_trait("ADHD susceptibility")
 for gene in genes:
@@ -885,14 +938,17 @@ for gene in genes:
 ```
 
 #### `search_traits(search_term: str) -> List[Dict]`
+
 Search trait associations by name.
 
 **Parameters:**
+
 - `search_term` (str): Search term
 
 **Returns:** List of matching trait associations
 
 **Example:**
+
 ```python
 traits = db.search_traits("pain")
 for trait in traits:
@@ -902,9 +958,11 @@ for trait in traits:
 ### Health Condition Methods
 
 #### `add_health_condition_association(gene_id, condition_name, association_type=None, notes=None, reference_ids=None) -> int`
+
 Add a health condition association for a gene.
 
 **Parameters:**
+
 - `gene_id` (int): Associated gene ID
 - `condition_name` (str): Condition name
 - `association_type` (str, optional): "risk", "protection", "susceptibility"
@@ -914,6 +972,7 @@ Add a health condition association for a gene.
 **Returns:** Health condition association ID
 
 **Example:**
+
 ```python
 condition_id = db.add_health_condition_association(
     gene_id=gene_id,
@@ -924,14 +983,17 @@ condition_id = db.add_health_condition_association(
 ```
 
 #### `get_health_conditions_for_gene(gene_id: int) -> List[Dict]`
+
 Get all health conditions for a gene.
 
 **Parameters:**
+
 - `gene_id` (int): Gene ID
 
 **Returns:** List of health condition dictionaries
 
 **Example:**
+
 ```python
 conditions = db.get_health_conditions_for_gene(gene_id)
 for condition in conditions:
@@ -939,14 +1001,17 @@ for condition in conditions:
 ```
 
 #### `get_genes_by_condition(condition_name: str) -> List[Dict]`
+
 Get all genes associated with a specific health condition.
 
 **Parameters:**
+
 - `condition_name` (str): Condition name to search for
 
 **Returns:** List of gene dictionaries with condition information
 
 **Example:**
+
 ```python
 genes = db.get_genes_by_condition("ADHD")
 for gene in genes:
@@ -954,14 +1019,17 @@ for gene in genes:
 ```
 
 #### `search_health_conditions(search_term: str) -> List[Dict]`
+
 Search health conditions by name.
 
 **Parameters:**
+
 - `search_term` (str): Search term
 
 **Returns:** List of matching health conditions
 
 **Example:**
+
 ```python
 conditions = db.search_health_conditions("anxiety")
 for condition in conditions:
@@ -971,9 +1039,11 @@ for condition in conditions:
 ### Citation Methods
 
 #### `add_reference(citation_number, authors=None, year=None, title=None, journal=None, volume=None, pages=None, doi=None, pubmed_id=None, url=None, reference_type=None) -> int`
+
 Add a citation/reference to the database.
 
 **Parameters:**
+
 - `citation_number` (int): Sequential citation number
 - `authors` (str, optional): Author names
 - `year` (int, optional): Publication year
@@ -989,6 +1059,7 @@ Add a citation/reference to the database.
 **Returns:** Citation ID
 
 **Example:**
+
 ```python
 citation_id = db.add_reference(
     citation_number=1,
@@ -1002,11 +1073,13 @@ citation_id = db.add_reference(
 ```
 
 #### `get_all_references() -> List[Dict]`
+
 Get all citations/references from the database.
 
 **Returns:** List of citation dictionaries
 
 **Example:**
+
 ```python
 citations = db.get_all_references()
 for citation in citations:
@@ -1016,9 +1089,11 @@ for citation in citations:
 ### Gene-Gene Interaction Methods
 
 #### `add_gene_gene_interaction(gene1_id, gene2_id, interaction_description) -> int`
+
 Add a gene-gene interaction.
 
 **Parameters:**
+
 - `gene1_id` (int): First gene ID
 - `gene2_id` (int): Second gene ID
 - `interaction_description` (str): Description of interaction
@@ -1026,6 +1101,7 @@ Add a gene-gene interaction.
 **Returns:** Interaction ID
 
 **Example:**
+
 ```python
 interaction_id = db.add_gene_gene_interaction(
     gene1_id=gene1_id,
@@ -1035,14 +1111,17 @@ interaction_id = db.add_gene_gene_interaction(
 ```
 
 #### `get_interacting_genes(gene_symbol: str) -> List[Dict]`
+
 Get all genes that interact with a given gene.
 
 **Parameters:**
+
 - `gene_symbol` (str): Gene symbol
 
 **Returns:** List of interacting gene dictionaries
 
 **Example:**
+
 ```python
 interactions = db.get_interacting_genes("COMT")
 for interaction in interactions:
@@ -1053,9 +1132,11 @@ for interaction in interactions:
 ### Pharmacogenomic Methods
 
 #### `add_pharmacogenomic_data(gene_id, metabolism_status, genotype_phenotype=None, citation_id=None) -> int`
+
 Add pharmacogenomic data for a gene.
 
 **Parameters:**
+
 - `gene_id` (int): Gene ID
 - `metabolism_status` (str): "Normal", "Intermediate", "Poor", "Ultra-Rapid"
 - `genotype_phenotype` (str, optional): Genotype/phenotype
@@ -1064,6 +1145,7 @@ Add pharmacogenomic data for a gene.
 **Returns:** Pharmacogenomic data ID
 
 **Example:**
+
 ```python
 pharm_id = db.add_pharmacogenomic_data(
     gene_id=gene_id,
@@ -1073,14 +1155,17 @@ pharm_id = db.add_pharmacogenomic_data(
 ```
 
 #### `get_pharmacogenomic_data_for_gene(gene_id: int) -> Optional[Dict]`
+
 Get pharmacogenomic data for a specific gene.
 
 **Parameters:**
+
 - `gene_id` (int): Gene ID
 
 **Returns:** Pharmacogenomic data dictionary or None
 
 **Example:**
+
 ```python
 pharm_data = db.get_pharmacogenomic_data_for_gene(gene_id)
 if pharm_data:
@@ -1088,11 +1173,13 @@ if pharm_data:
 ```
 
 #### `get_all_pharmacogenomic() -> List[Dict]`
+
 Get all pharmacogenomic data.
 
 **Returns:** List of pharmacogenomic data dictionaries
 
 **Example:**
+
 ```python
 all_pharm = db.get_all_pharmacogenomic()
 for pharm in all_pharm:
@@ -1100,28 +1187,34 @@ for pharm in all_pharm:
 ```
 
 #### `add_gene_pharmacogenomic_drug(pharmacogenomic_data_id, drug_name) -> int`
+
 Add a medication affected by pharmacogenomic data.
 
 **Parameters:**
+
 - `pharmacogenomic_data_id` (int): Pharmacogenomic data ID
 - `drug_name` (str): Drug name
 
 **Returns:** Drug association ID
 
 **Example:**
+
 ```python
 drug_id = db.add_gene_pharmacogenomic_drug(pharm_id, "Citalopram")
 ```
 
 #### `get_medications_for_gene(gene_id: int) -> List[str]`
+
 Get all medications affected by a gene's pharmacogenomic data.
 
 **Parameters:**
+
 - `gene_id` (int): Gene ID
 
 **Returns:** List of drug names
 
 **Example:**
+
 ```python
 medications = db.get_medications_for_gene(gene_id)
 for med in medications:
@@ -1129,14 +1222,17 @@ for med in medications:
 ```
 
 #### `search_pharmacogenomic(medication_name: str) -> List[Dict]`
+
 Search pharmacogenomic data by medication name.
 
 **Parameters:**
+
 - `medication_name` (str): Medication name to search for
 
 **Returns:** List of matching pharmacogenomic data
 
 **Example:**
+
 ```python
 results = db.search_pharmacogenomic("Citalopram")
 for result in results:
@@ -1146,9 +1242,11 @@ for result in results:
 ### Primary Source Methods
 
 #### `add_primary_source(source_name, source_type, institution=None, patient_name=None, document_date=None, file_path=None, file_name=None, extracted_text=None, metadata=None) -> int`
+
 Add a primary source document.
 
 **Parameters:**
+
 - `source_name` (str): Source name/identifier
 - `source_type` (str): "health_log", "health_issue", "lab_result", "medical_record", "test_report"
 - `institution` (str, optional): Institution name
@@ -1162,6 +1260,7 @@ Add a primary source document.
 **Returns:** Primary source ID
 
 **Example:**
+
 ```python
 source_id = db.add_primary_source(
     source_name="Health Summary 2025",
@@ -1172,11 +1271,13 @@ source_id = db.add_primary_source(
 ```
 
 #### `get_all_primary_sources() -> List[Dict]`
+
 Get all primary sources.
 
 **Returns:** List of primary source dictionaries
 
 **Example:**
+
 ```python
 sources = db.get_all_primary_sources()
 for source in sources:
@@ -1184,9 +1285,11 @@ for source in sources:
 ```
 
 #### `add_primary_source_finding(primary_source_id, finding_type, finding_text, finding_date=None, related_gene_id=None, related_condition=None, notes=None) -> int`
+
 Add a finding from a primary source.
 
 **Parameters:**
+
 - `primary_source_id` (int): Primary source ID
 - `finding_type` (str): "diagnosis", "symptom", "test_result", "medication", "visit"
 - `finding_text` (str): Finding text/content
@@ -1198,6 +1301,7 @@ Add a finding from a primary source.
 **Returns:** Finding ID
 
 **Example:**
+
 ```python
 finding_id = db.add_primary_source_finding(
     primary_source_id=source_id,
@@ -1209,14 +1313,17 @@ finding_id = db.add_primary_source_finding(
 ```
 
 #### `get_primary_source_findings(primary_source_id: int) -> List[Dict]`
+
 Get all findings for a primary source.
 
 **Parameters:**
+
 - `primary_source_id` (int): Primary source ID
 
 **Returns:** List of finding dictionaries
 
 **Example:**
+
 ```python
 findings = db.get_primary_source_findings(source_id)
 for finding in findings:
@@ -1226,9 +1333,11 @@ for finding in findings:
 ### Health Metric Methods
 
 #### `add_health_metric(primary_source_id, metric_type, metric_name=None, metric_value=None, metric_value_text=None, unit=None, collection_date, collection_time=None, visit_type=None, is_abnormal=False, normal_range_min=None, normal_range_max=None, notes=None, finding_id=None) -> int`
+
 Add a health metric.
 
 **Parameters:**
+
 - `primary_source_id` (int): Primary source ID
 - `metric_type` (str): "temperature", "blood_pressure", "heart_rate", "weight", "bmi", "lab_value"
 - `metric_name` (str, optional): Specific name if lab value
@@ -1247,6 +1356,7 @@ Add a health metric.
 **Returns:** Health metric ID
 
 **Example:**
+
 ```python
 metric_id = db.add_health_metric(
     primary_source_id=source_id,
@@ -1266,7 +1376,7 @@ metric_id = db.add_health_metric(
 
 ### Entity Relationship Diagram
 
-```
+```text
 genes (1) ──< (many) trait_associations
 genes (1) ──< (many) health_condition_associations
 genes (1) ──< (many) snps
@@ -1318,6 +1428,7 @@ pharmacogenomic_data (1) ──< (1) citations
 ### Basic Queries
 
 #### Get all genes with their trait counts
+
 ```sql
 SELECT 
     g.gene_symbol,
@@ -1330,6 +1441,7 @@ ORDER BY trait_count DESC;
 ```
 
 #### Get genes associated with ADHD
+
 ```sql
 SELECT DISTINCT
     g.gene_symbol,
@@ -1343,6 +1455,7 @@ ORDER BY g.gene_symbol;
 ```
 
 #### Get all citations for a specific gene's traits
+
 ```sql
 SELECT DISTINCT
     c.citation_number,
@@ -1361,6 +1474,7 @@ ORDER BY c.citation_number;
 ### Advanced Queries
 
 #### Get complete gene profile
+
 ```sql
 SELECT 
     g.gene_symbol,
@@ -1380,6 +1494,7 @@ GROUP BY g.id;
 ```
 
 #### Get average health metrics (routine visits only)
+
 ```sql
 SELECT 
     metric_type,
@@ -1397,6 +1512,7 @@ ORDER BY metric_type, metric_name;
 ```
 
 #### Get genes with most trait associations
+
 ```sql
 SELECT 
     g.gene_symbol,
@@ -1437,6 +1553,7 @@ LIMIT 10;
 ### Constraint Verification
 
 All database constraints are properly enforced:
+
 - ✅ Primary keys on all tables
 - ✅ Unique constraints on gene symbols, rs numbers, citation numbers
 - ✅ Foreign key relationships maintained
@@ -1450,6 +1567,7 @@ All database constraints are properly enforced:
 ### Index Usage
 
 All indexes are optimized for common query patterns:
+
 - Gene lookups by symbol
 - SNP lookups by rs number
 - Trait/condition searches by gene
@@ -1468,6 +1586,7 @@ All indexes are optimized for common query patterns:
 ### WAL Mode
 
 The database uses Write-Ahead Logging (WAL) mode for:
+
 - Better concurrency (multiple readers, single writer)
 - Improved performance
 - Reduced lock contention
@@ -1487,17 +1606,20 @@ The database uses Write-Ahead Logging (WAL) mode for:
 ### Backup Procedures
 
 #### Manual Backup
+
 ```bash
 # Copy database file
 cp genetic_profile.db genetic_profile_backup_$(date +%Y%m%d).db
 ```
 
 #### SQLite Backup Command
+
 ```bash
 sqlite3 genetic_profile.db ".backup genetic_profile_backup.db"
 ```
 
 #### Python Backup
+
 ```python
 import shutil
 from datetime import datetime
@@ -1510,21 +1632,25 @@ print(f"Backup created: {backup_name}")
 ### Maintenance Commands
 
 #### VACUUM (Reclaim Space)
+
 ```sql
 VACUUM;
 ```
 
 #### ANALYZE (Update Statistics)
+
 ```sql
 ANALYZE;
 ```
 
 #### Check Integrity
+
 ```sql
 PRAGMA integrity_check;
 ```
 
 #### Check Foreign Keys
+
 ```sql
 PRAGMA foreign_key_check;
 ```
@@ -1570,4 +1696,3 @@ PRAGMA foreign_key_check;
 **Last Updated:** December 7, 2025  
 **Database Version:** 1.0.0  
 **Status:** ✅ PRODUCTION-READY
-
