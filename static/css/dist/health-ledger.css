@@ -3199,6 +3199,31 @@ input[type="date"]::-webkit-calendar-picker-indicator {
   padding: var(--space-5) var(--space-2);
 }
 
+/* A CHOSEN PATH, SHOWN RATHER THAN TYPED
+   Where the app has already picked a sensible folder, it says so in a
+   sentence and keeps the path underneath as reference. Somebody meeting
+   the app for the first time should not have to read a filesystem path to
+   get past the first screen, but they should still be able to see where
+   their records are going. */
+.chosen-path {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: var(--space-1);
+}
+
+.chosen-path-summary {
+  margin: 0;
+}
+
+.chosen-path-value {
+  margin: 0 0 var(--space-1);
+  font-family: var(--font-family-mono);
+  font-size: var(--font-size-sm);
+  color: var(--color-text-secondary);
+  overflow-wrap: anywhere;
+}
+
 /* NOTHING HERE YET
    Every page can be opened before anything has been added, and a page
    that only says "none found" leaves somebody who has just installed the

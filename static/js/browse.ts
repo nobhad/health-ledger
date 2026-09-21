@@ -6,8 +6,13 @@
  * open the computer's own dialog and puts the choice into the field. An
  * optional data-status="<element id>" names where to say what is happening,
  * and data-filename-from="<select id>" derives the proposed file name's
- * extension from a format select. Typing a path still works without any
- * of this.
+ * extension from a format select.
+ *
+ * When the field itself is hidden and the choice is shown as a sentence
+ * instead, data-echo-path and data-echo-name name the elements that carry
+ * the full path and the folder's own name, and data-echo-clear names a
+ * clause that was only true of the folder proposed at the start ("in your
+ * home folder") and must go once another one is picked.
  */
 (function (): void {
     const buttons = document.querySelectorAll<HTMLButtonElement>('[data-browse]');
@@ -21,6 +26,9 @@
             return;
         }
         const status = document.getElementById(button.dataset.status ?? '');
+        const echoPath = document.getElementById(button.dataset.echoPath ?? '');
+        const echoName = document.getElementById(button.dataset.echoName ?? '');
+        const echoClear = document.getElementById(button.dataset.echoClear ?? '');
         const formatSelect = document.getElementById(button.dataset.filenameFrom ?? '') as HTMLSelectElement | null;
         const kind = button.dataset.browse === 'save' ? 'save' : 'folder';
 
@@ -47,6 +55,16 @@
                 const data = (await response.json()) as { path?: string | null; error?: string };
                 if (data.path) {
                     target.value = data.path;
+                    if (echoPath) {
+                        echoPath.textContent = data.path;
+                    }
+                    if (echoName) {
+                        echoName.textContent =
+                            data.path.split('/').pop()?.split('\\').pop() || data.path;
+                    }
+                    if (echoClear) {
+                        echoClear.remove();
+                    }
                     target.dispatchEvent(new Event('change', { bubbles: true }));
                     say('');
                 } else if (data.error) {

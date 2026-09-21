@@ -19,16 +19,26 @@
     <form class="form-stack" method="post" enctype="multipart/form-data">
     <div class="section">
         <div class="section-header"><h3 class="section-title">Where your records will live</h3></div>
-        <p class="note">Everything private stays in this one folder on your computer: the database, your source documents, generated PDFs and backups. Keep the suggestion or type another folder.</p>
-        <div class="form-group">
-            <label for="dataFolder" class="field-label">Data folder</label>
-            <div class="input-group">
-                <input type="text" id="dataFolder" name="data_folder" value="{{ proposed_folder }}" autocomplete="off" spellcheck="false" class="form-input">
-                <button type="button" class="btn btn-secondary" data-browse="folder" data-target="dataFolder" data-status="browseStatus">
-                    <i data-lucide="folder-open"></i>
-                    Choose a folder
-                </button>
-            </div>
+        <p class="note">Everything private stays in this one folder on your computer: the database, your source documents, generated PDFs and backups.</p>
+        {# The folder is named in a sentence rather than put in a path field:
+           the first screen of the app should not open with somebody being
+           asked to type a filesystem path. The path itself is still shown,
+           quietly, because it is the thing they will need when they go
+           looking for their records. The field is still here, hidden, so the
+           form posts exactly what it did before. #}
+        <div class="chosen-path">
+            <p class="chosen-path-summary">
+                Your records will be kept in a folder called
+                <strong id="dataFolderName">{{ proposed_folder_name }}</strong>{% if proposed_in_home %}<span id="dataFolderWhere"> in your home folder</span>{% endif %}.
+            </p>
+            <p class="chosen-path-value" id="dataFolderPath">{{ proposed_folder }}</p>
+            <input type="hidden" id="dataFolder" name="data_folder" value="{{ proposed_folder }}">
+            <button type="button" class="btn btn-secondary" data-browse="folder" data-target="dataFolder"
+                    data-status="browseStatus" data-echo-path="dataFolderPath"
+                    data-echo-name="dataFolderName" data-echo-clear="dataFolderWhere">
+                <i data-lucide="folder-open"></i>
+                Choose a different folder
+            </button>
             <small class="helper-text" id="browseStatus"></small>
         </div>
     </div>

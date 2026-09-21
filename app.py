@@ -283,12 +283,19 @@ def _render_setup(error: str = None, status: int = 200):
     # The folder field proposes what is configured, or a plainly named
     # folder in the home directory when nothing has been chosen yet.
     proposed = config.DATA_ROOT if config.DATA_DIR_IS_CONFIGURED else config.default_data_root()
+    proposed_folder = request.form.get('data_folder') or str(proposed)
+    # The screen names the folder in plain words rather than showing a path
+    # field, so it needs the folder's own name, and whether saying "in your
+    # home folder" would be true of it.
+    proposed_path = Path(proposed_folder).expanduser()
     return render_template('setup.html',
                            current=ledger_setup.summarize(db.conn),
                            backups=list_backups(),
                            data_root=str(config.DATA_ROOT),
                            db_path=str(config.DB_PATH),
-                           proposed_folder=request.form.get('data_folder') or str(proposed),
+                           proposed_folder=proposed_folder,
+                           proposed_folder_name=proposed_path.name or proposed_folder,
+                           proposed_in_home=proposed_path.parent == Path.home(),
                            error=error), status
 
 
