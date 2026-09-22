@@ -82,6 +82,10 @@ data/rename_mapping.json
 
 # Local settings (HEALTH_LEDGER_DATA_DIR etc.) - never commit
 .env
+
+# Internal working docs - never shared. This repo is PUBLIC, so these
+# .gitignore entries are what keep them out; the export-ignore rules in
+# .gitattributes only cover archives, not clones.
 CLAUDE.md
 CURRENT_WORK.md
 .claude/

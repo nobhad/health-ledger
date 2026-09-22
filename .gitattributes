@@ -1,3 +1,6 @@
+# `export-ignore` is honoured by `git archive` - GitHub's source tarballs
+# and the Download ZIP button. It does NOT affect a clone; the .gitignore
+# entries are what keep these out of the public repo.
 CLAUDE.md        export-ignore
 CURRENT_WORK.md  export-ignore
 .claude/         export-ignore
