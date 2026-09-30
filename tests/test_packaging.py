@@ -190,6 +190,63 @@ class TestTheSpecMatchesTheRepository(unittest.TestCase):
         self.assertRegex(self.spec, r'(?m)^\s*console=False,')
 
 
+class TestTheDownloadCarriesNoDeveloperNotes(unittest.TestCase):
+    """
+    The 1.0.0 build shipped every CSS source file, and three of them carried
+    comments pointing at an internal planning document by name and section.
+    The bundle is now built without comments and the CSS sources stay out of
+    the download. Both halves are checked, plus the one way the filter could
+    go wrong: leaving out a file the app actually serves.
+    """
+
+    @classmethod
+    def setUpClass(cls):
+        spec = (ROOT / 'packaging' / 'health_ledger.spec').read_text(encoding='utf-8')
+        # The file selection is plain Python; run just that part, since the
+        # rest of the spec needs PyInstaller's globals.
+        start = spec.index('SHIPPED_CSS')
+        end = spec.index('# Everything the running app reads')
+        namespace = {'Path': Path, 'ROOT': ROOT}
+        exec(spec[start:end], namespace)
+        cls.shipped = {
+            (Path(dest) / Path(src).name).as_posix()
+            for src, dest in namespace['_static_datas']()
+        }
+
+    def test_every_static_file_a_page_asks_for_is_shipped(self):
+        referenced = set()
+        for template in (ROOT / 'templates').rglob('*.html'):
+            text = template.read_text(encoding='utf-8')
+            referenced.update(re.findall(
+                r"url_for\('static',\s*filename='([^']+)'\)", text))
+        source = (ROOT / 'pdf_generator.py').read_text(encoding='utf-8')
+        referenced.update(re.findall(r'href="static/([^"]+)"', source))
+        self.assertTrue(referenced, 'found no static references; the regex is stale')
+        for rel in sorted(referenced):
+            self.assertIn(f'static/{rel}', self.shipped,
+                          f'static/{rel} is used by the app but left out of the build')
+
+    def test_css_and_typescript_sources_stay_out(self):
+        for rel in self.shipped:
+            self.assertFalse(rel.startswith('static/css/design-system/'), rel)
+            self.assertFalse(rel.endswith(('.ts', '.map')), rel)
+
+    def test_the_css_bundle_has_no_comments(self):
+        bundle = (ROOT / 'static' / 'css' / 'dist' / 'health-ledger.css').read_text(encoding='utf-8')
+        self.assertNotIn('/*', bundle,
+                         'the built bundle carries comments; is postcss-discard-comments '
+                         'still in postcss.config.cjs? Run npm run build:css.')
+
+    def test_no_shipped_file_names_the_working_notes(self):
+        for rel in sorted(self.shipped):
+            path = ROOT / rel
+            if path.suffix not in ('.css', '.js', '.svg'):
+                continue
+            text = path.read_text(encoding='utf-8', errors='replace')
+            for marker in ('CURRENT_WORK', 'ARCHIVED_WORK', 'CLAUDE.md'):
+                self.assertNotIn(marker, text, f'{rel} mentions {marker}')
+
+
 class TestTheLicenceAndDisclaimerAreShipped(unittest.TestCase):
 
     def test_the_licence_exists_and_names_its_terms(self):

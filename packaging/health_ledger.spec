@@ -43,11 +43,35 @@ def _version() -> str:
 
 VERSION = _version()
 
+# Stylesheets the running app serves. Everything else under static/css is a
+# source for the PostCSS bundle (dist/), carries developer comments, and is
+# never requested by the app, so it stays out of the download.
+SHIPPED_CSS = {'dist/health-ledger.css', 'pdf.css', 'print.css'}
+# TypeScript sources and source maps: the browser only loads the compiled .js.
+UNSHIPPED_SUFFIXES = ('.ts', '.map')
+
+
+def _static_datas() -> list:
+    """static/, file by file, minus the sources the app never serves."""
+    static = ROOT / 'static'
+    datas = []
+    for path in sorted(static.rglob('*')):
+        if not path.is_file() or path.name.startswith('.'):
+            continue
+        rel = path.relative_to(static)
+        if rel.parts[0] == 'css' and rel.relative_to('css').as_posix() not in SHIPPED_CSS:
+            continue
+        if path.name.endswith(UNSHIPPED_SUFFIXES):
+            continue
+        datas.append((str(path), str(Path('static') / rel.parent)))
+    return datas
+
+
 # Everything the running app reads off disk. Templates and static files are
 # found through config.BASE_DIR, which resolves to the unpack directory.
 datas = [
     (str(ROOT / 'templates'), 'templates'),
-    (str(ROOT / 'static'), 'static'),
+    *_static_datas(),
     (str(ROOT / 'genetic_profile_db_schema.sql'), '.'),
     (str(HERE / 'icon.png'), 'packaging'),
 ]

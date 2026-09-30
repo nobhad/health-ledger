@@ -18,7 +18,7 @@ APP_NAME = "Health Ledger"
 DOCUMENT_DISCLAIMER = (
     "For personal record-keeping. Not a substitute for professional medical advice."
 )
-APP_VERSION = "1.0.0"
+APP_VERSION = "1.0.1"
 
 # A copy running from a PyInstaller bundle sees two different roots: the
 # read-only bundle it was unpacked into, and a writable folder of its own for

@@ -652,7 +652,7 @@ def test():
     return jsonify({
         'status': 'ok',
         'message': 'Server is working!',
-        'version': '1.0.0'
+        'version': config.APP_VERSION
     })
 
 

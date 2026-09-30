@@ -140,11 +140,11 @@ jobs:
             and choose **More info → Run anyway** the first time.
 
             Neither build is code-signed, which is what those warnings are
-            about. [INSTALL.md](INSTALL.md) explains them, and running from
+            about. [INSTALL.md](${{ github.server_url }}/${{ github.repository }}/blob/${{ github.ref_name }}/INSTALL.md) explains them, and running from
             source is always an option.
 
             Your records stay on your own computer. Nothing is uploaded.
             Health Ledger is not a medical device and is not a substitute for
             professional medical advice.
 
-            See [CHANGELOG.md](CHANGELOG.md) for what changed.
+            See [CHANGELOG.md](${{ github.server_url }}/${{ github.repository }}/blob/${{ github.ref_name }}/CHANGELOG.md) for what changed.

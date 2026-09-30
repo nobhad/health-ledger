@@ -2,6 +2,22 @@
 
 Notable changes to Health Ledger. Newest first.
 
+## 1.0.1 — 2026-09-30
+
+The first published release. 1.0.0 was built but never published.
+
+### Changed
+
+- The downloadable apps carry only the stylesheets the app serves: the built
+  bundle and the two print sheets. The CSS source files and the TypeScript
+  sources stay out of the download.
+- The built stylesheet has no comments, which roughly halves its size
+  (190 KB to 86 KB). No rule changed.
+- The `/test` health check reports the version from `config.APP_VERSION`
+  instead of a copy of it.
+- Release notes link to `INSTALL.md` and `CHANGELOG.md` by full URL; the
+  relative links went nowhere on a release page.
+
 ## 1.0.0 — 2026-09-20
 
 First public release: downloadable apps for macOS and Windows, and the source

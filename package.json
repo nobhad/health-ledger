@@ -1,6 +1,6 @@
 {
   "name": "health-ledger",
-  "version": "1.0.0",
+  "version": "1.0.1",
   "description": "Health Ledger - personal medical record tracker",
   "scripts": {
     "build": "tsc && npm run build:css",
@@ -26,6 +26,7 @@
     "postcss": "^8.5.6",
     "postcss-cli": "^11.0.1",
     "postcss-custom-media": "^11.0.6",
+    "postcss-discard-comments": "^7.0.8",
     "postcss-import": "^16.1.1",
     "typescript": "^5.3.3"
   },
