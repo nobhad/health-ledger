@@ -56,6 +56,9 @@
   --z-index-portal-modal: 9600;
   --z-index-portal-dropdown: 9700;
   --z-index-portal-toast: 9800;
+  /* Post-login terminal boot: over everything, the consent banner included
+     (Z_INDEX_CONSENT_BANNER in src/constants/z-index.ts). */
+  --z-index-portal-boot: 10002;
   
   /* Performance dashboard */
 }

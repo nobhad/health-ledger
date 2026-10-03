@@ -339,13 +339,22 @@ body[data-page="ledger"] {
   --table-truncate-max-width: calc(var(--space-base) * 37.5);
   --table-checkbox-width: var(--space-5);
   --table-cell-max-width: calc(var(--space-base) * 25);
-  /* The primary column hugs its content and stops here. 44 * 8px = 352px fits
-     the longest thing these columns carry on ONE line — a full email
-     ("clementine.carter-rutledge@demo.nobhad.codes" ~334px) or a project
-     title — so nothing wraps or truncates at a normal desktop width (Noelle:
-     "i dont want the emails to wrap", 2026-09-17). A rarer, longer string (a
-     six-name contact) ellipsizes; its hover card carries the whole thing. */
-  --table-name-max-width: calc(var(--space-base) * 44);
+  /* The primary column hugs its content and stops here. The floor, 44 * 8px =
+     352px, fits the longest thing these columns carry on ONE line — a full
+     email ("clementine.carter-rutledge@demo.nobhad.codes" ~334px) or a project
+     title — so nothing wraps at a narrow desktop width (Noelle: "i dont want
+     the emails to wrap", 2026-09-17). It was a flat 352px, which clipped a
+     long title on a 1440px table with hundreds of pixels idle in the middle
+     columns (Noelle, 2026-10-02: "here is so much room!?"), so it now grows
+     with the viewport, 35vw, up to 80 * 8px = 640px. That is still a ceiling:
+     the 789px column around one character is what the hug idiom exists to
+     stop. A string past it (a six-name contact) ellipsizes; its hover card
+     carries the whole thing. */
+  --table-name-max-width: clamp(
+    calc(var(--space-base) * 44),
+    35vw,
+    calc(var(--space-base) * 80)
+  );
   /* The ceiling on a SHORT-VALUE column — type, status, date, amount, count.
      It is there to stop one of them growing into the primary column's space,
      not to cut the values themselves, and at 120px it was cutting them: the
@@ -590,12 +599,12 @@ html[data-theme="dark"] body[data-page="ledger"] {
  * ============================================ */
 [data-page="admin"] {
   --activity-email-color: var(--color-info);
-  --activity-invoice-color: var(--app-color-success);
+  --activity-invoice-color: var(--color-success);
   --activity-project-color: var(--color-admin-purple);
-  --activity-file-color: var(--app-color-warning);
+  --activity-file-color: var(--color-warning);
   --activity-message-color: var(--color-cyan);
   --activity-contact-color: var(--color-pink);
-  --activity-status-color: var(--app-color-warning);
+  --activity-status-color: var(--color-warning);
 }
 
 /* ============================================

@@ -20,6 +20,11 @@
   --font--acme: "Acme", sans-serif;
   --font-family-acme: var(--font--acme);
 
+  /* The TV's title cards: a heavy geometric title over a wide squared line
+     (base/fonts.css). */
+  --font-family-title-card: "League Spartan", "Futura", sans-serif;
+  --font-family-title-card-sub: "Michroma", "Eurostile", sans-serif;
+
   /* Body/UI: Inconsolata monospace */
   --font-family-sans:
     "Inconsolata", ui-monospace, "Cascadia Code", "Source Code Pro", Menlo, monospace;

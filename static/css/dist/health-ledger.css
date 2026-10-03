@@ -9,6 +9,22 @@
   font-style:normal;
   font-display:swap;
 }
+
+@font-face{
+  font-family:"League Spartan";
+  src:url("/static/fonts/LeagueSpartan/LeagueSpartan-Variable.woff2") format("woff2"), url("/static/fonts/LeagueSpartan/LeagueSpartan-Variable.ttf") format("truetype");
+  font-weight:100 900;
+  font-style:normal;
+  font-display:swap;
+}
+
+@font-face{
+  font-family:"Michroma";
+  src:url("/static/fonts/Michroma/Michroma-Regular.woff2") format("woff2"), url("/static/fonts/Michroma/Michroma-Regular.ttf") format("truetype");
+  font-weight:400;
+  font-style:normal;
+  font-display:swap;
+}
 @font-face{
   font-family:"Inconsolata";
   src:url("/static/fonts/Inconsolata/Inconsolata-Regular.woff2") format("woff2");
@@ -298,7 +314,7 @@ details > summary:focus-visible{
 
 :root{
   --nav-overlay-rgb:25, 25, 25;
-  --nav-overlay-alpha:0.7;
+  --nav-overlay-alpha:0.25;
   --overlay-backdrop:rgba(var(--nav-overlay-rgb), var(--nav-overlay-alpha));
   --color-brand-red:#b91c1c;
   --color-brand-red-rgb:185, 28, 28;
@@ -397,8 +413,6 @@ html[data-theme="light"]{
   --color-border:#000000;
   --color-text-on-light:#191a0b;
     --color-shadow:rgba(0, 0, 0, 0.2);
-    --app-color-success:var(--color-success);
-  --app-color-warning:var(--color-warning);
   --color-label-ink:var(--color-gray-900);
   --color-success:#065f46;
   --color-warning:#92400e;
@@ -415,9 +429,9 @@ html[data-theme="light"]{
   --status-pending:#92400e;
     
   --status-completed:#065f46;
-    --status-completed-bg:rgba(16, 185, 129, 0.15);
+    --status-completed-bg:rgba(var(--color-success-rgb), 0.15);
   --status-cancelled:var(--color-error);
-    --status-cancelled-bg:rgba(190, 18, 60, 0.15);
+    --status-cancelled-bg:rgba(var(--color-error-rgb), 0.15);
 
   --status-qualified:#6d28d9;
     
@@ -448,7 +462,7 @@ html[data-theme="light"]{
   --color-mac-close-rgb:255, 95, 86;
   --color-mac-minimize:#ffbd2e;
   --color-mac-maximize:#27ca40;
-  --color-success-rgb:16, 185, 129;
+  --color-success-rgb:6, 95, 70;
   --color-skeleton-base:#2a2a2a;
   --color-skeleton-highlight:#3a3a3a;
   --color-card-bg:var(--color-off-white);
@@ -471,6 +485,7 @@ html[data-theme="dark"]{
   --color-ink-on-fill:#171717;
   --color-error:#fda4af;
   --color-error-rgb:253, 164, 175;
+  --color-success-rgb:52, 211, 153;
   --color-neutral-300:#333333;
   --color-neutral-100:#3a3a3a;
   --color-neutral-700:#d0d0d0;
@@ -491,6 +506,8 @@ html[data-theme="dark"]{
 :root{
   --font--acme:"Acme", sans-serif;
   --font-family-acme:var(--font--acme);
+  --font-family-title-card:"League Spartan", "Futura", sans-serif;
+  --font-family-title-card-sub:"Michroma", "Eurostile", sans-serif;
   --font-family-sans:"Inconsolata", ui-monospace, "Cascadia Code", "Source Code Pro", Menlo, monospace;
   --font-family-serif:var(--font-family-mono);
   --font-family-mono:"Inconsolata", ui-monospace, "Cascadia Code", "Source Code Pro", Menlo, monospace;
@@ -653,6 +670,7 @@ html[data-theme="dark"]{
   --duration-faster:0.15s;
   --duration-fast:0.2s;
   --duration-medium:0.3s;
+  --duration-menu-roll:0.4s;
   --transition-faster:0.15s ease;
   --transition-fast:0.2s ease;
   --transition-slow:0.4s ease;
@@ -710,6 +728,7 @@ html[data-theme="dark"]{
   --z-index-portal-modal:9600;
   --z-index-portal-dropdown:9700;
   --z-index-portal-toast:9800;
+  --z-index-portal-boot:10002;
 }
 }
 
@@ -799,6 +818,7 @@ html[data-theme="light"] [data-page="admin"]{
   --contact-input-width:min(520px, 100%);
   --contact-textarea-height:175px;
   --contact-textarea-width:min(520px, 100%);
+  --contact-field-padding:0.78rem 0.85rem;
         --contact-field-border-width:var(--border-width);
   --contact-field-border-color:var(--color-text-primary);
   --terminal-font-family:"Menlo", "Monaco", "Consolas", "Liberation Mono", "Courier New", monospace;
@@ -3349,7 +3369,11 @@ body[data-page="ledger"]{
   --table-truncate-max-width:calc(var(--space-base) * 37.5);
   --table-checkbox-width:var(--space-5);
   --table-cell-max-width:calc(var(--space-base) * 25);
-  --table-name-max-width:calc(var(--space-base) * 44);
+  --table-name-max-width:clamp(
+    calc(var(--space-base) * 44),
+    35vw,
+    calc(var(--space-base) * 80)
+  );
   --table-icon-size:var(--icon-size-md);
   --table-sort-indicator-size:calc(var(--icon-size-xs) - var(--border-width));
   --table-pagination-btn-size:var(--space-3-5);
@@ -3450,12 +3474,12 @@ html[data-theme="dark"] body[data-page="ledger"]{
 }
 [data-page="admin"]{
   --activity-email-color:var(--color-info);
-  --activity-invoice-color:var(--app-color-success);
+  --activity-invoice-color:var(--color-success);
   --activity-project-color:var(--color-admin-purple);
-  --activity-file-color:var(--app-color-warning);
+  --activity-file-color:var(--color-warning);
   --activity-message-color:var(--color-cyan);
   --activity-contact-color:var(--color-pink);
-  --activity-status-color:var(--app-color-warning);
+  --activity-status-color:var(--color-warning);
 }
 html:has(body[data-page="admin"]),
 html:has(body[data-page="ledger"]){

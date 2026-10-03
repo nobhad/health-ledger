@@ -34,6 +34,35 @@
   font-display: swap;
 }
 
+/* ============================================
+ * TITLE CARD FACES (the TV's title cards)
+ * ============================================
+ * League Spartan for the title, Michroma for the line under it: free,
+ * self-hosted stand-ins for the Futura Extra Bold and Eurostile Extended the
+ * cards were first lettered in, which have no web licence here. Both SIL OFL
+ * (licences beside the files). League Spartan is the variable file, one
+ * download for every weight. Chosen in the title-card type lab, 2026-09-23. */
+
+@font-face {
+  font-family: "League Spartan";
+  src:
+    url("/static/fonts/LeagueSpartan/LeagueSpartan-Variable.woff2") format("woff2"),
+    url("/static/fonts/LeagueSpartan/LeagueSpartan-Variable.ttf") format("truetype");
+  font-weight: 100 900;
+  font-style: normal;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: "Michroma";
+  src:
+    url("/static/fonts/Michroma/Michroma-Regular.woff2") format("woff2"),
+    url("/static/fonts/Michroma/Michroma-Regular.ttf") format("truetype");
+  font-weight: 400;
+  font-style: normal;
+  font-display: swap;
+}
+
 /* KC ACME HAND INKED is gone, and was never really here.
  *
  * It declared the family `KCAcmeHandInked` and served

@@ -19,6 +19,9 @@
   --duration-faster: 0.15s;
   --duration-fast: 0.2s;
   --duration-medium: 0.3s;
+  /* The menu link's roll on hover and on tap. navigation.ts waits
+     MENU_TAP_ANIMATION_MS (400) for it before closing the menu. */
+  --duration-menu-roll: 0.4s;
   
   /* Shorthand transition tokens — duration + ease combined */
   --transition-faster: 0.15s ease;

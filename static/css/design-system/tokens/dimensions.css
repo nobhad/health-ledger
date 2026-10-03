@@ -97,6 +97,9 @@
   --contact-input-width: min(520px, 100%);
   --contact-textarea-height: 175px;
   --contact-textarea-width: min(520px, 100%);
+  /* The inset of text inside a contact field; the portraits photo picker
+     lines up with it. */
+  --contact-field-padding: 0.78rem 0.85rem;
         --contact-field-border-width: var(--border-width);
   --contact-field-border-color: var(--color-text-primary);
 
