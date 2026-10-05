@@ -5,8 +5,10 @@ print.
 
 Health Ledger keeps lab results, visit notes, letters, portal exports and DNA
 test reports in a single private file, and turns them into a document you can
-hand a doctor. It runs entirely on your machine. Nothing is uploaded, there is
-no account, and there is no server to sign in to.
+hand a doctor. It runs entirely on your machine. Your records are never
+uploaded, there is no account, and there is no server to sign in to. The one
+thing it can send out is a journal search you press a button for, which sends
+only the words you typed to Europe PMC.
 
 > **Not medical advice.** Health Ledger is a filing cabinet, not a doctor. It
 > does not diagnose or treat anything and it is not an approved medical
@@ -56,6 +58,9 @@ To quit: use the Health Ledger icon in your menu bar (Mac) or system tray
 - **DNA raw data** — the download from 23andMe, AncestryDNA, MyHeritage,
   FamilyTreeDNA or Living DNA, zipped or not. Clinical VCF files are not read
   yet.
+- **Journal articles** — on the **References** page, look up articles, save
+  them, and add short word-for-word excerpts from their abstracts to a
+  specialist's document. See [docs/features/REFERENCES.md](docs/features/REFERENCES.md).
 
 A scanned page is a picture with no text in it. Health Ledger keeps it with
 your records either way, and marks it as having no searchable text.
@@ -68,8 +73,13 @@ second copy.
 In the folder you chose in step 2, and nowhere else. The database, the
 original files, generated documents, logs and backups all sit under it.
 
-- Nothing is sent anywhere. The app has no analytics, no crash reporting and
-  no update check.
+- Your records are never sent anywhere. The app has no analytics, no crash
+  reporting and no update check. The one exception is the **References** page:
+  when you type a search and press **Look up**, the words you typed go to
+  Europe PMC, a public index of journal articles. Nothing from your records
+  goes with them, and it never happens unless you press the button. A search
+  term can itself be revealing, such as the name of a gene or a condition.
+  See [docs/features/REFERENCES.md](docs/features/REFERENCES.md).
 - The server listens on `127.0.0.1` only, so no other machine on your network
   can reach it.
 - Back it up like any other folder. Use the **Backup** page, or copy the

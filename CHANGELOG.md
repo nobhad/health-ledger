@@ -2,9 +2,50 @@
 
 Notable changes to Health Ledger. Newest first.
 
+## 1.1.0 — unreleased
+
+The first published release. It includes everything listed under 1.0.1 and
+1.0.0, neither of which was published.
+
+### Added
+
+- **A References page.** Type a gene, condition or medication, press
+  **Look up**, and see journal articles with journal, year, type and citation
+  count. Only articles indexed in MEDLINE are shown, so preprints are left
+  out, and the words must be in the title or abstract. The most-cited matches
+  are shown: practice guidelines first, then meta-analyses, systematic
+  reviews and reviews, then the rest, each by citation count. The lookup
+  happens only when you press the button.
+- Saving an article puts it in your ledger and writes a readable file for it
+  in a `references` folder inside your data folder. The file opens without the
+  app.
+- Fetching the abstract of a saved article, and adding verbatim excerpts from
+  it. An excerpt must appear word for word in the abstract. Each excerpt can
+  be assigned to one or more specialists.
+- A "From the literature" section in a specialist's document, with each
+  assigned excerpt as a quote followed by the article's title and a link. It
+  is left out when the specialist has no excerpts.
+- An **Include journal excerpts** option on Doctor Docs, on by default.
+
+### Changed
+
+- The privacy wording in the README, `SECURITY.md`, `docs/PRIVACY.md` and on
+  the Overview and Import pages. Your records still never leave your computer.
+  The app previously made no outbound request at all; it now makes one kind,
+  the journal lookup you press, which sends the words you typed (or the
+  PubMed id of an article you saved) to Europe PMC and nothing from your
+  records.
+
+### Fixed
+
+- Saving a citation failed on a newly created ledger, because the code wrote
+  to a column the schema does not create.
+- A long web address in the middle panel of Sources or References pushed the
+  panel sideways instead of wrapping.
+
 ## 1.0.1 — 2026-09-30
 
-The first published release. 1.0.0 was built but never published.
+Built but never published, like 1.0.0.
 
 ### Changed
 

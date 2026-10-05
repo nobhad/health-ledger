@@ -143,7 +143,7 @@ jobs:
             about. [INSTALL.md](${{ github.server_url }}/${{ github.repository }}/blob/${{ github.ref_name }}/INSTALL.md) explains them, and running from
             source is always an option.
 
-            Your records stay on your own computer. Nothing is uploaded.
+            Your records stay on your own computer and are never uploaded.
             Health Ledger is not a medical device and is not a substitute for
             professional medical advice.
 

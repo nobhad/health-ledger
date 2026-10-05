@@ -20,9 +20,14 @@ Use made-up data to demonstrate the problem.
 
 ## The privacy model
 
-- **Nothing leaves your machine.** No account, no sync, no telemetry, no crash
-  reporting, no update check. The app makes no outbound network request while
-  you use it.
+- **Your records never leave your machine.** No account, no sync, no
+  telemetry, no crash reporting, no update check. The app makes exactly one
+  kind of outbound network request: when you type a search on the References
+  page and press **Look up**, the words you typed (or, to fetch the abstract
+  of an article you already saved, that article's PubMed id) go to Europe PMC,
+  a public index of journal articles run by EMBL-EBI. Nothing from your
+  records is sent, and it happens only on that click, never automatically. A
+  search term can itself be revealing, for example a gene or condition name.
 - **The server binds to `127.0.0.1`.** Not `0.0.0.0`. Another machine on your
   network cannot reach it, and neither can anything on the internet.
 - **No CORS headers.** A website open in the same browser cannot read the API,

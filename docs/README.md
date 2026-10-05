@@ -31,6 +31,7 @@ Complete documentation for the Genetic Profile Database application.
 - **[Summary Generator](features/SUMMARY_GENERATOR.md)** - Personalized summary creation
 - **[Data Import](features/DATA_IMPORT.md)** - Importing data from markdown
 - **[Citation Management](features/CITATION_MANAGEMENT.md)** - Citation system
+- **[References](features/REFERENCES.md)** - Journal lookup, saved articles and excerpts for specialist documents
 - **[Pharmacogenomic Data](features/PHARMACOGENOMIC.md)** - Drug metabolism information
 - **[Database Queries](features/DATABASE_QUERIES.md)** - Programmatic database access
 
@@ -80,6 +81,7 @@ docs/
 │   ├── SUMMARY_GENERATOR.md
 │   ├── DATA_IMPORT.md
 │   ├── CITATION_MANAGEMENT.md
+│   ├── REFERENCES.md
 │   ├── PHARMACOGENOMIC.md
 │   └── DATABASE_QUERIES.md
 │

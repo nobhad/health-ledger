@@ -11,7 +11,8 @@ ordered, and a change that jumps it may not be merged however good it is.
 
 Two things will be declined on sight, so please do not spend time on them:
 
-- Anything that sends data off the machine — analytics, crash reporting,
+- Anything that sends a person's records off the machine, or sends anything
+  at all without them pressing a button for it — analytics, crash reporting,
   update checks, cloud sync, an account system.
 - Design, layout or CSS changes that were not asked for.
 

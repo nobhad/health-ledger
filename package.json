@@ -1,6 +1,6 @@
 {
   "name": "health-ledger",
-  "version": "1.0.1",
+  "version": "1.1.0",
   "description": "Health Ledger - personal medical record tracker",
   "scripts": {
     "build": "tsc && npm run build:css",

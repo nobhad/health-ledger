@@ -2,14 +2,14 @@
 
 ## Privacy-First Architecture
 
-This application is designed with privacy as the primary concern. All health data remains on your local machine and is never transmitted to external servers.
+This application is designed with privacy as the primary concern. Your health records remain on your local machine and are never transmitted to external servers. The one outbound request the application can make is a journal search you start yourself on the References page; see [No External Services](#no-external-services).
 
 ## Localhost-Only Access
 
 The application is configured to run on `127.0.0.1` (localhost) only. This means:
 
 - The server is only accessible from your local machine
-- No external network access is allowed
+- No other machine can connect to it
 - Your health data cannot be accessed by others on your network
 
 ### Configuration
@@ -95,19 +95,29 @@ All data is stored in a single SQLite database file (`genetic_profile.db`). This
 
 This application does not:
 
-- Send data to external servers
+- Send your records to external servers
 - Use cloud-based services
-- Require internet connection (except for downloading research papers, which is optional)
+- Require an internet connection
 - Store data in third-party databases
 
 All processing happens locally on your machine.
+
+There is one exception, and it is a request you make. On the References page,
+when you type a search and press **Look up**, the application sends the words
+you typed to Europe PMC (a public index of journal articles run by EMBL-EBI).
+Fetching the abstract of an article you already saved sends that article's
+PubMed id instead. Nothing from your records is sent: no names, results,
+genotypes or files. It never happens automatically. A search term can itself
+be revealing, such as the name of a gene or condition. See
+[References](features/REFERENCES.md).
 
 ## Privacy Guarantee
 
 Your health data:
 
 - Stays on your local machine
-- Is never transmitted externally
+- Is never transmitted externally (a journal search you press sends only the
+  words you typed, not your records)
 - Is only accessible by you
 - Can be exported and backed up at your discretion
 
