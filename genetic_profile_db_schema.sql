@@ -80,6 +80,31 @@ CREATE TABLE IF NOT EXISTS citations (
     updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 );
 
+-- Journal articles saved from a lookup: the abstract, the passages the person
+-- selected from it, and the specialists each passage is for. An article is a
+-- row in citations; these tables only hang extra data off it.
+CREATE TABLE IF NOT EXISTS citation_abstracts (
+    citation_id INTEGER PRIMARY KEY,
+    abstract TEXT NOT NULL,
+    fetched_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    FOREIGN KEY (citation_id) REFERENCES citations(id)
+);
+
+CREATE TABLE IF NOT EXISTS citation_excerpts (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    citation_id INTEGER NOT NULL,
+    excerpt_text TEXT NOT NULL,
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    FOREIGN KEY (citation_id) REFERENCES citations(id)
+);
+
+CREATE TABLE IF NOT EXISTS citation_excerpt_specialties (
+    excerpt_id INTEGER NOT NULL,
+    specialty TEXT NOT NULL,
+    UNIQUE (excerpt_id, specialty),
+    FOREIGN KEY (excerpt_id) REFERENCES citation_excerpts(id)
+);
+
 -- Gene-trait-citation mapping (many-to-many)
 CREATE TABLE IF NOT EXISTS gene_trait_citations (
     id INTEGER PRIMARY KEY AUTOINCREMENT,
@@ -419,3 +444,5 @@ CREATE TABLE IF NOT EXISTS snp_genotypes (
 );
 
 CREATE INDEX IF NOT EXISTS idx_snp_genotypes_import ON snp_genotypes(import_id);
+CREATE INDEX IF NOT EXISTS idx_citation_excerpts_citation ON citation_excerpts(citation_id);
+CREATE INDEX IF NOT EXISTS idx_citation_excerpt_specialties_specialty ON citation_excerpt_specialties(specialty);

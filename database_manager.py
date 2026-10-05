@@ -41,6 +41,10 @@ except ImportError:
     logger = logging.getLogger(__name__)
 
 
+class ArticleInUse(Exception):
+    """Raised when a saved article cannot be removed because the ledger cites it."""
+
+
 class GeneticProfileDB:
     """
     Database manager for genetic profile data.
@@ -374,16 +378,24 @@ class GeneticProfileDB:
                      pubmed_id: Optional[str] = None, url: Optional[str] = None,
                      reference_type: str = "journal", pdf_file_path: Optional[str] = None) -> int:
         """Add a reference to the database"""
+        # pdf_file_path is not in the schema; only a one-off migration added it
+        # to some databases. Name it only where it exists.
+        columns = ['citation_number', 'authors', 'year', 'title', 'journal',
+                   'volume', 'pages', 'doi', 'pubmed_id', 'url', 'reference_type']
+        values = [citation_number, authors, year, title, journal, volume, pages,
+                  doi, pubmed_id, url, reference_type]
+        existing = {row[1] for row in
+                    self.conn.execute("PRAGMA table_info(citations)").fetchall()}
+        if 'pdf_file_path' in existing:
+            columns.append('pdf_file_path')
+            values.append(pdf_file_path)
         cursor = self.conn.cursor()
-        cursor.execute("""
-            INSERT INTO citations (citation_number, authors, year, title, journal, 
-                                  volume, pages, doi, pubmed_id, url, reference_type, pdf_file_path)
-            VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
-        """, (citation_number, authors, year, title, journal, volume, pages, 
-              doi, pubmed_id, url, reference_type, pdf_file_path))
+        cursor.execute(
+            f"INSERT INTO citations ({', '.join(columns)}) "
+            f"VALUES ({', '.join('?' * len(columns))})", values)
         self.conn.commit()
         return cursor.lastrowid
-    
+
     def add_reference_if_not_exists(self, citation_number: int, authors: Optional[str] = None,
                                    year: Optional[int] = None, title: Optional[str] = None,
                                    journal: Optional[str] = None, volume: Optional[str] = None,
@@ -416,6 +428,207 @@ class GeneticProfileDB:
                 return existing.get('id') if existing else None
             raise
     
+    # ------------------------------------------------------------------
+    # Saved journal articles: abstracts, excerpts, specialties
+    # ------------------------------------------------------------------
+
+    @staticmethod
+    def _collapse_whitespace(text: Optional[str]) -> str:
+        """Every run of whitespace becomes one space; the ends are trimmed."""
+        return ' '.join((text or '').split())
+
+    def save_article(self, article: Dict) -> int:
+        """
+        Save a journal article as a citation.
+
+        Args:
+            article: Keys title, authors, journal, year, doi, pubmed_id, url and
+                abstract; all optional except title.
+
+        Returns:
+            The citation id. When the PubMed id or DOI is already among the
+            citations, that row's id is returned and no row is added; the
+            abstract is stored if that row had none.
+        """
+        abstract = article.get('abstract')
+        existing = self.check_citation_exists(pubmed_id=article.get('pubmed_id'),
+                                              doi=article.get('doi'))
+        if existing:
+            citation_id = existing['id']
+        else:
+            row = self.conn.execute(
+                "SELECT COALESCE(MAX(citation_number), 0) + 1 FROM citations").fetchone()
+            citation_id = self.add_reference(
+                row[0], authors=article.get('authors'), year=article.get('year'),
+                title=article['title'], journal=article.get('journal'),
+                doi=article.get('doi'), pubmed_id=article.get('pubmed_id'),
+                url=article.get('url'), reference_type='journal')
+        if abstract and not self.conn.execute(
+                "SELECT 1 FROM citation_abstracts WHERE citation_id = ?",
+                (citation_id,)).fetchone():
+            self.set_article_abstract(citation_id, abstract)
+        return citation_id
+
+    def list_articles(self) -> List[Dict]:
+        """
+        Every citation that is not one of the person's own records.
+
+        Returns:
+            Citation rows, each with has_abstract (bool) and excerpt_count (int).
+        """
+        cursor = self.conn.execute("""
+            SELECT c.*,
+                   EXISTS (SELECT 1 FROM citation_abstracts a
+                           WHERE a.citation_id = c.id) AS has_abstract,
+                   (SELECT COUNT(*) FROM citation_excerpts e
+                    WHERE e.citation_id = c.id) AS excerpt_count
+            FROM citations c
+            WHERE COALESCE(c.reference_type, '') != 'primary_source'
+            ORDER BY c.citation_number, c.id
+        """)
+        articles = []
+        for row in cursor.fetchall():
+            article = dict(row)
+            article['has_abstract'] = bool(article['has_abstract'])
+            articles.append(article)
+        return articles
+
+    def get_article(self, citation_id: int) -> Optional[Dict]:
+        """
+        One citation with its abstract and excerpts.
+
+        Returns:
+            The row plus abstract (None when not fetched) and excerpts, a list
+            of {id, excerpt_text, specialties}; None when there is no such row.
+        """
+        row = self.conn.execute(
+            "SELECT * FROM citations WHERE id = ?", (citation_id,)).fetchone()
+        if not row:
+            return None
+        article = dict(row)
+        abstract_row = self.conn.execute(
+            "SELECT abstract FROM citation_abstracts WHERE citation_id = ?",
+            (citation_id,)).fetchone()
+        article['abstract'] = abstract_row['abstract'] if abstract_row else None
+        excerpts = []
+        for excerpt in self.conn.execute(
+                "SELECT id, excerpt_text FROM citation_excerpts "
+                "WHERE citation_id = ? ORDER BY id", (citation_id,)).fetchall():
+            specialties = self.conn.execute(
+                "SELECT specialty FROM citation_excerpt_specialties "
+                "WHERE excerpt_id = ? ORDER BY specialty", (excerpt['id'],)).fetchall()
+            excerpts.append({'id': excerpt['id'],
+                             'excerpt_text': excerpt['excerpt_text'],
+                             'specialties': [s['specialty'] for s in specialties]})
+        article['excerpts'] = excerpts
+        return article
+
+    def set_article_abstract(self, citation_id: int, abstract: str) -> None:
+        """Store or replace the abstract for a citation."""
+        self.conn.execute("""
+            INSERT INTO citation_abstracts (citation_id, abstract)
+            VALUES (?, ?)
+            ON CONFLICT(citation_id) DO UPDATE SET
+                abstract = excluded.abstract, fetched_at = CURRENT_TIMESTAMP
+        """, (citation_id, abstract))
+        self.conn.commit()
+
+    def add_excerpt(self, citation_id: int, text: str) -> int:
+        """
+        Save a passage of an article's abstract.
+
+        The passage must appear word for word in the stored abstract, compared
+        with whitespace collapsed on both sides; the collapsed text is stored.
+
+        Raises:
+            ValueError: No abstract, empty text, or text not in the abstract.
+        """
+        abstract_row = self.conn.execute(
+            "SELECT abstract FROM citation_abstracts WHERE citation_id = ?",
+            (citation_id,)).fetchone()
+        if not abstract_row:
+            raise ValueError("This article has no abstract yet, so nothing can be quoted from it.")
+        excerpt = self._collapse_whitespace(text)
+        if not excerpt:
+            raise ValueError("Select some text from the abstract first.")
+        if excerpt not in self._collapse_whitespace(abstract_row['abstract']):
+            raise ValueError("That text is not in the abstract, word for word.")
+        cursor = self.conn.execute(
+            "INSERT INTO citation_excerpts (citation_id, excerpt_text) VALUES (?, ?)",
+            (citation_id, excerpt))
+        self.conn.commit()
+        return cursor.lastrowid
+
+    def set_excerpt_specialties(self, excerpt_id: int, specialties: List[str]) -> None:
+        """Replace the set of specialists an excerpt is for."""
+        self.conn.execute(
+            "DELETE FROM citation_excerpt_specialties WHERE excerpt_id = ?", (excerpt_id,))
+        self.conn.executemany(
+            "INSERT OR IGNORE INTO citation_excerpt_specialties (excerpt_id, specialty) "
+            "VALUES (?, ?)", [(excerpt_id, s) for s in specialties])
+        self.conn.commit()
+
+    def delete_excerpt(self, excerpt_id: int) -> Optional[int]:
+        """
+        Remove an excerpt and its specialist assignments.
+
+        Returns:
+            The citation id it belonged to, or None when there was no such excerpt.
+        """
+        row = self.conn.execute(
+            "SELECT citation_id FROM citation_excerpts WHERE id = ?", (excerpt_id,)).fetchone()
+        if not row:
+            return None
+        self.conn.execute(
+            "DELETE FROM citation_excerpt_specialties WHERE excerpt_id = ?", (excerpt_id,))
+        self.conn.execute("DELETE FROM citation_excerpts WHERE id = ?", (excerpt_id,))
+        self.conn.commit()
+        return row['citation_id']
+
+    def delete_article(self, citation_id: int) -> None:
+        """
+        Remove a saved article with its abstract and excerpts.
+
+        Raises:
+            ArticleInUse: Another part of the ledger cites it; nothing is removed.
+        """
+        for table, column in (('gene_trait_citations', 'citation_id'),
+                              ('gene_health_citations', 'citation_id'),
+                              ('research_finding_citations', 'citation_id'),
+                              ('primary_sources', 'citation_id'),
+                              ('pharmacogenomic_data', 'citation_id')):
+            if self.conn.execute(
+                    f"SELECT 1 FROM {table} WHERE {column} = ? LIMIT 1",
+                    (citation_id,)).fetchone():
+                raise ArticleInUse(
+                    "Something else in the ledger cites this article, so it cannot be removed.")
+        self.conn.execute(
+            "DELETE FROM citation_excerpt_specialties WHERE excerpt_id IN "
+            "(SELECT id FROM citation_excerpts WHERE citation_id = ?)", (citation_id,))
+        self.conn.execute("DELETE FROM citation_excerpts WHERE citation_id = ?", (citation_id,))
+        self.conn.execute("DELETE FROM citation_abstracts WHERE citation_id = ?", (citation_id,))
+        self.conn.execute("DELETE FROM citations WHERE id = ?", (citation_id,))
+        self.conn.commit()
+
+    def get_excerpts_for_specialty(self, specialty: str) -> List[Dict]:
+        """
+        Excerpts assigned to a specialist, with the article each came from.
+
+        Returns:
+            Dicts of excerpt_text, title, authors, journal, year, doi, pubmed_id
+            and url, ordered by article then excerpt id.
+        """
+        cursor = self.conn.execute("""
+            SELECT e.excerpt_text, c.title, c.authors, c.journal, c.year,
+                   c.doi, c.pubmed_id, c.url
+            FROM citation_excerpts e
+            JOIN citation_excerpt_specialties s ON s.excerpt_id = e.id
+            JOIN citations c ON c.id = e.citation_id
+            WHERE s.specialty = ?
+            ORDER BY c.id, e.id
+        """, (specialty,))
+        return [dict(row) for row in cursor.fetchall()]
+
     def add_trait_association(self, gene_id: int, trait_name: str,
                             association_direction: Optional[str] = None,
                             notes: Optional[str] = None,
