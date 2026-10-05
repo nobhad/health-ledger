@@ -255,6 +255,12 @@ class TestAbstractsAndExcerpts(StoreTestCase):
     def test_delete_excerpt_unknown_id_is_none(self):
         self.assertIsNone(self.db.delete_excerpt(999))
 
+    def test_get_excerpt_article_id(self):
+        excerpt = self.db.add_excerpt(self.article, 'We tested nothing')
+        self.assertEqual(self.db.get_excerpt_article_id(excerpt), self.article)
+        self.assertIsNone(self.db.get_excerpt_article_id(999))
+        self.assertEqual(self.count('citation_excerpts'), 1)
+
 
 class TestDeleteArticle(StoreTestCase):
 

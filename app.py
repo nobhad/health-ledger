@@ -20,9 +20,10 @@ Usage:
 
 from flask import Flask, render_template, jsonify, request, send_file, after_this_request, redirect, url_for
 from werkzeug.utils import secure_filename
-from database_manager import GeneticProfileDB
+from database_manager import GeneticProfileDB, ArticleInUse
 from pathlib import Path
 from typing import Optional
+import functools
 import os
 import re
 import secrets
@@ -40,6 +41,8 @@ from profile_generator import generate_profile_html
 import ledger_setup
 import pdf_generator
 import documents
+import literature
+import reference_files
 import raw_dna
 import variant_reference
 from doctor_templates import get_available_specialties, DOCTOR_TEMPLATES
@@ -1255,6 +1258,232 @@ def api_source_text(source_id):
         }), 500
 
 
+# ---------------------------------------------------------------------------
+# References: journal lookup, saved articles, excerpts
+# ---------------------------------------------------------------------------
+
+REFERENCE_SAVE_KEYS = ('title', 'authors', 'journal', 'year', 'doi', 'pubmed_id', 'url', 'abstract')
+URL_SCHEMES = ('http://', 'https://')
+MESSAGE_NOT_JSON = 'The request was not understood. Please try again.'
+MESSAGE_SOMETHING_WRONG = 'Something went wrong on this computer. Nothing was changed. Please try again.'
+MESSAGE_NO_ARTICLE = 'That article is not in your ledger.'
+MESSAGE_NO_EXCERPT = 'That excerpt is not in your ledger.'
+MESSAGE_NEEDS_TITLE = 'An article needs a title before it can be saved.'
+MESSAGE_NO_PUBMED_ID = 'This article has no PubMed id, so its abstract cannot be fetched.'
+MESSAGE_NO_INDEX_ABSTRACT = 'The journal index has no abstract for this article.'
+MESSAGE_BAD_SPECIALTIES = 'Specialists must be sent as a list of names.'
+
+
+class ReferenceRefusal(Exception):
+    """A request the references routes refuse, with the sentence and status to send."""
+
+    def __init__(self, message: str, status: int):
+        super().__init__(message)
+        self.message = message
+        self.status = status
+
+
+def references_route(handler):
+    """Turn a refusal into its JSON answer and anything unexpected into a plain 500."""
+    @functools.wraps(handler)
+    def wrapper(*args, **kwargs):
+        try:
+            return handler(*args, **kwargs)
+        except ReferenceRefusal as refusal:
+            return jsonify({'success': False, 'message': refusal.message}), refusal.status
+        except literature.LookupFailed as failure:
+            return jsonify({'success': False, 'message': str(failure)}), 502
+        except Exception as e:
+            app_logger.error(f"Error in references route {request.path}: {e}", exc_info=True)
+            return jsonify({'success': False, 'message': MESSAGE_SOMETHING_WRONG}), 500
+    return wrapper
+
+
+def reference_body() -> dict:
+    """The JSON object the request carried, or a refusal."""
+    body = request.get_json(silent=True)
+    if not isinstance(body, dict):
+        raise ReferenceRefusal(MESSAGE_NOT_JSON, 400)
+    return body
+
+
+def reference_article_or_404(db, article_id: int) -> dict:
+    article = db.get_article(article_id)
+    if not article:
+        raise ReferenceRefusal(MESSAGE_NO_ARTICLE, 404)
+    return article
+
+
+def reference_specialty_choices() -> list:
+    return [{'id': s, 'label': s.replace('_', ' ').title()} for s in get_available_specialties()]
+
+
+def clean_article_for_save(body: dict) -> dict:
+    """Only the keys a search result carries, each checked; the client is not trusted."""
+    article = {key: body[key] for key in REFERENCE_SAVE_KEYS if key in body}
+    title = article.get('title')
+    if not isinstance(title, str) or not title.strip():
+        raise ReferenceRefusal(MESSAGE_NEEDS_TITLE, 400)
+    article['title'] = title.strip()
+    try:
+        article['year'] = int(article.get('year'))
+    except (TypeError, ValueError):
+        article['year'] = None
+    abstract = article.get('abstract')
+    article['abstract'] = literature.plain_text(abstract) or None if isinstance(abstract, str) else None
+    url = article.get('url')
+    article['url'] = url.strip() if isinstance(url, str) and url.strip().lower().startswith(URL_SCHEMES) else None
+    pubmed_id = article.get('pubmed_id')
+    pubmed_id = str(pubmed_id).strip() if isinstance(pubmed_id, (str, int)) else ''
+    article['pubmed_id'] = pubmed_id if pubmed_id.isascii() and pubmed_id.isdigit() else None
+    for key in ('authors', 'journal', 'doi'):
+        value = article.get(key)
+        article[key] = value.strip() or None if isinstance(value, str) else None
+    return article
+
+
+@app.route('/references')
+def references():
+    """Journal references page"""
+    try:
+        return render_template('references.html')
+    except Exception as e:
+        app_logger.error(f"Error rendering references page: {e}", exc_info=True)
+        return "Error loading references page", 500
+
+
+@app.route('/api/references/search', methods=['POST'])
+@references_route
+def api_references_search():
+    """Look a term up in the journal index. Nothing is saved."""
+    term = reference_body().get('term')
+    try:
+        found = literature.search(term)
+    except ValueError as e:
+        raise ReferenceRefusal(str(e), 400)
+    db = get_db()
+    results = []
+    for article in found:
+        entry = article.as_dict()
+        existing = db.check_citation_exists(pubmed_id=article.pubmed_id, doi=article.doi)
+        entry['saved_id'] = existing['id'] if existing else None
+        results.append(entry)
+    return jsonify({'success': True, 'results': results})
+
+
+@app.route('/api/references')
+@references_route
+def api_references():
+    """Every saved article"""
+    return jsonify({'success': True, 'articles': get_db().list_articles()})
+
+
+@app.route('/api/references/<int:article_id>')
+@references_route
+def api_reference_detail(article_id):
+    """One saved article, with its abstract, excerpts and the specialists to choose from"""
+    article = reference_article_or_404(get_db(), article_id)
+    if not (Path(config.REFERENCES_DIR) / reference_files.article_file_name(article)).is_file():
+        reference_files.write_article_file(article)
+    return jsonify({'success': True, 'article': article,
+                    'specialties': reference_specialty_choices()})
+
+
+@app.route('/api/references', methods=['POST'])
+@references_route
+def api_reference_save():
+    """Save an article a search returned"""
+    cleaned = clean_article_for_save(reference_body())
+    db = get_db()
+    article_id = db.save_article(cleaned)
+    article = db.get_article(article_id)
+    reference_files.write_article_file(article)
+    return jsonify({'success': True, 'id': article_id, 'article': article})
+
+
+@app.route('/api/references/<int:article_id>/abstract', methods=['POST'])
+@references_route
+def api_reference_fetch_abstract(article_id):
+    """Fetch a saved article's abstract from the journal index"""
+    db = get_db()
+    article = reference_article_or_404(db, article_id)
+    if not article.get('pubmed_id'):
+        raise ReferenceRefusal(MESSAGE_NO_PUBMED_ID, 400)
+    found = literature.fetch_by_pubmed_id(article['pubmed_id'])
+    if found is None or not found.abstract:
+        raise ReferenceRefusal(MESSAGE_NO_INDEX_ABSTRACT, 404)
+    db.set_article_abstract(article_id, found.abstract)
+    article = db.get_article(article_id)
+    reference_files.write_article_file(article)
+    return jsonify({'success': True, 'article': article})
+
+
+@app.route('/api/references/<int:article_id>', methods=['DELETE'])
+@references_route
+def api_reference_delete(article_id):
+    """Remove a saved article, unless something else in the ledger cites it"""
+    db = get_db()
+    article = reference_article_or_404(db, article_id)
+    try:
+        db.delete_article(article_id)
+    except ArticleInUse as e:
+        raise ReferenceRefusal(str(e), 409)
+    reference_files.remove_article_file(article)
+    return jsonify({'success': True})
+
+
+@app.route('/api/references/<int:article_id>/excerpts', methods=['POST'])
+@references_route
+def api_reference_add_excerpt(article_id):
+    """Quote a passage of a saved article's abstract"""
+    body = reference_body()
+    db = get_db()
+    reference_article_or_404(db, article_id)
+    try:
+        text = body.get('text')
+        excerpt_id = db.add_excerpt(article_id, text if isinstance(text, str) else '')
+    except ValueError as e:
+        raise ReferenceRefusal(str(e), 400)
+    article = db.get_article(article_id)
+    reference_files.write_article_file(article)
+    return jsonify({'success': True, 'id': excerpt_id, 'article': article})
+
+
+@app.route('/api/excerpts/<int:excerpt_id>', methods=['PUT'])
+@references_route
+def api_excerpt_set_specialties(excerpt_id):
+    """Choose which specialists an excerpt is for"""
+    body = reference_body()
+    db = get_db()
+    article_id = db.get_excerpt_article_id(excerpt_id)
+    if article_id is None:
+        raise ReferenceRefusal(MESSAGE_NO_EXCERPT, 404)
+    specialties = body.get('specialties')
+    if not isinstance(specialties, list) or not all(isinstance(s, str) for s in specialties):
+        raise ReferenceRefusal(MESSAGE_BAD_SPECIALTIES, 400)
+    known = get_available_specialties()
+    for specialty in specialties:
+        if specialty not in known:
+            raise ReferenceRefusal(f"'{specialty}' is not a specialist this app knows.", 400)
+    db.set_excerpt_specialties(excerpt_id, specialties)
+    article = db.get_article(article_id)
+    reference_files.write_article_file(article)
+    return jsonify({'success': True, 'article': article})
+
+
+@app.route('/api/excerpts/<int:excerpt_id>', methods=['DELETE'])
+@references_route
+def api_excerpt_delete(excerpt_id):
+    """Remove an excerpt"""
+    db = get_db()
+    article_id = db.delete_excerpt(excerpt_id)
+    if article_id is None:
+        raise ReferenceRefusal(MESSAGE_NO_EXCERPT, 404)
+    article = db.get_article(article_id)
+    reference_files.write_article_file(article)
+    return jsonify({'success': True, 'article': article})
+
+
 PDF_UNAVAILABLE_MESSAGE = (
     "This computer cannot make PDF files yet: the PDF library's helper programs "
     "are not installed. Open the printable version and choose Save as PDF in the "
@@ -1425,6 +1654,7 @@ def api_pdf_doctor(specialty):
             include_pharmacogenomics = data.get('include_pharmacogenomics', True)
             include_variants = data.get('include_variants', True)
             include_details = data.get('include_details', True)
+            include_references = data.get('include_references', True)
         else:
             save_path = None
             include_original = True
@@ -1433,13 +1663,15 @@ def api_pdf_doctor(specialty):
             include_pharmacogenomics = True
             include_variants = True
             include_details = True
+            include_references = True
         
         unavailable = _pdf_unavailable(url_for(
             'doctor_document_print', specialty=specialty,
             medications=int(bool(include_medications)), stats=int(bool(include_stats)),
             pharmacogenomics=int(bool(include_pharmacogenomics)),
             variants=int(bool(include_variants)),
-            details=int(bool(include_details))))
+            details=int(bool(include_details)),
+            references=int(bool(include_references))))
         if unavailable:
             return unavailable
         
@@ -1468,7 +1700,8 @@ def api_pdf_doctor(specialty):
                                include_stats=include_stats,
                                include_pharmacogenomics=include_pharmacogenomics,
                                include_variants=include_variants,
-                               include_details=include_details):
+                               include_details=include_details,
+                               include_references=include_references):
             app_logger.info(f"PDF saved to: {final_path}")
             
             # Return file for download
@@ -1546,8 +1779,8 @@ def doctor_document_print(specialty):
     Works on every computer, WeasyPrint or not: the print dialog's own
     "Save as PDF" makes the file. The original test report is not appended
     here (that needs WeasyPrint); the toolbar says so. Query flags
-    medications, stats, pharmacogenomics, variants and details take 0 to
-    leave a section out.
+    medications, stats, pharmacogenomics, variants, details and references
+    take 0 to leave a section out.
     """
     specialty = specialty.lower()
     if specialty not in get_available_specialties():
@@ -1568,6 +1801,7 @@ def doctor_document_print(specialty):
             include_pharmacogenomics=wanted('pharmacogenomics'),
             include_variants=wanted('variants'),
             include_details=wanted('details'),
+            include_references=wanted('references'),
             asset_base='/', body_prefix_html=toolbar)
     except Exception as e:
         app_logger.error(f"Error rendering printable doctor document: {e}", exc_info=True)

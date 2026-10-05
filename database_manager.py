@@ -568,6 +568,12 @@ class GeneticProfileDB:
             "VALUES (?, ?)", [(excerpt_id, s) for s in specialties])
         self.conn.commit()
 
+    def get_excerpt_article_id(self, excerpt_id: int) -> Optional[int]:
+        """The citation id an excerpt belongs to, or None when there is no such excerpt."""
+        row = self.conn.execute(
+            "SELECT citation_id FROM citation_excerpts WHERE id = ?", (excerpt_id,)).fetchone()
+        return row['citation_id'] if row else None
+
     def delete_excerpt(self, excerpt_id: int) -> Optional[int]:
         """
         Remove an excerpt and its specialist assignments.
