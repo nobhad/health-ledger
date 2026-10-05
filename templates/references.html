@@ -1,7 +1,71 @@
 {% extends "base.html" %}
 
 {% block title %}References - Health Ledger{% endblock %}
+{% block page_body_class %} page-body--flush{% endblock %}
 
 {% block page_title %}References{% endblock %}
+{% block page_description %}Journal articles you looked up, and the passages you chose from them for your doctors.{% endblock %}
 
-{% block content %}{% endblock %}
+{% block content %}
+<div class="panel-container" id="referencesContainer" data-panel-state="referencesPanel">
+    <!-- Left Panel: Look up, results, saved articles -->
+    <div class="panel sources-panel-left">
+        <div class="panel-header">Find articles</div>
+        <form class="source-filters" id="lookupForm" autocomplete="off">
+            <div class="filter-group">
+                <label class="filter-label" for="lookupTerm">Search</label>
+                <input type="text" class="filter-input" id="lookupTerm" name="lookupTerm" maxlength="200" autocomplete="off" placeholder="A gene, condition or medication">
+            </div>
+            <div>
+                <button type="submit" class="btn btn-primary" id="lookupBtn">Look up</button>
+                <small class="helper-text">Pressing Look up sends only these words to Europe PMC, a public index of journal articles. Nothing from your records is sent.</small>
+                <div class="status-message" id="referencesStatus" role="status" aria-live="polite"></div>
+            </div>
+        </form>
+        <div class="panel-content">
+            <h4 id="resultsHeading" hidden>Results</h4>
+            <ul class="sources-list" id="resultsList" hidden></ul>
+            <div class="source-filters">
+                <div class="filter-group">
+                    <label class="filter-label" for="savedFilter">Saved articles</label>
+                    <input type="text" class="filter-input" id="savedFilter" name="savedFilter" autocomplete="off" placeholder="Filter saved articles">
+                </div>
+            </div>
+            <ul class="sources-list" id="savedList">
+                <li class="sources-list-item is-empty">Loading saved articles...</li>
+            </ul>
+        </div>
+    </div>
+
+    <!-- Splitter -->
+    <div class="panel-splitter"></div>
+
+    <!-- Middle Panel: the article and its abstract -->
+    <div class="panel sources-panel-middle">
+        <div class="panel-header">Article</div>
+        <div class="panel-content">
+            <div id="articleView" class="source-details">
+                <p>Choose an article from the list.</p>
+            </div>
+        </div>
+    </div>
+
+    <!-- Splitter -->
+    <div class="panel-splitter"></div>
+
+    <!-- Right Panel: excerpts chosen from the open article -->
+    <div class="panel sources-panel-right">
+        <div class="panel-header">Your excerpts</div>
+        <div class="panel-content">
+            <div id="excerptsView">
+                <p>Choose an article from the list.</p>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script src="{{ url_for('static', filename='js/panels.js') }}"></script>
+<script src="{{ url_for('static', filename='js/references.js') }}"></script>
+{% endblock %}

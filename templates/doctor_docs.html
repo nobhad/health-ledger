@@ -105,6 +105,10 @@
                     <input type="checkbox" id="includeStats" checked>
                     Include average health statistics (BP, temp, weight, height, etc.)
                 </label>
+                <label class="check-label">
+                    <input type="checkbox" id="includeReferences" checked>
+                    Include journal excerpts (passages you chose on the References page)
+                </label>
             </div>
             
             <div class="check-list">
@@ -198,6 +202,7 @@ document.addEventListener('DOMContentLoaded', function() {
     const includeOriginalCheckbox = document.getElementById('includeOriginal');
     const includeMedicationsCheckbox = document.getElementById('includeMedications');
     const includeStatsCheckbox = document.getElementById('includeStats');
+    const includeReferencesCheckbox = document.getElementById('includeReferences');
     const includePharmacogenomicsCheckbox = document.getElementById('includePharmacogenomics');
     const includeVariantsCheckbox = document.getElementById('includeVariants');
     const includeDetailsCheckbox = document.getElementById('includeDetails');
@@ -208,6 +213,7 @@ document.addEventListener('DOMContentLoaded', function() {
         const params = new URLSearchParams({
             medications: includeMedicationsCheckbox.checked ? '1' : '0',
             stats: includeStatsCheckbox.checked ? '1' : '0',
+            references: includeReferencesCheckbox.checked ? '1' : '0',
             pharmacogenomics: includePharmacogenomicsCheckbox.checked ? '1' : '0',
             variants: includeVariantsCheckbox.checked ? '1' : '0',
             details: includeDetailsCheckbox.checked ? '1' : '0'
@@ -255,6 +261,7 @@ document.addEventListener('DOMContentLoaded', function() {
                 include_original: includeOriginal,
                 include_medications: includeMedications,
                 include_stats: includeStats,
+                include_references: includeReferencesCheckbox.checked,
                 include_pharmacogenomics: includePharmacogenomics,
                 include_variants: includeVariantsCheckbox.checked,
                 include_details: includeDetailsCheckbox.checked
