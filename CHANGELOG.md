@@ -18,6 +18,13 @@ The first published release. 1.0.0 was built but never published.
 - Release notes link to `INSTALL.md` and `CHANGELOG.md` by full URL; the
   relative links went nowhere on a release page.
 
+### Fixed
+
+- The stylesheet declared two fonts (League Spartan, Michroma) whose files
+  were not in the app. Nothing on screen uses them yet, so nothing looked
+  wrong; the files and their licences now travel with the app, and a test
+  fails if a stylesheet ever names a file that is not there.
+
 ## 1.0.0 — 2026-09-20
 
 First public release: downloadable apps for macOS and Windows, and the source

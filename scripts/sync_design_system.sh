@@ -33,6 +33,14 @@ cp "$SRC/public/fonts/Inconsolata/Inconsolata-Regular.woff2" "$FONTS_DST/Inconso
 cp "$SRC/public/fonts/Inconsolata/Inconsolata-Bold.woff2"    "$FONTS_DST/Inconsolata/"
 mkdir -p "$FONTS_DST/Acme" "$(dirname "$FONTS_DST")/images"
 cp "$SRC/public/fonts/Acme/Acme-Regular.woff2" "$SRC/public/fonts/Acme/Acme-Regular.ttf" "$FONTS_DST/Acme/"
+# fonts.css declares the title-card faces too. Nothing here sets type in them,
+# but a stylesheet that names a file the app does not carry is a 404 waiting
+# for the first rule that does. Each travels with its licence (SIL OFL).
+for family in LeagueSpartan Michroma; do
+  mkdir -p "$FONTS_DST/$family"
+  cp "$SRC/public/fonts/$family/"*.woff2 "$SRC/public/fonts/$family/"*.ttf \
+     "$SRC/public/fonts/$family/OFL.txt" "$FONTS_DST/$family/"
+done
 # The footer band reuses the site's avatar art
 cp "$SRC/public/images/avatar.svg" "$(dirname "$FONTS_DST")/images/avatar.svg"
 # The sidebar brand mark (masked with the current text colour)

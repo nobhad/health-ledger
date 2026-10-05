@@ -19,6 +19,11 @@ every vendored file from the commit VENDORED.md names.
 `test_no_dangling_token_references` catches the second, and needs nothing but
 this repository.
 
+A third arrived with the 2026-10 sync: upstream's fonts.css gained two
+`@font-face` blocks and the sync copied the stylesheet without the font files.
+A browser only asks for a font once some rule sets type in it, so nothing
+404s until then. `test_every_stylesheet_url_names_a_file` catches it at rest.
+
 Lagging behind upstream is NOT a failure here. The pin is deliberate: a sync
 takes whatever upstream has changed, which can include values tuned for a
 surface this project does not have. Run `npm run sync:design-system` when you
@@ -61,6 +66,7 @@ PATCHES = {
 
 DEFINITION = re.compile(r'^\s*(--[A-Za-z0-9-]+)\s*:', re.MULTILINE)
 REFERENCE = re.compile(r'var\(\s*(--[A-Za-z0-9-]+)')
+STATIC_URL = re.compile(r'url\(\s*["\']?(/static/[^"\')\s?#]+)')
 
 # `s<delim>find<delim>replace<delim>g` plus the files it is applied to.
 SED_CALL = re.compile(
@@ -110,6 +116,20 @@ class TestVendoredDesignSystem(unittest.TestCase):
             ['tokens read but never defined — an upstream rename lands here:']
             + [f'  {name}  <- {", ".join(sorted(files))}'
                for name, files in sorted(dangling.items())]))
+
+    def test_every_stylesheet_url_names_a_file(self):
+        """Every url(/static/...) in a stylesheet is a file the app carries."""
+        missing = {}
+        for path in sorted(CSS.rglob('*.css')):
+            for url in STATIC_URL.findall(path.read_text()):
+                if not (ROOT / url.lstrip('/')).is_file():
+                    missing.setdefault(url, set()).add(str(path.relative_to(ROOT)))
+
+        self.assertEqual(missing, {}, '\n'.join(
+            ['stylesheets name files that are not in static/ — a sync that '
+             'brings a new @font-face must bring its files:']
+            + [f'  {url}  <- {", ".join(sorted(files))}'
+               for url, files in sorted(missing.items())]))
 
     def test_vendored_files_match_the_pinned_commit(self):
         """Nothing under design-system/ has been hand-edited since the sync."""
