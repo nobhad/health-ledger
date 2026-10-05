@@ -137,10 +137,29 @@ body {
     font-style: italic;
 }
 
-/* Caution under the first table of DNA variants in a document */
-.note {
+/* Caution under the first table of DNA variants in a document; the note
+   above the journal excerpts */
+.note,
+.literature-note {
     color: #666;
     font-size: 0.9em;
+}
+
+/* A passage quoted from a journal abstract, and its source directly under it */
+.literature-excerpt {
+    margin: 0 0 6px 0;
+    padding-left: 12px;
+    border-left: 3px solid #ddd;
+    page-break-inside: avoid;
+    break-inside: avoid;
+}
+
+.literature-source {
+    margin: 0 0 12px 0;
+    color: #666;
+    font-size: 0.9em;
+    page-break-before: avoid;
+    break-before: avoid;
 }
 
 .main-content {

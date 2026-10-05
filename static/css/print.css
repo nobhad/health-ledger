@@ -117,6 +117,24 @@
         margin: 8pt 0;
         font-style: italic;
     }
+
+    /* A journal excerpt is a plain quote, kept with its source line */
+    .literature-excerpt {
+        font-style: normal;
+        page-break-inside: avoid;
+        break-inside: avoid;
+    }
+
+    .literature-source {
+        font-size: 9pt;
+        page-break-before: avoid;
+        break-before: avoid;
+    }
+
+    /* Its link already shows the address; do not print it a second time */
+    .literature-source a:after {
+        content: none;
+    }
 }
 
 @page {

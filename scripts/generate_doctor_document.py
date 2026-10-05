@@ -25,6 +25,7 @@ def generate_doctor_document_html(db: GeneticProfileDB, specialty: str,
                                   include_pharmacogenomics: bool = True,
                                   include_variants: bool = True,
                                   include_details: bool = True,
+                                  include_references: bool = True,
                                   asset_base: str = '',
                                   body_prefix_html: str = '') -> str:
     """
@@ -201,10 +202,68 @@ def generate_doctor_document_html(db: GeneticProfileDB, specialty: str,
                                 f'({metric.get("collection_date")})</li>')
             html_parts.append('</ul>')
     
+    # Passages the patient chose from published abstracts, for this specialist.
+    if include_references:
+        html_parts.extend(literature_html(db, specialty))
+
     html_parts.append(f'<p class="footer-disclaimer">{html.escape(DOCUMENT_DISCLAIMER)}</p>')
     html_parts.append('</body></html>')
     
     return '\n'.join(html_parts)
+
+
+LITERATURE_NOTE = ('Passages quoted word for word from the abstracts of published '
+                   'articles, chosen by the patient.')
+
+
+def article_link(excerpt: Dict) -> Optional[str]:
+    """DOI page, else PubMed page, else a stored http(s) address, else None."""
+    if excerpt.get('doi'):
+        return f'https://doi.org/{excerpt["doi"]}'
+    if excerpt.get('pubmed_id'):
+        return f'https://pubmed.ncbi.nlm.nih.gov/{excerpt["pubmed_id"]}/'
+    url = (excerpt.get('url') or '').strip()
+    if url.lower().startswith(('http://', 'https://')):
+        return url
+    return None
+
+
+def literature_source_html(excerpt: Dict) -> str:
+    """Title. <em>Journal</em>, year. link - with missing parts left out."""
+    # An older citation can have no title; the quote still gets its link.
+    source = html.escape((excerpt.get('title') or '').strip())
+    if source and source[-1] not in '.?!':
+        source += '.'
+    tail = []
+    if excerpt.get('journal'):
+        tail.append(f'<em>{html.escape(excerpt["journal"])}</em>')
+    if excerpt.get('year'):
+        tail.append(html.escape(str(excerpt['year'])))
+    if tail:
+        source = (source + ' ' + ', '.join(tail) + '.').strip()
+    link = article_link(excerpt)
+    if link:
+        # The visible text is the address itself: a printed link cannot be clicked.
+        safe = html.escape(link, quote=True)
+        source = f'{source} <a href="{safe}">{safe}</a>'.strip()
+    return f'<p class="literature-source">{source}</p>'
+
+
+def literature_html(db: GeneticProfileDB, specialty: str) -> List[str]:
+    """
+    The excerpts the patient assigned to this specialist, each quote with its
+    own source line, or an empty list when there are none.
+    """
+    excerpts = db.get_excerpts_for_specialty(specialty)
+    if not excerpts:
+        return []
+    parts = ['<h2>From the literature</h2>',
+             f'<p class="literature-note">{html.escape(LITERATURE_NOTE)}</p>']
+    for excerpt in excerpts:
+        parts.append('<blockquote class="literature-excerpt">{}</blockquote>'.format(
+            html.escape(excerpt['excerpt_text'])))
+        parts.append(literature_source_html(excerpt))
+    return parts
 
 
 CATEGORY_HEADINGS = [

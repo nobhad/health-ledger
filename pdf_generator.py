@@ -242,7 +242,8 @@ def generate_doctor_pdf(db, doctor_type: str, output_path: str,
                        include_stats: bool = True,
                        include_pharmacogenomics: bool = True,
                        include_variants: bool = True,
-                       include_details: bool = True) -> bool:
+                       include_details: bool = True,
+                       include_references: bool = True) -> bool:
     """
     Generate PDF for a specific doctor specialty.
     Includes original genetic test report at the end if available.
@@ -266,7 +267,8 @@ def generate_doctor_pdf(db, doctor_type: str, output_path: str,
                                                      include_stats=include_stats,
                                                      include_pharmacogenomics=include_pharmacogenomics,
                                                      include_variants=include_variants,
-                                                     include_details=include_details)
+                                                     include_details=include_details,
+                                                     include_references=include_references)
         
         # Create temporary file for main document
         with tempfile.NamedTemporaryFile(delete=False, suffix='.pdf') as tmp:
