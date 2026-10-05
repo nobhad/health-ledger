@@ -141,27 +141,27 @@ class PlainTextTests(unittest.TestCase):
 
 
 class BuildRequestTests(unittest.TestCase):
-    def test_params_are_exactly_four_keys(self):
+    def test_params_are_exactly_these(self):
         url, params = literature.build_search_request('statin')
         self.assertEqual(url, literature.SEARCH_URL)
-        self.assertEqual(params, {'query': '(statin) AND SRC:MED', 'format': 'json',
-                                  'resultType': 'core', 'pageSize': '25'})
+        self.assertEqual(params, {'query': '(TITLE:(statin) OR ABSTRACT:(statin)) AND SRC:MED',
+                                  'format': 'json', 'resultType': 'core', 'pageSize': '25',
+                                  'sort': 'CITED desc'})
 
     def test_term_cannot_escape_the_parentheses(self):
         _, params = literature.build_search_request('x) OR SRC:PPR (')
         query = params['query']
-        self.assertTrue(query.endswith(') AND SRC:MED'))
-        inner = query[1:-len(') AND SRC:MED')]
-        self.assertNotIn(')', inner)
-        self.assertNotIn('(', inner)
-        self.assertNotIn(':', inner)
+        # What was typed, with its syntax taken out, sits inside each field's
+        # own parentheses and nowhere else.
+        typed = 'x OR SRC PPR'
+        self.assertEqual(query, f'(TITLE:({typed}) OR ABSTRACT:({typed})) AND SRC:MED')
         self.assertEqual(query.count('SRC:'), 1)
 
     def test_balanced_quotes_kept_unbalanced_removed(self):
         self.assertEqual(literature.build_search_request('"heart failure"')[1]['query'],
-                         '("heart failure") AND SRC:MED')
+                         '(TITLE:("heart failure") OR ABSTRACT:("heart failure")) AND SRC:MED')
         self.assertEqual(literature.build_search_request('heart "failure')[1]['query'],
-                         '(heart failure) AND SRC:MED')
+                         '(TITLE:(heart failure) OR ABSTRACT:(heart failure)) AND SRC:MED')
 
     def test_empty_and_long_terms_refused(self):
         for term in ('', '   '):
@@ -200,7 +200,8 @@ class NetworkTests(unittest.TestCase):
         self.assertEqual(kwargs['timeout'], literature.REQUEST_TIMEOUT_SECONDS)
         self.assertEqual(literature.REQUEST_TIMEOUT_SECONDS, 10)
         self.assertEqual(set(kwargs), {'params', 'headers', 'timeout'})
-        self.assertEqual(set(kwargs['params']), {'query', 'format', 'resultType', 'pageSize'})
+        self.assertEqual(set(kwargs['params']),
+                         {'query', 'format', 'resultType', 'pageSize', 'sort'})
 
     def test_failures_become_lookup_failed_without_raw_text(self):
         cases = [

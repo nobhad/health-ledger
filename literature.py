@@ -8,9 +8,20 @@ User-Agent says only which app and version is asking.
 
 "Reputable" is a query, not a judgement: results are limited to MEDLINE-indexed
 articles (SRC:MED), which leaves preprints out, and no search term can cancel
-that filter. Results come back ordered guidelines first, then meta-analyses,
+that filter. The words must be in the title or the abstract, and the index is
+asked for the most-cited matches. Its own default order was tried first, on
+2026-10-05: for "CYP2D6 codeine" it returned 25 articles, most of them months
+old with no citations, and none of the three clinical guidelines on exactly
+that pair. Searching every field and sorting by citations found the guidelines
+but put an atrial fibrillation guideline that merely mentions the words above
+them. Title-or-abstract, most cited first, put the guidelines on top for each
+of four terms tried.
+
+What comes back is then ordered guidelines first, then meta-analyses,
 systematic reviews and reviews, then everything else, each group by how often
-it has been cited, and each one says what kind of article it is.
+it has been cited, and each one says what kind of article it is. Most-cited
+favours older work: a guideline revised last year sits below the one it
+replaced until the citations catch up, which is why the year is shown.
 
 Abstracts arrive with HTML in them. They are reduced to plain text here, before
 anything is stored; templates escape it on the way out.
@@ -33,6 +44,7 @@ REQUEST_TIMEOUT_SECONDS = 10
 MAX_TERM_LENGTH = 200
 PAGE_SIZE = 25
 SOURCE_FILTER = 'SRC:MED'
+SORT_MOST_CITED = 'CITED desc'
 
 KIND_GUIDELINE = 'Guideline'
 KIND_META_ANALYSIS = 'Meta-analysis'
@@ -138,13 +150,18 @@ def _sanitise_term(term: str) -> str:
     return term
 
 
-def _request_params(query: str) -> Dict[str, str]:
-    return {'query': query, 'format': 'json', 'resultType': 'core', 'pageSize': str(PAGE_SIZE)}
+def _request_params(query: str, sort: Optional[str] = None) -> Dict[str, str]:
+    params = {'query': query, 'format': 'json', 'resultType': 'core', 'pageSize': str(PAGE_SIZE)}
+    if sort:
+        params['sort'] = sort
+    return params
 
 
 def build_search_request(term: str) -> Tuple[str, Dict[str, str]]:
     """The URL and parameters for a search. No term can cancel the source filter."""
-    return SEARCH_URL, _request_params(f'({_sanitise_term(term)}) AND {SOURCE_FILTER}')
+    term = _sanitise_term(term)
+    query = f'(TITLE:({term}) OR ABSTRACT:({term})) AND {SOURCE_FILTER}'
+    return SEARCH_URL, _request_params(query, sort=SORT_MOST_CITED)
 
 
 def build_id_request(pubmed_id: str) -> Tuple[str, Dict[str, str]]:
