@@ -2008,6 +2008,7 @@ input[type="date"]::-webkit-calendar-picker-indicator{
 
 .source-details{
   line-height:var(--line-height-relaxed);
+  overflow-wrap:anywhere;
 }
 .source-extract{
   margin-top:var(--space-3);

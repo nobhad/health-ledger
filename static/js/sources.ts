@@ -41,7 +41,6 @@ function formatDate(value: string | undefined | null, fallback: string): string 
 document.addEventListener('DOMContentLoaded', function() {
     loadSources();
     setupFilters();
-    setupPanelResizing();
 });
 
 function setupFilters(): void {
@@ -215,96 +214,6 @@ function displayFindings(findings: Finding[]): void {
     `;
 }
 
-function setupPanelResizing(): void {
-    const splitter1 = document.getElementById('splitter1');
-    const splitter2 = document.getElementById('splitter2');
-    const leftPanel = document.querySelector('.sources-panel-left') as HTMLElement;
-    const middlePanel = document.querySelector('.sources-panel-middle') as HTMLElement;
-    const rightPanel = document.querySelector('.sources-panel-right') as HTMLElement;
-    
-    if (!splitter1 || !splitter2 || !leftPanel || !middlePanel || !rightPanel) {return;}
-    
-    let isResizing1 = false;
-    let isResizing2 = false;
-    
-    splitter1.addEventListener('mousedown', (e) => {
-        isResizing1 = true;
-        splitter1.classList.add('active');
-        document.body.style.cursor = 'col-resize';
-        e.preventDefault();
-    });
-    
-    splitter2.addEventListener('mousedown', (e) => {
-        isResizing2 = true;
-        splitter2.classList.add('active');
-        document.body.style.cursor = 'col-resize';
-        e.preventDefault();
-    });
-    
-    document.addEventListener('mousemove', (e) => {
-        if (isResizing1) {
-            const container = document.getElementById('sourcesContainer');
-            if (container) {
-                const containerRect = container.getBoundingClientRect();
-                const newWidth = e.clientX - containerRect.left;
-                if (newWidth > 200 && newWidth < 500) {
-                    leftPanel.style.width = newWidth + 'px';
-                }
-            }
-        } else if (isResizing2) {
-            const container = document.getElementById('sourcesContainer');
-            if (container) {
-                const containerRect = container.getBoundingClientRect();
-                const rightStart = containerRect.right - rightPanel.offsetWidth;
-                const newWidth = rightStart - e.clientX;
-                if (newWidth > 250 && newWidth < 600) {
-                    rightPanel.style.width = newWidth + 'px';
-                }
-            }
-        }
-    });
-    
-    document.addEventListener('mouseup', () => {
-        if (isResizing1) {
-            isResizing1 = false;
-            splitter1.classList.remove('active');
-            document.body.style.cursor = '';
-            savePanelState();
-        }
-        if (isResizing2) {
-            isResizing2 = false;
-            splitter2.classList.remove('active');
-            document.body.style.cursor = '';
-            savePanelState();
-        }
-    });
-}
-
-function savePanelState(): void {
-    const leftPanel = document.querySelector('.sources-panel-left') as HTMLElement;
-    const rightPanel = document.querySelector('.sources-panel-right') as HTMLElement;
-    
-    if (leftPanel && rightPanel) {
-        localStorage.setItem('sourcesPanelLeftWidth', leftPanel.style.width);
-        localStorage.setItem('sourcesPanelRightWidth', rightPanel.style.width);
-    }
-}
-
-function loadPanelState(): void {
-    const leftPanel = document.querySelector('.sources-panel-left') as HTMLElement;
-    const rightPanel = document.querySelector('.sources-panel-right') as HTMLElement;
-    
-    if (leftPanel) {
-        const savedWidth = localStorage.getItem('sourcesPanelLeftWidth');
-        if (savedWidth) {leftPanel.style.width = savedWidth;}
-    }
-    
-    if (rightPanel) {
-        const savedWidth = localStorage.getItem('sourcesPanelRightWidth');
-        if (savedWidth) {rightPanel.style.width = savedWidth;}
-    }
-}
-
 function escapeHtmlSource(text: string | undefined | null): string {
     if (!text) {return '';}
     const div = document.createElement('div');
@@ -323,7 +232,3 @@ function debounce(func: () => void, wait: number): () => void {
         timeout = window.setTimeout(later, wait);
     };
 }
-
-// Load saved panel state on page load
-window.addEventListener('load', loadPanelState);
-

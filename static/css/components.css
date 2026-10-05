@@ -1102,6 +1102,9 @@ input[type="date"]::-webkit-calendar-picker-indicator {
 
 .source-details {
   line-height: var(--line-height-relaxed);
+  /* An article's address is one unbroken word, longer than the panel; with
+     nowhere to break it pushed the panel sideways. */
+  overflow-wrap: anywhere;
 }
 
 /* The extracted text, set off from the source's own details above it. */
