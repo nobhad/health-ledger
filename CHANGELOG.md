@@ -2,7 +2,7 @@
 
 Notable changes to Health Ledger. Newest first.
 
-## 1.1.0 — unreleased
+## 1.1.0 — 2026-10-05
 
 The first published release. It includes everything listed under 1.0.1 and
 1.0.0, neither of which was published.
