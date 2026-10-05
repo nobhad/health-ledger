@@ -18,7 +18,7 @@ APP_NAME = "Health Ledger"
 DOCUMENT_DISCLAIMER = (
     "For personal record-keeping. Not a substitute for professional medical advice."
 )
-APP_VERSION = "1.0.1"
+APP_VERSION = "1.1.0"
 
 # A copy running from a PyInstaller bundle sees two different roots: the
 # read-only bundle it was unpacked into, and a writable folder of its own for
@@ -119,13 +119,14 @@ def set_data_root(path) -> Path:
     import them by value.
     """
     global DATA_ROOT, DB_PATH, OUTPUT_DIR, DATA_DIR, PRIMARY_SOURCES_DIR
-    global LOGS_DIR, BACKUPS_DIR, DOCTOR_DOCS_DIR
+    global LOGS_DIR, BACKUPS_DIR, DOCTOR_DOCS_DIR, REFERENCES_DIR
     DATA_ROOT = Path(path).expanduser().resolve()
     # HEALTH_LEDGER_DB_PATH overrides the database location (used by the tests).
     DB_PATH = Path(os.environ.get('HEALTH_LEDGER_DB_PATH') or DATA_ROOT / 'genetic_profile.db')
     OUTPUT_DIR = DATA_ROOT / 'output'
     DATA_DIR = DATA_ROOT / 'data'
     PRIMARY_SOURCES_DIR = DATA_ROOT / 'primary_sources'
+    REFERENCES_DIR = DATA_ROOT / 'references'
     LOGS_DIR = DATA_ROOT / 'logs'
     BACKUPS_DIR = DATA_ROOT / 'backups'
     DOCTOR_DOCS_DIR = OUTPUT_DIR / 'doctor_docs'  # Default folder for doctor PDFs

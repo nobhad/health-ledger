@@ -101,7 +101,7 @@ def mark_setup_completed(conn: sqlite3.Connection) -> None:
 def ensure_data_directories() -> None:
     """The folders the app writes into, created so the first run finds them."""
     for directory in (config.DATA_ROOT, config.PRIMARY_SOURCES_DIR, config.OUTPUT_DIR,
-                      config.LOGS_DIR, config.BACKUPS_DIR):
+                      config.LOGS_DIR, config.BACKUPS_DIR, config.REFERENCES_DIR):
         Path(directory).mkdir(parents=True, exist_ok=True)
 
 
