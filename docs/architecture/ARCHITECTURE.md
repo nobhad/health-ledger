@@ -49,7 +49,6 @@ repository. Under it, `config.py` defines:
 | `primary_sources/` | Copies of imported documents. |
 | `references/` | The saved-article files. |
 | `output/` | Generated files, including `output/doctor_docs/`. |
-| `data/` | Defined in `config.py` as `DATA_DIR`; nothing in the app writes to it now. |
 | `logs/` | `app.log`. |
 | `backups/` | Database backups. |
 

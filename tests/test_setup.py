@@ -32,7 +32,7 @@ class SetupTestCase(unittest.TestCase):
 
         self._saved = {name: getattr(config, name) for name in
                        ('DB_PATH', 'DATA_ROOT', 'BACKUPS_DIR', 'PRIMARY_SOURCES_DIR',
-                        'OUTPUT_DIR', 'LOGS_DIR', 'DATA_DIR', 'DOCTOR_DOCS_DIR',
+                        'OUTPUT_DIR', 'LOGS_DIR', 'DOCTOR_DOCS_DIR',
                         'ENV_PATH', 'DATA_DIR_IS_CONFIGURED', 'default_data_root')}
         self._saved_env = os.environ.get('HEALTH_LEDGER_DATA_DIR')
         config.DB_PATH = self.db_path
@@ -41,7 +41,6 @@ class SetupTestCase(unittest.TestCase):
         config.PRIMARY_SOURCES_DIR = self.tmp / 'primary_sources'
         config.OUTPUT_DIR = self.tmp / 'output'
         config.LOGS_DIR = self.tmp / 'logs'
-        config.DATA_DIR = self.tmp / 'data'
         config.DOCTOR_DOCS_DIR = self.tmp / 'output' / 'doctor_docs'
         # The folder choice is written to a throwaway .env, and the proposed
         # default points into the temp tree, so no test touches the home

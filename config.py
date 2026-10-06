@@ -118,13 +118,12 @@ def set_data_root(path) -> Path:
     a module must read these names from `config` at call time rather than
     import them by value.
     """
-    global DATA_ROOT, DB_PATH, OUTPUT_DIR, DATA_DIR, PRIMARY_SOURCES_DIR
+    global DATA_ROOT, DB_PATH, OUTPUT_DIR, PRIMARY_SOURCES_DIR
     global LOGS_DIR, BACKUPS_DIR, DOCTOR_DOCS_DIR, REFERENCES_DIR
     DATA_ROOT = Path(path).expanduser().resolve()
     # HEALTH_LEDGER_DB_PATH overrides the database location (used by the tests).
     DB_PATH = Path(os.environ.get('HEALTH_LEDGER_DB_PATH') or DATA_ROOT / 'genetic_profile.db')
     OUTPUT_DIR = DATA_ROOT / 'output'
-    DATA_DIR = DATA_ROOT / 'data'
     PRIMARY_SOURCES_DIR = DATA_ROOT / 'primary_sources'
     REFERENCES_DIR = DATA_ROOT / 'references'
     LOGS_DIR = DATA_ROOT / 'logs'

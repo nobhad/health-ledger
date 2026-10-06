@@ -93,14 +93,14 @@ def example_queries():
     print("-" * 60)
     anxiety_genes = db.get_genes_with_trait("anxiety")
     for gene_info in anxiety_genes[:5]:
-        print(f"  {gene_info['gene_symbol']}: {gene_info.get('trait_name', 'N/A')}")
+        print(f"  {gene_info['gene_symbol']}: {gene_info.get('matching_traits', 'N/A')}")
     
     # 9. Find genes associated with a condition
     print("\n9. Genes Associated with 'depression':")
     print("-" * 60)
     depression_genes = db.get_genes_with_condition("depression")
     for gene_info in depression_genes[:5]:
-        print(f"  {gene_info['gene_symbol']}: {gene_info.get('condition_name', 'N/A')}")
+        print(f"  {gene_info['gene_symbol']}: {gene_info.get('matching_conditions', 'N/A')}")
     
     # 10. Find genes that interact with a given gene
     print("\n10. Genes that Interact with COMT:")
