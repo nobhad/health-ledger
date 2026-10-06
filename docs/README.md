@@ -1,7 +1,8 @@
 # Documentation
 
-Documentation for Health Ledger, a personal medical record app that runs on
-your own computer. For what it is and how to install it, start with the
+Documentation for Health Ledger, an app for researching your own results
+and bringing what you find to your care providers, running on your own
+computer. For what it is and how to install it, start with the
 [main README](../README.md) and [INSTALL.md](../INSTALL.md).
 
 ## Index

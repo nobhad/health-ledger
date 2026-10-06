@@ -1,14 +1,23 @@
 # Health Ledger
 
-Your medical records, on your own computer, in one place you can search and
-print.
+Research your own results, and bring what you find to your care providers.
 
-Health Ledger keeps lab results, visit notes, letters, portal exports and DNA
-test reports in a single private file, and turns them into a document you can
-hand a doctor. It runs entirely on your machine. Your records never
-leave your laptop, there is no account, and there is no server to sign in to. The one
-thing it can send out is a journal search you press a button for, which sends
-only the words you typed to Europe PMC.
+A test report hands you a conclusion and a list of gene names; lab results
+arrive as PDFs with numbers and no story. Health Ledger is where you work
+through them. It keeps lab results, visit notes, letters, portal exports and
+DNA test reports in a single private file, shows how your numbers move over
+time, lets you look up what the published literature says about a gene, a
+condition or a medication, and keeps the passages that matter. When you see a
+specialist, it builds one document for them: your relevant results, your
+medications, and the sentences from the papers you want them to see, each
+with its title and a link.
+
+It runs entirely on your machine. Your records never leave your laptop, there
+is no account, and there is no server to sign in to. The one thing it can
+send out is a journal search you press a button for, which sends only the
+words you typed to Europe PMC. It does not interpret your results or tell you
+what to do about them; it gives you the material for that conversation with
+someone who can.
 
 > **Not medical advice.** Health Ledger is a filing cabinet, not a doctor. It
 > does not diagnose or treat anything and it is not an approved medical
