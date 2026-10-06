@@ -67,6 +67,12 @@ class StoreTestCase(unittest.TestCase):
 
 class TestAddReferenceOnFreshLedger(StoreTestCase):
 
+    def test_add_research_reference_works_on_a_fresh_ledger(self):
+        """The research_references insert named pdf_file_path too, and failed the same way."""
+        ref_id = self.db.add_research_reference(1, authors='Example A', year=2020,
+                                                title='A made-up paper', journal='J')
+        self.assertIsInstance(ref_id, int)
+
     def test_add_reference_returns_an_id(self):
         new_id = self.db.add_reference(1, authors='Example A', year=2020,
                                        title='A made-up trial of nothing')

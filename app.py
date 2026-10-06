@@ -1646,7 +1646,7 @@ def api_pdf_doctor(specialty):
         
         # Get options from request (POST) or use defaults (GET)
         if request.method == 'POST':
-            data = request.get_json() or {}
+            data = request.get_json(silent=True) or {}
             save_path = data.get('save_path')
             include_original = data.get('include_original', True)
             include_medications = data.get('include_medications', True)
@@ -1927,7 +1927,7 @@ if __name__ == '__main__':
     app_logger.info(f"Access at: http://localhost:{port}")
     app_logger.info("Press Ctrl+C to stop the server")
     app_logger.warning("PRIVACY: Server is configured for localhost-only access (127.0.0.1)")
-    app_logger.warning("PRIVACY: No external network access allowed")
+    app_logger.warning("PRIVACY: The only outbound request is a journal lookup the person presses (literature.py)")
     
     # Security: Only bind to localhost for privacy
     # This ensures the server is only accessible from the local machine

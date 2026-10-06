@@ -1040,13 +1040,21 @@ class GeneticProfileDB:
                               reference_type: str = "journal", abstract: Optional[str] = None,
                               keywords: Optional[str] = None, pdf_file_path: Optional[str] = None) -> int:
         """Add a research reference to the database"""
+        # Same as add_reference: pdf_file_path is not in the schema, so name
+        # it only where a migration has added it.
+        columns = ['reference_number', 'authors', 'year', 'title', 'journal', 'volume',
+                   'pages', 'doi', 'pubmed_id', 'url', 'reference_type', 'abstract', 'keywords']
+        values = [reference_number, authors, year, title, journal, volume, pages,
+                  doi, pubmed_id, url, reference_type, abstract, keywords]
+        existing = {row[1] for row in
+                    self.conn.execute("PRAGMA table_info(research_references)").fetchall()}
+        if 'pdf_file_path' in existing:
+            columns.append('pdf_file_path')
+            values.append(pdf_file_path)
         cursor = self.conn.cursor()
-        cursor.execute("""
-            INSERT INTO research_references (reference_number, authors, year, title, journal, 
-                                  volume, pages, doi, pubmed_id, url, reference_type, abstract, keywords, pdf_file_path)
-            VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
-        """, (reference_number, authors, year, title, journal, volume, pages, 
-              doi, pubmed_id, url, reference_type, abstract, keywords, pdf_file_path))
+        cursor.execute(
+            f"INSERT INTO research_references ({', '.join(columns)}) "
+            f"VALUES ({', '.join('?' * len(columns))})", values)
         self.conn.commit()
         return cursor.lastrowid
     
