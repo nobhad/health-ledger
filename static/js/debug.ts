@@ -90,14 +90,17 @@ window.errorLog = function(message: string, error?: Error | null, ...args: unkno
     }
 };
 
-// Performance logger
+// Performance logger. What counts as slow, in milliseconds.
+const SLOW_MS = 1000;
+const NOTICEABLE_MS = 500;
+
 window.perfLog = function(operation: string, startTime: number): void {
     if (!window.GENETIC_PROFILE_DEBUG.enabled) {
         return;
     }
     const duration = performance.now() - startTime;
-    const color = duration > 1000 ? 'color: red' : duration > 500 ? 'color: orange' : 'color: green';
-    console.log(`%c[PERF] ${operation}: ${duration.toFixed(2)}ms`, color);
+    const verdict = duration > SLOW_MS ? 'slow' : duration > NOTICEABLE_MS ? 'noticeable' : 'fine';
+    console.log(`[PERF] ${operation}: ${duration.toFixed(2)}ms (${verdict})`);
 };
 
 // API call logger

@@ -26,11 +26,11 @@ if (typeof window.warnLog === 'undefined') {
 // This avoids "already declared" errors
 // Load genes, conditions, and traits on page load
 document.addEventListener('DOMContentLoaded', function () {
-    console.log('%c[INIT] DOM Content Loaded - Starting application initialization', 'color: #0066cc; font-weight: bold');
+    console.log('[INIT] DOM Content Loaded - Starting application initialization');
     window.debugLog('DOM Content Loaded - Initializing application');
     try {
         // Initialize multiselects first (with empty state)
-        console.log('%c[INIT] Initializing multiselect components...', 'color: #0066cc');
+        console.log('[INIT] Initializing multiselect components...');
         window.debugLog('Initializing multiselect components');
         if (window.initMultiselect) {
             window.initMultiselect('condition', 'conditionInput', 'conditionDropdown', 'conditionTags');
@@ -41,30 +41,30 @@ document.addEventListener('DOMContentLoaded', function () {
         if (typeof window.lucide !== 'undefined') {
             window.lucide.createIcons();
         }
-        console.log('%c[INIT] [OK] Multiselect components initialized', 'color: #28a745; font-weight: bold');
+        console.log('[INIT] [OK] Multiselect components initialized');
         window.debugLog('Multiselect components initialized');
         // Then load data
-        console.log('%c[INIT] Loading data from API...', 'color: #0066cc');
+        console.log('[INIT] Loading data from API...');
         window.debugLog('Loading data from API');
         loadGenes();
         loadConditions();
         loadTraits();
-        console.log('%c[INIT] [OK] Application initialization complete', 'color: #28a745; font-weight: bold');
+        console.log('[INIT] [OK] Application initialization complete');
     }
     catch (error) {
-        console.error('%c[INIT] [ERROR] Error during initialization', 'color: #dc3545; font-weight: bold', error);
+        console.error('[INIT] [ERROR] Error during initialization', error);
         window.errorLog('Error during initialization', error);
     }
 });
 async function loadGenes() {
-    console.log('%c[API] loadGenes() called', 'color: #17a2b8');
+    console.log('[API] loadGenes() called');
     window.debugLog('loadGenes() called');
     const startTime = performance.now();
     try {
-        console.log('%c[API] Fetching /api/all-genes...', 'color: #17a2b8');
+        console.log('[API] Fetching /api/all-genes...');
         window.debugLog('Fetching /api/all-genes');
         const response = await fetch('/api/all-genes');
-        console.log('%c[API] Response received', 'color: #17a2b8', {
+        console.log('[API] Response received', {
             status: response.status,
             statusText: response.statusText,
             ok: response.ok
@@ -78,7 +78,7 @@ async function loadGenes() {
             throw new Error(`HTTP ${response.status}: ${response.statusText}`);
         }
         const data = await response.json();
-        console.log('%c[API] Response data:', 'color: #17a2b8', {
+        console.log('[API] Response data:', {
             type: typeof data,
             isArray: Array.isArray(data),
             length: Array.isArray(data) ? data.length : 'N/A'
@@ -86,11 +86,11 @@ async function loadGenes() {
         window.debugLog('Response data parsed', { dataType: typeof data, isArray: Array.isArray(data) });
         // Check if response is an array
         if (!Array.isArray(data)) {
-            console.error('%c[API] ✗ Error: Response is not an array', 'color: #dc3545; font-weight: bold', data);
+            console.error('[API] ✗ Error: Response is not an array', data);
             window.errorLog('Error loading genes: Response is not an array', null, { data });
             return;
         }
-        console.log(`%c[API] Processing ${data.length} genes`, 'color: #17a2b8');
+        console.log(`[API] Processing ${data.length} genes`);
         window.debugLog(`Processing ${data.length} genes`);
         // Store options for multiselect (use window.multiselectState)
         // IMPORTANT: Use singular keys ('gene', 'condition', 'trait') to match multiselect type parameter
@@ -116,7 +116,7 @@ async function loadGenes() {
             label: gene.gene_symbol + ' - ' + (gene.gene_name || '')
         }));
         window.multiselectState.gene.options = optionsArray;
-        console.log(`%c[API] ✓ Stored ${window.multiselectState.gene.options.length} gene options`, 'color: #28a745; font-weight: bold');
+        console.log(`[API] ✓ Stored ${window.multiselectState.gene.options.length} gene options`);
         window.debugLog(`Stored ${window.multiselectState.gene.options.length} gene options`);
         window.debugLog('State after storing', {
             stateExists: !!window.multiselectState.gene,
@@ -142,23 +142,23 @@ async function loadGenes() {
             }
         }, 0);
         const duration = performance.now() - startTime;
-        console.log(`%c[API] ✓ loadGenes() completed in ${duration.toFixed(2)}ms`, 'color: #28a745');
+        console.log(`[API] ✓ loadGenes() completed in ${duration.toFixed(2)}ms`);
         window.debugLog(`loadGenes() completed in ${duration.toFixed(2)}ms`);
     }
     catch (error) {
-        console.error('%c[API] ✗ Error loading genes', 'color: #dc3545; font-weight: bold', error);
+        console.error('[API] ✗ Error loading genes', error);
         window.errorLog('Error loading genes', error);
     }
 }
 async function loadConditions() {
-    console.log('%c[API] loadConditions() called', 'color: #17a2b8');
+    console.log('[API] loadConditions() called');
     window.debugLog('loadConditions() called');
     const startTime = performance.now();
     try {
-        console.log('%c[API] Fetching /api/all-conditions...', 'color: #17a2b8');
+        console.log('[API] Fetching /api/all-conditions...');
         window.debugLog('Fetching /api/all-conditions');
         const response = await fetch('/api/all-conditions');
-        console.log('%c[API] Response received', 'color: #17a2b8', {
+        console.log('[API] Response received', {
             status: response.status,
             ok: response.ok
         });
@@ -171,7 +171,7 @@ async function loadConditions() {
             throw new Error(`HTTP ${response.status}: ${response.statusText}`);
         }
         const data = await response.json();
-        console.log('%c[API] Response data:', 'color: #17a2b8', {
+        console.log('[API] Response data:', {
             type: typeof data,
             isArray: Array.isArray(data),
             length: Array.isArray(data) ? data.length : 'N/A'
@@ -179,11 +179,11 @@ async function loadConditions() {
         window.debugLog('Response data parsed', { dataType: typeof data, isArray: Array.isArray(data) });
         // Check if response is an array
         if (!Array.isArray(data)) {
-            console.error('%c[API] ✗ Error: Response is not an array', 'color: #dc3545; font-weight: bold', data);
+            console.error('[API] ✗ Error: Response is not an array', data);
             window.errorLog('Error loading conditions: Response is not an array', null, { data });
             return;
         }
-        console.log(`%c[API] Processing ${data.length} conditions`, 'color: #17a2b8');
+        console.log(`[API] Processing ${data.length} conditions`);
         window.debugLog(`Processing ${data.length} conditions`);
         // Store options for multiselect (use window.multiselectState)
         // IMPORTANT: Use singular keys ('gene', 'condition', 'trait') to match multiselect type parameter
@@ -209,7 +209,7 @@ async function loadConditions() {
             label: condition
         }));
         window.multiselectState.condition.options = optionsArray;
-        console.log(`%c[API] ✓ Stored ${window.multiselectState.condition.options.length} condition options`, 'color: #28a745; font-weight: bold');
+        console.log(`[API] ✓ Stored ${window.multiselectState.condition.options.length} condition options`);
         window.debugLog(`Stored ${window.multiselectState.condition.options.length} condition options`);
         window.debugLog('State after storing', {
             stateExists: !!window.multiselectState.condition,
@@ -227,23 +227,23 @@ async function loadConditions() {
             }
         }, 0);
         const duration = performance.now() - startTime;
-        console.log(`%c[API] ✓ loadConditions() completed in ${duration.toFixed(2)}ms`, 'color: #28a745');
+        console.log(`[API] ✓ loadConditions() completed in ${duration.toFixed(2)}ms`);
         window.debugLog(`loadConditions() completed in ${duration.toFixed(2)}ms`);
     }
     catch (error) {
-        console.error('%c[API] ✗ Error loading conditions', 'color: #dc3545; font-weight: bold', error);
+        console.error('[API] ✗ Error loading conditions', error);
         window.errorLog('Error loading conditions', error);
     }
 }
 async function loadTraits() {
-    console.log('%c[API] loadTraits() called', 'color: #17a2b8');
+    console.log('[API] loadTraits() called');
     window.debugLog('loadTraits() called');
     const startTime = performance.now();
     try {
-        console.log('%c[API] Fetching /api/all-traits...', 'color: #17a2b8');
+        console.log('[API] Fetching /api/all-traits...');
         window.debugLog('Fetching /api/all-traits');
         const response = await fetch('/api/all-traits');
-        console.log('%c[API] Response received', 'color: #17a2b8', {
+        console.log('[API] Response received', {
             status: response.status,
             ok: response.ok
         });
@@ -256,7 +256,7 @@ async function loadTraits() {
             throw new Error(`HTTP ${response.status}: ${response.statusText}`);
         }
         const data = await response.json();
-        console.log('%c[API] Response data:', 'color: #17a2b8', {
+        console.log('[API] Response data:', {
             type: typeof data,
             isArray: Array.isArray(data),
             length: Array.isArray(data) ? data.length : 'N/A'
@@ -264,11 +264,11 @@ async function loadTraits() {
         window.debugLog('Response data parsed', { dataType: typeof data, isArray: Array.isArray(data) });
         // Check if response is an array
         if (!Array.isArray(data)) {
-            console.error('%c[API] ✗ Error: Response is not an array', 'color: #dc3545; font-weight: bold', data);
+            console.error('[API] ✗ Error: Response is not an array', data);
             window.errorLog('Error loading traits: Response is not an array', null, { data });
             return;
         }
-        console.log(`%c[API] Processing ${data.length} traits`, 'color: #17a2b8');
+        console.log(`[API] Processing ${data.length} traits`);
         window.debugLog(`Processing ${data.length} traits`);
         // Store options for multiselect (use window.multiselectState)
         // IMPORTANT: Use singular keys ('gene', 'condition', 'trait') to match multiselect type parameter
@@ -294,7 +294,7 @@ async function loadTraits() {
             label: trait
         }));
         window.multiselectState.trait.options = optionsArray;
-        console.log(`%c[API] ✓ Stored ${window.multiselectState.trait.options.length} trait options`, 'color: #28a745; font-weight: bold');
+        console.log(`[API] ✓ Stored ${window.multiselectState.trait.options.length} trait options`);
         window.debugLog(`Stored ${window.multiselectState.trait.options.length} trait options`);
         window.debugLog('State after storing', {
             stateExists: !!window.multiselectState.trait,
@@ -312,12 +312,12 @@ async function loadTraits() {
             }
         }, 0);
         const duration = performance.now() - startTime;
-        console.log(`%c[API] ✓ loadTraits() completed in ${duration.toFixed(2)}ms`, 'color: #28a745');
-        console.log('%c[INIT] ✓ All data loaded successfully!', 'color: #28a745; font-weight: bold; font-size: 14px');
+        console.log(`[API] ✓ loadTraits() completed in ${duration.toFixed(2)}ms`);
+        console.log('[INIT] ✓ All data loaded successfully!');
         window.debugLog(`loadTraits() completed in ${duration.toFixed(2)}ms`);
     }
     catch (error) {
-        console.error('%c[API] ✗ Error loading traits', 'color: #dc3545; font-weight: bold', error);
+        console.error('[API] ✗ Error loading traits', error);
         window.errorLog('Error loading traits', error);
     }
 }

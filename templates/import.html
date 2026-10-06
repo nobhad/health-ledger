@@ -170,7 +170,7 @@
         <div class="card-header"><h3>A document from your care</h3></div>
         <div class="card-body">
             <p>Lab results, a visit note, a letter or an export from a patient portal, as a PDF or a text file. The text is read and shown to you first, along with any readings found in it.</p>
-            <p class="note">A scanned page photographed into a PDF has no text to read. Clinical VCF files are planned, not yet read.</p>
+            <p class="note">A scanned page photographed into a PDF is read by OCR when the optional extras are installed; otherwise it is kept without searchable text. Clinical VCF files are planned, not yet read.</p>
             <p>To bring in a whole database or go back to a backup, use <a href="/setup">Import or restore</a>.</p>
             <form method="post" action="/import/preview" enctype="multipart/form-data">
                 {% if first_run %}<input type="hidden" name="first" value="1">{% endif %}

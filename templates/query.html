@@ -100,15 +100,8 @@
     // Keep console.log and console.info unchanged for our debug output
     // (They're not overridden, so all our logs will show)
     
-    // Show startup banner IMMEDIATELY
-    originalLog('%c', 'font-size: 1px; line-height: 1px;');
-    originalLog('%c════════════════════════════════════════════════════════════════════', 'color: #0066cc; font-weight: bold; font-size: 12px;');
-    originalLog('%c  GENETIC PROFILE DATABASE - APPLICATION LOADING', 'color: #0066cc; font-weight: bold; font-size: 14px;');
-    originalLog('%c════════════════════════════════════════════════════════════════════', 'color: #0066cc; font-weight: bold; font-size: 12px;');
-    originalLog('%c[OK] Browser extension errors are being filtered', 'color: #28a745; font-weight: bold;');
-    originalLog('%c[OK] Debug logging is enabled', 'color: #28a745; font-weight: bold;');
-    originalLog('%c[OK] Application logs will appear below', 'color: #28a745; font-weight: bold;');
-    originalLog('');
+    // Say once what this console is doing to the messages below it.
+    originalLog('Health Ledger: errors raised by browser extensions are filtered out of this console.');
     
     // Store reference for later use
     window._originalConsoleError = originalError;
@@ -121,9 +114,9 @@
 // Verify debug.js loaded and show status
 (function() {
     if (typeof window.debugLog === 'function') {
-        console.log('%c[LOAD] [OK] debug.js loaded successfully', 'color: #28a745; font-weight: bold;');
+        console.log('[LOAD] [OK] debug.js loaded successfully');
     } else {
-        console.error('%c[LOAD] [ERROR] debug.js FAILED to load', 'color: #dc3545; font-weight: bold;');
+        console.error('[LOAD] [ERROR] debug.js FAILED to load');
     }
 })();
 </script>
@@ -133,10 +126,10 @@
 // Verify multiselect.js loaded
 (function() {
     if (typeof initMultiselect === 'function' && typeof multiselectState !== 'undefined') {
-        console.log('%c[LOAD] [OK] multiselect.js loaded successfully', 'color: #28a745; font-weight: bold;');
-        console.log('%c[LOAD] Multiselect state initialized:', 'color: #17a2b8;', multiselectState);
+        console.log('[LOAD] [OK] multiselect.js loaded successfully');
+        console.log('[LOAD] Multiselect state initialized:', multiselectState);
     } else {
-        console.error('%c[LOAD] [ERROR] multiselect.js FAILED to load', 'color: #dc3545; font-weight: bold;');
+        console.error('[LOAD] [ERROR] multiselect.js FAILED to load');
         console.error('initMultiselect:', typeof initMultiselect);
         console.error('multiselectState:', typeof multiselectState);
     }
@@ -151,14 +144,14 @@
     const allLoaded = functions.every(fn => typeof window[fn] === 'function');
     
     if (allLoaded) {
-        console.log('%c[LOAD] [OK] query.js loaded successfully', 'color: #28a745; font-weight: bold;');
-        console.log('%c[LOAD] All query functions available:', 'color: #17a2b8;', functions);
-        console.log('%c════════════════════════════════════════════════════════════════════', 'color: #0066cc; font-weight: bold; font-size: 12px;');
-        console.log('%c  READY - Waiting for DOM to load...', 'color: #28a745; font-weight: bold; font-size: 14px;');
-        console.log('%c════════════════════════════════════════════════════════════════════', 'color: #0066cc; font-weight: bold; font-size: 12px;');
+        console.log('[LOAD] [OK] query.js loaded successfully');
+        console.log('[LOAD] All query functions available:', functions);
+        console.log('════════════════════════════════════════════════════════════════════');
+        console.log('READY - Waiting for DOM to load...');
+        console.log('════════════════════════════════════════════════════════════════════');
         console.log('');
     } else {
-        console.error('%c[LOAD] [ERROR] query.js FAILED to load some functions', 'color: #dc3545; font-weight: bold;');
+        console.error('[LOAD] [ERROR] query.js FAILED to load some functions');
         functions.forEach(fn => {
             if (typeof window[fn] !== 'function') {
                 console.error(`Missing function: ${fn}`);

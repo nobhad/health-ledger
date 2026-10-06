@@ -1218,6 +1218,8 @@ def api_source_findings(source_id):
     """Get findings for a specific primary source"""
     try:
         db = get_db()
+        if not db.get_primary_source_with_findings(source_id):
+            return jsonify({'success': False, 'message': 'Source not found'}), 404
         findings = db.get_primary_source_findings(source_id)
         
         return jsonify({
@@ -1541,7 +1543,7 @@ def api_pdf_summary():
         tmp_path = _new_temp_pdf_path()
         
         if generate_summary_pdf(db, tmp_path):
-            return _send_temp_pdf(tmp_path, 'genetic_profile_summary.pdf')
+            return _send_temp_pdf(tmp_path, 'health_ledger_summary.pdf')
         else:
             return jsonify({
                 'success': False,
@@ -1568,7 +1570,7 @@ def api_pdf_profile():
         tmp_path = _new_temp_pdf_path()
         
         if generate_profile_pdf(db, tmp_path):
-            return _send_temp_pdf(tmp_path, 'genetic_profile_full.pdf')
+            return _send_temp_pdf(tmp_path, 'health_ledger_full.pdf')
         else:
             return jsonify({
                 'success': False,

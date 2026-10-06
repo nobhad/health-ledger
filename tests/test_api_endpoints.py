@@ -181,6 +181,13 @@ class TestDataDirectoryPaths(unittest.TestCase):
         response = self.client.post('/api/pdf/doctor/geneticist', json={'save_path': '../outside'})
         self.assertEqual(response.status_code, 400)
 
+    def test_findings_for_an_unknown_source_is_404_like_its_siblings(self):
+        """An empty list for an id that does not exist looked like a source with no findings."""
+        response = self.client.get('/api/sources/999999/findings')
+        self.assertEqual(response.status_code, 404)
+        self.assertFalse(response.get_json()['success'])
+
+
 
 if __name__ == '__main__':
     unittest.main()
