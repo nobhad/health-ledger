@@ -79,9 +79,6 @@ All run from the project root with `./venv/bin/python`.
 | `scripts/extract_health_metrics.py` | Extracts vitals and lab values from primary sources already in the database. Takes `--dry-run`. |
 | `scripts/import_pharmacogenomics.py` | See [PHARMACOGENOMIC.md](PHARMACOGENOMIC.md). |
 
-Older scripts from the earlier program are still in `scripts/` and are not part
-of the app: `import_from_markdown.py` (looks for a fixed set of markdown file
-names under `docs/` or the current directory; no arguments, no `--dry-run`),
-`extract_all_primary_sources.py` and `unified_extractor.py` (both read a
-`primary_sources` folder relative to the current directory). Read one before
-running it.
+The earlier program's bulk importers, which read fixed file names from one
+person's records, were removed from this repository on 2026-10-05. A script
+in `scripts/` has to work for anyone's records.

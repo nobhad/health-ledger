@@ -63,9 +63,5 @@ They open the configured database (`config.DB_PATH`, under
 for every gene or SNP in the database when given `--all`, not on a button
 press, so read a script before running it. None of them has a `--dry-run`.
 
-`citation_overhaul.py` is left over from the earlier program. It reads a
-fixed markdown file name from the current directory, which the app does not
-produce, and takes no arguments.
-
 An older write-up of the overhaul is in
 [../archive/CITATION_OVERHAUL_SUMMARY.md](../archive/CITATION_OVERHAUL_SUMMARY.md).

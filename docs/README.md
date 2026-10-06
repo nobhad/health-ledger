@@ -39,7 +39,6 @@ your own computer. For what it is and how to install it, start with the
 - [Tests](../tests/README.md)
 - [Packaging and releases](../packaging/README.md)
 - [Contributing](../CONTRIBUTING.md)
-- [Gene section template](templates/TEMPLATE_GENE_SECTION.md)
 
 ### Troubleshooting
 
@@ -64,5 +63,4 @@ your own computer. For what it is and how to install it, start with the
 | `architecture/` | How the modules fit together. |
 | `features/` | One page per page or feature of the app. |
 | `troubleshooting/` | Common problems and debugging. |
-| `templates/` | A template for a gene section. |
 | `archive/` | Notes from past work, kept as written. They describe the earlier program this one was renamed from, and are not kept up to date. |

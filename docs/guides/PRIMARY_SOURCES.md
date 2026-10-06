@@ -48,9 +48,7 @@ in `genetic_profile_db_schema.sql`.
 
 ## The older bulk script
 
-`scripts/extract_all_primary_sources.py` predates the Import page. It reads
-every file in a folder named `primary_sources` in the directory you run it
-from, not in your data folder, and it guesses each document's type and
-institution from patterns in the file name. Those patterns were written for
-one person's file names; a file that matches none of them is stored with type
-`unknown` and institution `Unknown`. Use the Import page instead.
+An earlier bulk extractor guessed each document's type and institution from
+patterns written for one person's file names. It was removed from this
+repository on 2026-10-05, since a script here has to work for anyone's
+records. The Import page does the same job for everyone.
