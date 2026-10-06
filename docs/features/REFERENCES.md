@@ -18,10 +18,11 @@ can see where it came from.
 2. **Save.** Click a result to read it in the middle of the page, then press
    **Save to my ledger**. It is added to your ledger and appears under
    **Saved articles**. Articles already cited elsewhere in your ledger appear
-   there too.
+   there too. If the result came with an abstract, it is saved with it.
 3. **Fetch the abstract.** A saved article that has no abstract yet shows a
    **Fetch abstract** button, and only where the article has a PubMed id.
-   Press it and the abstract appears in the middle of the page.
+   Press it and the abstract appears in the middle of the page. If the index
+   has no abstract for the article, the page says so.
 4. **Add an excerpt.** Select a sentence or two of the abstract with the
    mouse and press **Add excerpt**. The excerpt appears on the right.
 5. **Tick the specialists.** Each excerpt has a checkbox per specialist. Tick
@@ -83,5 +84,7 @@ to your doctor.
   selection that is not in the abstract is refused, so a quote in a document
   is always really from the article.
 - The paper's own PDF is not downloaded or stored.
-- Saved articles without a PubMed id show their title and link, and can be
-  removed, but cannot take excerpts.
+- An excerpt can only be taken from a stored abstract, and an abstract can
+  only be fetched for an article with a PubMed id. A saved article that has
+  neither a stored abstract nor a PubMed id shows its title and link, and can
+  be removed, but cannot take excerpts.

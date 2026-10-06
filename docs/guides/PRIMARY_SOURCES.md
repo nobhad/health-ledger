@@ -1,107 +1,56 @@
-# Primary Sources Extraction Guide
+# Primary Sources
 
-## Overview
+A primary source is a document you added to your ledger: a lab result, a visit
+note, a letter, a portal export, a DNA test report. The **Sources** page lists
+them.
 
-This system extracts and stores all information from primary source documents (PDFs, medical records, lab results, etc.) in the database. It automatically cross-references health logs with other documents to determine if entries were for sick visits.
+## Adding one
 
-## Database Tables
+Use the **Import** page. Under **A document from your care**, choose a `.pdf`,
+`.txt`, `.log`, `.md` or `.csv` file. Health Ledger reads it, shows what the
+document holds and any readings it found, and saves nothing until you press
+**Add to my ledger**.
 
-### New Tables Created
+What happens when you do:
 
-1. **research_references**: For research papers, studies, and academic references
-2. **primary_sources**: For healthcare data, medical records, test results, etc.
-3. **primary_source_findings**: Key findings extracted from primary sources
+- The file is copied into the `primary_sources` folder inside your data folder.
+- One source row is stored with the text read from the file, up to 50,000
+  characters.
+- Readings found in the text (lab values, blood pressure, temperature) are
+  added as health metrics, which the **Metrics** page shows.
+- A document that reads as a pharmacogenomic test report also fills in the
+  drug-metabolism tables from its gene results.
+- Importing the same file again replaces its earlier import rather than adding
+  a second copy.
 
-## Running the Extraction
+What kind of document it is comes from its text, never its file name. The
+kinds the Import page names are lab results, health log, test report and
+document.
 
-### Extract All Primary Sources
+A scanned page has no text to read. It is kept with your records and marked as
+having no searchable text, unless the optional OCR extras are installed (see
+[INSTALL.md](../../INSTALL.md)).
 
-To extract data from all PDFs in the `primary_sources` folder:
+DNA raw-data files go in under **DNA raw data** on the same page. Each variant
+is stored, and the file itself is recorded as a source too.
 
-```bash
-python3 scripts/extract_all_primary_sources.py
-```
+## Looking at them
 
-This script:
+**Sources** has three panels. The left lists sources, with a search box and
+filters for type and date range. The middle shows the selected source and its
+text. The right shows its findings.
 
-1. **First Pass**: Extracts lab results and test data for cross-referencing
-2. **Second Pass**: Processes all documents and adds them to the database
-3. **Cross-References**: Health logs are analyzed against lab results and test results to determine if entries were for sick visits
+## Tables
 
-### What Gets Extracted
+Sources live in `primary_sources` and their findings in
+`primary_source_findings`; the readings go to `health_metrics`. The columns are
+in `genetic_profile_db_schema.sql`.
 
-For each primary source:
+## The older bulk script
 
-- Document metadata (date, institution, type)
-- Full text content (up to 50,000 characters)
-- Key findings and observations
-- Visit type classification (sick visit vs routine visit)
-
-### Health Log Processing
-
-Health logs are parsed into individual entries, and each entry is analyzed to determine if it was a sick visit by:
-
-- Checking for sick visit keywords (symptoms, pain, illness, etc.)
-- Cross-referencing with lab results from the same time period
-- Checking for abnormal test values
-- Analyzing visit context
-
-## Document Types Recognized
-
-- **health_log**: Health logs and visit records
-- **health_issue**: Health issues documents
-- **lab_result**: Lab test results
-- **medical_record**: Medical records
-- **test_report**: Test reports (genetic testing, etc.)
-- **imaging**: CT scans, MRIs, X-rays, ECGs
-- **evaluation**: Neuropsychological evaluations
-- **health_summary**: Health summaries
-
-## Cross-Referencing Logic
-
-The system determines if a health log entry was a sick visit by:
-
-1. **Keyword Analysis**: Looks for words like "sick", "symptom", "pain", "fever", etc.
-2. **Date Matching**: Checks if lab results or test results exist within 7 days of the log entry
-3. **Abnormal Values**: If abnormal lab values are found around the same date, it's marked as a sick visit
-4. **Context Analysis**: Examines the entry text for diagnostic language
-
-## Adding Healthcare Summaries
-
-After each doctor's appointment, you can add a summary:
-
-```bash
-python3 scripts/add_healthcare_summary.py
-```
-
-This creates a structured record that can be cross-referenced with other documents.
-
-## Viewing Extracted Data
-
-View all primary sources:
-
-```python
-from database_manager import GeneticProfileDB
-
-db = GeneticProfileDB()
-sources = db.get_all_primary_sources()
-for source in sources:
-    print(f"{source['source_name']} - {source['document_date']}")
-    findings = db.get_primary_source_findings(source['id'])
-    print(f"  Findings: {len(findings)}")
-```
-
-## Integration
-
-The extracted data integrates with:
-
-- Gene associations (if genes are mentioned)
-- Health condition associations
-- Research findings
-- Citations and references
-
-## Next Steps
-
-1. Run `extract_all_primary_sources.py` to process all existing documents
-2. Use `add_healthcare_summary.py` after each appointment
-3. The system will automatically cross-reference new documents with existing data
+`scripts/extract_all_primary_sources.py` predates the Import page. It reads
+every file in a folder named `primary_sources` in the directory you run it
+from, not in your data folder, and it guesses each document's type and
+institution from patterns in the file name. Those patterns were written for
+one person's file names; a file that matches none of them is stored with type
+`unknown` and institution `Unknown`. Use the Import page instead.

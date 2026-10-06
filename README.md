@@ -37,9 +37,10 @@ to do about them.
 2. It asks where to keep your records. A folder called **Health Ledger** in
    your home folder is suggested; pick anywhere you like. Everything private
    lives there, and only there.
-3. Choose **Start fresh** if this is new, or **Import a database** if you are
-   moving from another computer or restoring a backup.
-4. Go to **Import** and give it a file — a lab PDF, a visit note, a DNA raw
+3. Press **Start with an empty ledger** if this is new. If you are moving from
+   another computer, choose the `.db` file under **Import a database**, or
+   pick one of your backups from **Or restore a backup** on the same card.
+4. Go to **Import** and give it a file: a lab PDF, a visit note, a DNA raw
    data download. It shows you what it found and writes nothing until you
    press **Add to my ledger**.
 5. When you have a doctor's appointment, go to **Doctor Docs**, pick the
@@ -51,19 +52,21 @@ To quit: use the Health Ledger icon in your menu bar (Mac) or system tray
 ## What you can put in it
 
 - **Documents from your care** — lab results, visit notes, letters, or a
-  patient-portal export, as PDF or plain text. Readings inside them (lab
-  values, blood pressure, temperature) are pulled out with their dates.
+  patient-portal export, as a `.pdf`, `.txt`, `.log`, `.md` or `.csv` file.
+  Readings inside them (lab values, blood pressure, temperature) are pulled
+  out with their dates.
 - **A pharmacogenomic test report** — recognised from its text. Adding it also
   fills in which medications each gene is known to affect.
 - **DNA raw data** — the download from 23andMe, AncestryDNA, MyHeritage,
-  FamilyTreeDNA or Living DNA, zipped or not. Clinical VCF files are not read
-  yet.
+  FamilyTreeDNA or Living DNA, zipped or not. VCF files are not read.
 - **Journal articles** — on the **References** page, look up articles, save
   them, and add short word-for-word excerpts from their abstracts to a
   specialist's document. See [docs/features/REFERENCES.md](docs/features/REFERENCES.md).
 
 A scanned page is a picture with no text in it. Health Ledger keeps it with
-your records either way, and marks it as having no searchable text.
+your records either way. It reads the page by OCR only if you have installed
+the optional extras ([INSTALL.md](INSTALL.md)); otherwise it marks the file as
+having no searchable text.
 
 Importing the same file twice updates what it stored rather than filing a
 second copy.
@@ -85,7 +88,8 @@ original files, generated documents, logs and backups all sit under it.
 - Back it up like any other folder. Use the **Backup** page, or copy the
   folder to a drive. Nobody can recover it for you.
 - Moving to a new computer: copy the folder across, install the app, and on
-  the first screen choose **Import a database**.
+  the first screen choose **Import a database** and pick the `.db` file from
+  the folder you copied.
 
 ## Making PDFs
 
@@ -99,9 +103,10 @@ library, the **Generate PDF** buttons appear on their own.
 
 ## If something goes wrong
 
-- The browser tab did not open: go to `http://127.0.0.1:5001` yourself. If
-  that port was busy the app picked the next free one — the menu-bar icon
-  shows the address it actually used.
+- The browser tab did not open: go to `http://127.0.0.1:5001` yourself. The
+  downloaded app uses the next free port if 5001 is busy, and its menu-bar or
+  tray icon shows the address it actually used. `start.sh` and `start.bat`
+  always use 5001.
 - Mac says the app is damaged or from an unidentified developer: right-click
   the app and choose **Open**, once. See [INSTALL.md](INSTALL.md).
 - Something else: [open an issue](https://github.com/nobhad/health-ledger/issues).

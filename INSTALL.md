@@ -49,8 +49,9 @@ you can read every line first.
 
 ## Run it from source
 
-You need [Python 3.9 or newer](https://www.python.org/downloads/). Git is
-handy but you can download the source as a zip instead.
+You need [Python 3.10 or newer](https://www.python.org/downloads/); the tests
+run on 3.10 and 3.12. Git is handy but you can download the source as a zip
+instead.
 
 ```bash
 git clone https://github.com/nobhad/health-ledger.git
@@ -58,18 +59,26 @@ cd health-ledger
 ./start.sh            # macOS and Linux
 ```
 
-On Windows, double-click `start.bat`.
+On Windows, double-click `start.bat`. On a Mac you can instead double-click
+`Health Ledger.command`, which runs `start.sh` in a Terminal window.
 
 The first run creates a private Python environment in `./venv`, installs what
 it needs, starts the server on <http://127.0.0.1:5001> and opens your browser.
-Every later run just starts it. `Ctrl+C` stops it.
+Every later run just starts it. `Ctrl+C` stops it. These launchers always use
+port 5001; if something else is using it, the server reports that and you can
+pass another port yourself with `venv/bin/python app.py 5002`.
 
-To get the menu-bar icon and a **Quit** item, as the downloadable app has:
+To get the menu-bar (or system tray) icon and a **Quit** item, as the
+downloadable app has, and to have it pick the next free port when 5001 is
+busy:
 
 ```bash
 venv/bin/pip install -r packaging/requirements-build.txt
 venv/bin/python desktop.py
 ```
+
+On Windows, use `venv\Scripts\pip` and `venv\Scripts\python`. That file also
+installs PyInstaller, which only the app builds need.
 
 ### Choosing where records go
 
@@ -106,13 +115,18 @@ by the printable version.
 
 ## Other optional extras
 
-Reading scanned pages (OCR), DICOM images and PubMed lookups are handled by
-scripts that need more packages. The file says which programs each one also
-needs:
+Three things need more packages than the app installs by default: reading
+scanned pages by OCR (the Import page uses it when it is installed), DICOM
+images, and PubMed lookups. The last two are command-line scripts under
+`scripts/`. The PubMed scripts contact NCBI when you run them, which the app
+itself never does. `requirements-extras.txt` says which programs each extra
+also needs, such as Tesseract and Poppler for OCR:
 
 ```bash
 venv/bin/pip install -r requirements-extras.txt
 ```
+
+The downloadable app does not include these.
 
 ## Uninstalling
 
@@ -126,7 +140,6 @@ with first, because nobody can recover it.
 
 The app also keeps one small settings file recording where that folder is:
 
-- macOS: `~/Library/Application Support/Health Ledger/.env`
-- Windows: `%APPDATA%\Health Ledger\.env`
-- Linux: `~/.config/health-ledger/.env`
+- macOS app: `~/Library/Application Support/Health Ledger/.env`
+- Windows app: `%APPDATA%\Health Ledger\.env`
 - From source: `.env` in the checkout

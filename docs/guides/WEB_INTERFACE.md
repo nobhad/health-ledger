@@ -1,113 +1,50 @@
-# Web Query Interface Guide
+# Web Interface Guide
 
-**Last Updated:** December 7, 2025
+Health Ledger is a local web app: a Flask server on `127.0.0.1` and the pages
+below in your browser. The pages are listed in the sidebar, in this order.
 
-## Overview
+To start it, see [QUICK_START.md](QUICK_START.md) or [INSTALL.md](../../INSTALL.md).
 
-This web application provides an interactive interface to query your genetic profile database from your web browser.
+## Pages
 
-> **Quick Start:** See [QUICK_START.md](QUICK_START.md) for a faster getting started guide.
+| Sidebar name | Address | What it is for |
+| --- | --- | --- |
+| Overview | `/` | What the ledger holds, recent sources, flagged results, and where to go next. |
+| Import | `/import` | Add a document from your care, or a DNA raw-data file. The file is read and shown first; nothing is saved until you press **Add to my ledger**. |
+| Sources | `/sources` | Every document you have added, with the text pulled out of it. Filter by search, type and date range. Three panels: Sources, Source Details, Findings. |
+| Metrics | `/metrics` | Readings over time (blood pressure, weight, lab results) taken from the documents you added. **Apply Filters** and **Clear Filters** narrow the table. |
+| Summary | `/summary` | The short version of your key findings. **Show everything** (`/summary?full=1`) is the long version; `/profile` redirects there. |
+| Query | `/query` | Which of your genes relate to a condition, a trait or a medication. See below. |
+| References | `/references` | Look up journal articles and choose excerpts for a specialist's document. See [REFERENCES.md](../features/REFERENCES.md). |
+| Doctor Docs | `/doctor-docs` | A document for one kind of specialist. Fill in **Your details**, choose a **Specialty**, tick what to include, then **Open printable version** (or **Generate PDF** where the PDF library is installed). |
+| Backup | `/backup` | **Create Backup**, **Available Backups**, **Export Database**, and notes on cloud storage. |
 
-## Features
+The first-run screen at `/setup` appears until you have started a ledger or
+imported one. Afterwards **Import or restore** (linked from
+the Import page) brings in a whole database or goes back to a backup.
 
-- **Query by Health Condition**: Find all genes associated with a specific health condition (e.g., ADHD, anxiety, depression)
-- **Query by Trait**: Find all genes associated with a specific trait (e.g., pain sensitivity, stress response)
-- **Gene Information**: Get comprehensive information about a specific gene including traits, conditions, interactions, and pharmacogenomic data
-- **View All Genes**: See all genes in the database
-- **Pharmacogenomic Data**: View medication metabolism information for all genes
+The specialties in Doctor Docs come from `doctor_templates.py`.
 
-## How to Use
+## Query
 
-### Starting the Web Server
+The Query page has three cards, each with a search box to pick names from:
 
-1. Open Terminal
-2. Navigate to the genetic_profile directory:
+1. **Find Genes by Health Condition**: pick one or more conditions, press
+   **Search**.
+2. **Find Genes by Trait**: pick one or more traits, press **Search**.
+3. **Get Gene Information**: pick one or more genes, press **Get Gene Info**.
 
-   ```bash
-   cd path/to/health-ledger
-   ```
+Two buttons below the cards show everything at once: **Show All Genes** and
+**Show Medication Metabolism**. Results appear underneath.
 
-3. Start the web server:
+The API behind these pages is described in
+[API_REFERENCE.md](../api/API_REFERENCE.md).
 
-   ```bash
-   python3 web_query_app.py
-   ```
+## Stopping
 
-   The server will automatically use port 5001 (port 5000 is often used by AirPlay on macOS).
-
-   To use a different port:
-
-   ```bash
-   python3 web_query_app.py 8080
-   ```
-
-   Or use the convenience script:
-
-   ```bash
-   ./start_web_query.sh
-   ```
-
-4. Open your web browser and go to:
-
-   ```text
-   http://localhost:5001
-   ```
-
-   Or try:
-
-   ```text
-   http://127.0.0.1:5001
-   ```
-
-### Using the Query Interface
-
-1. **Query by Condition**:
-   - Enter a health condition (e.g., "ADHD", "anxiety", "depression")
-   - Click "Search"
-   - Results show all genes associated with that condition
-
-2. **Query by Trait**:
-   - Enter a trait (e.g., "pain sensitivity", "stress response")
-   - Click "Search"
-   - Results show all genes associated with that trait
-
-3. **Get Gene Info**:
-   - Select a gene from the dropdown
-   - Click "Get Gene Info"
-   - See comprehensive information including traits, conditions, interactions, and pharmacogenomic data
-
-4. **View All Genes**:
-   - Click "Show All Genes"
-   - See a list of all genes in the database
-
-5. **View Pharmacogenomic Data**:
-   - Click "Show Medication Metabolism"
-   - See medication metabolism information for all genes
-
-### Navigation
-
-- **Query Interface**: Main page for querying the database
-- **View Full Profile**: Opens your complete genetic profile document
-- **View Summary**: Opens your personalized summary document
-
-## Stopping the Server
-
-Press `Ctrl+C` in the terminal where the server is running.
-
-## Technical Details
-
-- **Framework**: Flask (Python web framework)
-- **Database**: SQLite (genetic_profile.db)
-- **Port**: 5001 (default, 5000 is often used by AirPlay on macOS)
-- **API Endpoints**:
-  - `/api/genes-by-condition?condition=ADHD`
-  - `/api/genes-by-trait?trait=anxiety`
-  - `/api/gene-info?gene=ADRA2A`
-  - `/api/all-genes`
-  - `/api/pharmacogenomic`
+Press `Ctrl+C` in the terminal running `app.py`, `start.sh` or `start.bat`. The
+downloaded app has a **Quit** item in its menu-bar or tray icon.
 
 ## Troubleshooting
 
-- **Port already in use**: The app defaults to port 5001. If that's also busy, run with a different port: `python3 web_query_app.py 8080`
-- **Database not found**: Make sure `genetic_profile.db` exists in the same directory
-- **Module not found**: Install Flask with `pip3 install flask`
+See [the troubleshooting pages](../troubleshooting/README.md).

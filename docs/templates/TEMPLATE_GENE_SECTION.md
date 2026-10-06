@@ -1,3 +1,10 @@
+> **Legacy format.** This is the markdown layout the older scripts
+> `scripts/import_from_markdown.py`, `standardize_gene_sections.py`,
+> `uniform_gene_sections.py`, `standardize_document.py` and
+> `validate_formatting.py` read and check. They look for a fixed file name
+> that is not in this repository, and nothing in the web app reads this
+> format.
+
 # Gene Section Template
 
 This template defines the standard format for all gene sections. Use this as a reference when adding or modifying gene sections.
@@ -60,7 +67,7 @@ This template defines the standard format for all gene sections. Use this as a r
 ### Citations
 
 - **ALWAYS use square brackets:** `[1,2,3]` or `[1-15]`
-- **NEVER use parentheses:** `(1,2,3)` ❌
+- **NEVER use parentheses:** `(1,2,3)` (wrong)
 - **For descriptive text:** `[description][citation]` not `[description](citation)`
 
 ### Database Sources

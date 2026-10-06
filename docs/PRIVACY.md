@@ -21,7 +21,7 @@ HOST = '127.0.0.1'  # Localhost-only for privacy
 ALLOW_EXTERNAL_ACCESS = False
 ```
 
-The Flask application in `app.py` includes security headers to prevent accidental external exposure.
+`app.py` binds to `HOST` and adds `X-Content-Type-Options`, `X-Frame-Options` and `X-XSS-Protection` headers to every response. It sends no CORS headers, so a web page open in your browser cannot read the app's API.
 
 ## Single-User Design
 
@@ -33,11 +33,14 @@ This application is designed for single-user, personal use:
 
 ## Cloud Backup & Export
 
-While the application runs locally, you can export your data for cloud backup:
+The application never uploads anything to a cloud service. If you want a copy
+in cloud storage you can export one and put it there yourself. That is your
+choice to send the file to that provider, and the database is not encrypted
+(see [SECURITY.md](../SECURITY.md)):
 
 ### Creating Backups
 
-1. Use the Backup interface in the web application (`/backup`)
+1. Use the **Backup** page in the web application (`/backup`)
 2. Or use the command-line script:
 
    ```bash
@@ -51,13 +54,13 @@ Export your database to a file for cloud storage sync:
 1. **SQLite Database Export:**
 
    ```bash
-   python3 scripts/backup_database.py --export backups/my_backup.db
+   python3 scripts/backup_database.py --export /path/to/my_backup.db
    ```
 
 2. **JSON Export:**
 
    ```bash
-   python3 scripts/backup_database.py --json backups/my_backup.json
+   python3 scripts/backup_database.py --json /path/to/my_backup.json
    ```
 
 ### Cloud Storage Sync
@@ -65,7 +68,8 @@ Export your database to a file for cloud storage sync:
 To sync backups to cloud storage:
 
 1. Create backups using the methods above
-2. Locate the `backups/` directory
+2. Locate the `backups/` folder inside your data folder (the folder you chose
+   on the first screen)
 3. Add the `backups/` directory to your cloud storage sync folder:
    - **Dropbox**: Add `backups/` to your Dropbox folder
    - **iCloud**: Add `backups/` to your iCloud Drive
@@ -111,14 +115,13 @@ genotypes or files. It never happens automatically. A search term can itself
 be revealing, such as the name of a gene or condition. See
 [References](features/REFERENCES.md).
 
-## Privacy Guarantee
+## What stays on your computer
 
 Your health data:
 
 - Stays on your local machine
 - Is never transmitted externally (a journal search you press sends only the
   words you typed, not your records)
-- Is only accessible by you
+- Is reachable only from this computer. There is no password and no
+  encryption, so anyone who can use your logged-in computer can open it
 - Can be exported and backed up at your discretion
-
-The application is designed to give you complete control over your health data.
