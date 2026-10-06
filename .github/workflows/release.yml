@@ -22,8 +22,28 @@ permissions:
   contents: write
 
 jobs:
+  # A tag push does not run ci.yml, so the suite runs here first: nothing is
+  # built from a commit whose tests fail.
+  tests:
+    name: tests
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+          cache: pip
+      - name: Install
+        run: |
+          python -m pip install --upgrade pip
+          grep -v -i '^weasyprint' requirements.txt > requirements-ci.txt
+          pip install -r requirements-ci.txt -r requirements-dev.txt
+      - run: python -m pytest -q
+      - run: python scripts/check_private_data.py
+
   macos:
     name: macOS (arm64)
+    needs: [tests]
     runs-on: macos-14          # Apple Silicon
     steps:
       - uses: actions/checkout@v4
@@ -71,6 +91,7 @@ jobs:
 
   windows:
     name: Windows (x64)
+    needs: [tests]
     runs-on: windows-latest
     steps:
       - uses: actions/checkout@v4
@@ -143,7 +164,7 @@ jobs:
             about. [INSTALL.md](${{ github.server_url }}/${{ github.repository }}/blob/${{ github.ref_name }}/INSTALL.md) explains them, and running from
             source is always an option.
 
-            Your records stay on your own computer and are never uploaded.
+            Your records never leave your laptop. Nothing is uploaded.
             Health Ledger is not a medical device and is not a substitute for
             professional medical advice.
 

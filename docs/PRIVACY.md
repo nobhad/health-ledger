@@ -2,7 +2,7 @@
 
 ## Privacy-First Architecture
 
-This application is designed with privacy as the primary concern. Your health records remain on your local machine and are never transmitted to external servers. The one outbound request the application can make is a journal search you start yourself on the References page; see [No External Services](#no-external-services).
+This application is designed with privacy as the primary concern. Your records never leave your laptop. The one outbound request the application can make is a journal search you start yourself on the References page; see [No External Services](#no-external-services).
 
 ## Localhost-Only Access
 

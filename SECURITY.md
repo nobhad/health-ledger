@@ -20,7 +20,7 @@ Use made-up data to demonstrate the problem.
 
 ## The privacy model
 
-- **Your records never leave your machine.** No account, no sync, no
+- **Your records never leave your laptop.** No account, no sync, no
   telemetry, no crash reporting, no update check. The app makes exactly one
   kind of outbound network request: when you type a search on the References
   page and press **Look up**, the words you typed (or, to fetch the abstract
@@ -50,7 +50,7 @@ with anything.
 | --- | --- |
 | Local processes | Any program running as your user can reach `127.0.0.1` on the app's port (5001 by default) and read the API. This is inherent to a local web app with no auth. |
 | Unsigned downloads | The Mac and Windows builds are not signed, so your OS cannot verify who built them. See [INSTALL.md](INSTALL.md). If this matters to you, run from source. |
-| Reference data | The pharmacogenomic and variant tables are compiled from public sources (dbSNP, CPIC, Ensembl) and checked by `scripts/check_variant_reference.py`. Correct naming is not clinical validation. Nothing here is a reason to change a medication. |
+| Reference data | The pharmacogenomic and variant tables are compiled from public sources and checked by `scripts/check_variant_reference.py`: gene symbols against dbSNP and star-allele function against CPIC are gates, and Ensembl amino-acid changes are printed for a person to compare. Correct naming is not clinical validation. Nothing here is a reason to change a medication. |
 | Not a medical device | Not reviewed by any regulator. See [LICENSE](LICENSE) §6. |
 
 ## For contributors

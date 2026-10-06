@@ -5,8 +5,8 @@ print.
 
 Health Ledger keeps lab results, visit notes, letters, portal exports and DNA
 test reports in a single private file, and turns them into a document you can
-hand a doctor. It runs entirely on your machine. Your records are never
-uploaded, there is no account, and there is no server to sign in to. The one
+hand a doctor. It runs entirely on your machine. Your records never
+leave your laptop, there is no account, and there is no server to sign in to. The one
 thing it can send out is a journal search you press a button for, which sends
 only the words you typed to Europe PMC.
 
@@ -76,7 +76,7 @@ second copy.
 In the folder you chose in step 2, and nowhere else. The database, the
 original files, generated documents, logs and backups all sit under it.
 
-- Your records are never sent anywhere. The app has no analytics, no crash
+- Your records never leave your laptop. The app has no analytics, no crash
   reporting and no update check. The one exception is the **References** page:
   when you type a search and press **Look up**, the words you typed go to
   Europe PMC, a public index of journal articles. Nothing from your records
