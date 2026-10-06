@@ -30,8 +30,9 @@ All three run in CI and a red one will not be merged.
 
 - **Never commit private data.** No real names, record file names, home
   paths, dates of birth, genotypes or results — in code, tests, fixtures,
-  docs or commit messages. Use placeholders. The scanner above enforces it and
-  so does a pre-commit hook.
+  docs or commit messages. Use placeholders. The scanner above enforces it,
+  and the test suite runs the same scan. `check_private_data.py --staged` is
+  what a pre-commit hook would call; the repository does not install one.
 - **Never edit a `.js` file that has a `.ts` sibling.** Edit the TypeScript;
   `npm run build` compiles it.
 - **Never hand-edit `static/css/design-system/`.** It is vendored. Run

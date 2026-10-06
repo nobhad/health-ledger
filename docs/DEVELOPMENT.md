@@ -15,16 +15,18 @@ npm run dev           # the same as ./start.sh
 
 The first run creates `./venv`, installs `requirements.txt`, starts the server
 on <http://127.0.0.1:5001> and opens a browser. The server binds to `127.0.0.1`
-only.
+only. `start.sh` reinstalls when `requirements.txt` changes; `start.bat`
+installs once, so after a change run `venv\Scripts\pip install -r requirements.txt`.
 
-By hand:
+By hand, from the project root:
 
 ```bash
-pip3 install -r requirements.txt          # what the app needs
-pip3 install -r requirements-extras.txt   # optional: OCR, DICOM, PubMed scripts
-pip3 install -r requirements-dev.txt      # optional: the test suite
-python3 app.py            # http://localhost:5001
-python3 desktop.py        # the same, with the menu-bar icon the packaged app has
+python3 -m venv venv
+./venv/bin/pip install -r requirements.txt          # what the app needs
+./venv/bin/pip install -r requirements-extras.txt   # optional: OCR, DICOM, PubMed scripts
+./venv/bin/pip install -r requirements-dev.txt      # optional: the test suite
+./venv/bin/python app.py            # http://127.0.0.1:5001
+./venv/bin/python desktop.py        # the same, with the menu-bar icon the packaged app has
 ```
 
 `python3 app.py [port]` takes a port. `desktop.py` finds a free one by itself,
@@ -36,7 +38,11 @@ starting from 5001.
 | --- | --- |
 | `HEALTH_LEDGER_DATA_DIR` | Where all private data lives. Set in `.env`. |
 | `HEALTH_LEDGER_DB_PATH` | Overrides just the database file. Used by the tests. |
-| `HEALTH_LEDGER_DEBUG` | `1` turns on Flask debug and DEBUG-level logs. Off by default, and it must stay that way in anything released — debug mode serves the Werkzeug interactive debugger, which runs arbitrary code for whatever can reach the port. |
+| `HEALTH_LEDGER_DEBUG` | `1`, `true`, `yes` or `on` turns on Flask debug and DEBUG-level logs. Off by default, and it must stay that way in anything released: debug mode serves the Werkzeug interactive debugger, which runs arbitrary code for whatever can reach the port. |
+
+`config.py` reads `.env` from the checkout (a packaged copy reads a per-user
+folder) without overriding variables already in the environment. The setup
+screen writes `HEALTH_LEDGER_DATA_DIR` there.
 
 ## Privacy — the one hard rule
 
@@ -49,12 +55,14 @@ script default or a test fixture. No real names, record file names, home
 paths, genotypes or results in tracked files — use placeholders.
 
 ```bash
-python3 scripts/check_private_data.py       # the whole tree
-python3 scripts/check_private_data.py --staged
+./venv/bin/python scripts/check_private_data.py            # every tracked file
+./venv/bin/python scripts/check_private_data.py --staged   # what is staged
+./venv/bin/python scripts/check_private_data.py path/to/file.md
 ```
 
-The test suite runs the same scan and the pre-commit hook blocks a commit that
-fails it. Import scripts written against one person's records live with that
+The test suite runs the same scan, and so does CI. A pre-commit hook that runs
+`check_private_data.py --staged` is a local file in `.git/hooks/`; a clone does
+not have one, and a `core.hooksPath` setting bypasses it. Import scripts written against one person's records live with that
 person's data, not here: a script in `scripts/` must work for anyone's record.
 
 ## Project structure
@@ -66,19 +74,26 @@ health-ledger/
 ├── config.py                     # paths, logging, the frozen/checkout split
 ├── database_manager.py           # database API
 ├── documents.py, raw_dna.py      # the file readers behind /import
+├── literature.py                 # journal lookup: the only code that reaches the internet
+├── reference_files.py            # one readable file per saved article
+├── ledger_setup.py               # first-run setup, database import and restore
 ├── pdf_generator.py              # WeasyPrint, with the printable fallback
+├── profile_generator.py          # the /profile page
 ├── doctor_templates.py           # per-specialty gene lists
-├── pharmacogenomic_reference.py  # public gene-drug reference
-├── variant_reference.py          # public rsID reference, checked against dbSNP
-├── validation.py, ledger_setup.py
+├── pharmacogenomic_reference.py  # public gene-drug reference (used by an import script)
+├── variant_reference.py          # public rsID reference
+├── validation.py                 # request validation
 ├── genetic_profile_db_schema.sql
-├── templates/                    # Jinja: base, header, footer, one per page
+├── templates/                    # Jinja: base, sidebar, footer, one per page
 ├── static/                       # css/, js/ (TypeScript), fonts/, images/
 ├── scripts/                      # importers, extractors, checks
 ├── packaging/                    # PyInstaller spec, build scripts, icons
 ├── tests/                        # pytest
 └── docs/
 ```
+
+For how the pieces fit together, see
+[architecture/ARCHITECTURE.md](architecture/ARCHITECTURE.md).
 
 ## Front end
 
@@ -91,8 +106,9 @@ select `.form-select` or `.filter-select` and it gets the portal dropdown.
 
 ```bash
 npm install
-npm run build          # tsc + CSS
-npm run check          # lint + typecheck — run before calling a change done
+npm run build          # tsc, then the CSS bundle
+npm run build:watch    # tsc --watch
+npm run check          # lint + typecheck: run before calling a change done
 ```
 
 ## Styling
@@ -143,8 +159,10 @@ The built bundle is committed so the Flask app runs without Node. PDFs
 Use the project venv: `./venv/bin/python`.
 
 ```bash
-./venv/bin/python -m pytest          # 185 tests
+./venv/bin/python -m pytest
 ```
+
+[tests/README.md](../tests/README.md) says what each test file covers.
 
 Extraction scripts that write to `health_metrics` must stay idempotent and
 support `--dry-run`.
@@ -173,4 +191,4 @@ rewrite history.
 - [Architecture](architecture/ARCHITECTURE.md)
 - [Privacy](PRIVACY.md)
 - [Troubleshooting](troubleshooting/DEBUGGING_GUIDE.md)
-- [Release process](../packaging/README.md)
+- [Packaging and releases](../packaging/README.md)

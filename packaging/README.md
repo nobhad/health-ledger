@@ -9,7 +9,8 @@ How the downloadable Health Ledger apps are built.
 | `health_ledger.spec` | The PyInstaller build. Shared by both platforms. |
 | `build_macos.sh` | Builds `Health Ledger.app`, wraps it in a `.dmg`. |
 | `build_windows.ps1` | Builds `HealthLedger.exe`, wraps it in a `.zip`. |
-| `make_icons.py` | Draws `icon.png`, `icon.icns` and `icon.ico`. |
+| `make_icons.py` | Draws `icon.svg`, `icon.png`, `icon.icns` and `icon.ico`; `icon.sha256` records what they were drawn from. |
+| `verify_icon.py` | Checks that a built `.icns` carries the committed `icon.png`, by pixels. The release workflow runs it. |
 | `requirements-build.txt` | PyInstaller and pystray, on top of `requirements.txt`. |
 
 The entry point is `desktop.py` in the project root, not `app.py`: it adds the
@@ -30,16 +31,16 @@ packaging/build_macos.sh
 powershell -ExecutionPolicy Bypass -File packaging\build_windows.ps1
 ```
 
-Output lands in `dist/`:
+Output lands in `dist/`, named from `APP_VERSION` in `config.py`:
 
 ```text
-dist/HealthLedger-1.0.0-macOS-arm64.dmg      ~37 MB
-dist/HealthLedger-1.0.0-windows-x64.zip
+dist/HealthLedger-<version>-macOS-<arch>.dmg
+dist/HealthLedger-<version>-windows-x64.zip
 ```
 
 Both `build/` and `dist/` are git-ignored. **A Mac cannot build the Windows
 executable and vice versa** — PyInstaller bundles a platform's own Python
-runtime. Use the GitHub Actions workflow for the pair.
+runtime. Use the `release` GitHub Actions workflow for the pair.
 
 ## Two decisions worth knowing
 
@@ -50,8 +51,10 @@ inside a bundle means relocating a good part of Homebrew and fixing every
 dylib path, and it breaks on the next OS update.
 
 The app already degrades without it — `pdf_generator.pdf_unavailable_reason()`
-reports why, the `/api/pdf/*` routes answer 503 with a plain message and a
-`print_url`, and Doctor Docs offers **Open printable version** instead. The
+reports why, the PDF routes (`/api/pdf/summary`, `/api/pdf/profile`,
+`/api/pdf/source/<id>`, `/api/pdf/doctor/<specialty>`) answer 503 with a plain message and a
+`reason`, the doctor route adds a `print_url`, and Doctor Docs offers
+**Open printable version** instead. The
 browser's own Save as PDF makes the file. The build scripts strip WeasyPrint
 out of the runtime requirements so it cannot be pulled in by accident.
 
@@ -88,15 +91,21 @@ Gatekeeper — it only keeps macOS from refusing to run the app locally.
 5. Commit, then tag:
 
    ```bash
-   git tag -a v1.0.0 -m "Health Ledger 1.0.0"
+   git tag -a v<version> -m "Health Ledger <version>"
    git push origin main --tags
    ```
 
-6. The `release` workflow builds both platforms and attaches them to a draft
-   GitHub Release. Check the draft, then publish it.
+6. The `release` workflow builds both platforms, starts each built app and
+   waits for it to answer on `127.0.0.1:5099`, checks the macOS icon with
+   `verify_icon.py`, and attaches the files to a draft GitHub Release. Check
+   the draft, then publish it.
 
 To build without tagging, run the workflow by hand from the Actions tab
-(`workflow_dispatch`).
+(`workflow_dispatch`); that builds and uploads the files as workflow artifacts but drafts no release.
+
+The separate `tests` workflow (`.github/workflows/ci.yml`) runs pytest, the
+private-data scan, lint, typecheck, and checks that the committed CSS bundle
+and compiled JS are current, on every push to `main` and every pull request.
 
 ## Cost
 

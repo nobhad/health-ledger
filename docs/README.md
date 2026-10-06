@@ -1,172 +1,68 @@
-# Genetic Profile Database Documentation
+# Documentation
 
-**Last Updated:** December 7, 2025  
-**Status:** ✅ Production-Ready
+Documentation for Health Ledger, a personal medical record app that runs on
+your own computer. For what it is and how to install it, start with the
+[main README](../README.md) and [INSTALL.md](../INSTALL.md).
 
-Complete documentation for the Genetic Profile Database application.
+## Index
 
----
+### Getting started
 
-## 📚 Quick Navigation
+- [Quick Start Guide](guides/QUICK_START.md)
+- [Web Query Interface Guide](guides/WEB_INTERFACE.md)
+- [Healthcare Summary Guide](guides/HEALTHCARE_SUMMARY.md)
+- [Primary Sources Extraction Guide](guides/PRIMARY_SOURCES.md)
 
-### 🚀 Getting Started
+### How it works
 
-- **[Quick Start Guide](guides/QUICK_START.md)** - Get up and running in 5 minutes
-- **[Web Interface Guide](guides/WEB_INTERFACE.md)** - Using the web query interface
+- [Architecture](architecture/ARCHITECTURE.md)
+- [API Reference](api/API_REFERENCE.md)
+- [Database overview](database/OVERVIEW.md) and
+  [Database reference](database/README.md) (also reachable from
+  [DATABASE_README.md](DATABASE_README.md))
+- [Privacy and security](PRIVACY.md)
 
-### 🗄️ Database Documentation
+### Pages and features
 
-- **[Database Overview](database/README.md)** - Complete database documentation
-- **[Database Overview (Short)](database/OVERVIEW.md)** - Quick reference
+- [Query page](features/QUERY_INTERFACE.md)
+- [Summary](features/SUMMARY_GENERATOR.md)
+- [Full profile](features/PROFILE_VIEWER.md)
+- [Data import](features/DATA_IMPORT.md)
+- [References](features/REFERENCES.md)
+- [Citation management](features/CITATION_MANAGEMENT.md)
+- [Pharmacogenomic data](features/PHARMACOGENOMIC.md)
+- [Database queries](features/DATABASE_QUERIES.md)
 
-### 🏗️ Architecture & API
+### Working on the code
 
-- **[System Architecture](architecture/ARCHITECTURE.md)** - Complete system architecture
-- **[API Reference](api/API_REFERENCE.md)** - All API endpoints
+- [Development](DEVELOPMENT.md): running from source, building, the rules
+- [Tests](../tests/README.md)
+- [Packaging and releases](../packaging/README.md)
+- [Contributing](../CONTRIBUTING.md)
+- [Gene section template](templates/TEMPLATE_GENE_SECTION.md)
 
-### 📦 Features
+### Troubleshooting
 
-- **[Query Interface](features/QUERY_INTERFACE.md)** - Search and query functionality
-- **[Profile Viewer](features/PROFILE_VIEWER.md)** - Full profile document display
-- **[Summary Generator](features/SUMMARY_GENERATOR.md)** - Personalized summary creation
-- **[Data Import](features/DATA_IMPORT.md)** - Importing data from markdown
-- **[Citation Management](features/CITATION_MANAGEMENT.md)** - Citation system
-- **[References](features/REFERENCES.md)** - Journal lookup, saved articles and excerpts for specialist documents
-- **[Pharmacogenomic Data](features/PHARMACOGENOMIC.md)** - Drug metabolism information
-- **[Database Queries](features/DATABASE_QUERIES.md)** - Programmatic database access
+- [Troubleshooting guide](troubleshooting/README.md)
+- [Common issues](troubleshooting/COMMON_ISSUES.md)
+- [Debugging guide](troubleshooting/DEBUGGING_GUIDE.md)
+- [JavaScript debugging](troubleshooting/DEBUGGING_JAVASCRIPT.md)
 
-### 📖 User Guides
+### Project files
 
-- **[Healthcare Summary Guide](guides/HEALTHCARE_SUMMARY.md)** - Creating healthcare summaries
-- **[Primary Sources Guide](guides/PRIMARY_SOURCES.md)** - Extracting primary source data
+- [Changelog](../CHANGELOG.md): what changed, by version
 
-### 🔧 Troubleshooting
+## What is in this folder
 
-- **[Troubleshooting Guide](troubleshooting/README.md)** - Complete troubleshooting documentation
-- **[Common Issues](troubleshooting/COMMON_ISSUES.md)** - Quick fixes for common problems
-- **[Debugging Guide](troubleshooting/DEBUGGING_GUIDE.md)** - Comprehensive debugging
-- **[JavaScript Debugging](troubleshooting/DEBUGGING_JAVASCRIPT.md)** - Frontend debugging
-
-### 📝 Templates
-
-- **[Gene Section Template](templates/TEMPLATE_GENE_SECTION.md)** - Template for gene documentation
-
----
-
-## 📁 Documentation Structure
-
-```text
-docs/
-├── README.md                    # This file - Documentation index
-│
-├── guides/                      # User guides
-│   ├── QUICK_START.md          # Quick start guide
-│   ├── WEB_INTERFACE.md        # Web interface guide
-│   ├── HEALTHCARE_SUMMARY.md   # Healthcare summary guide
-│   └── PRIMARY_SOURCES.md      # Primary sources guide
-│
-├── database/                    # Database documentation
-│   ├── README.md               # Complete database documentation
-│   └── OVERVIEW.md             # Quick database overview
-│
-├── api/                        # API documentation
-│   └── API_REFERENCE.md        # API endpoint reference
-│
-├── architecture/               # Architecture docs
-│   └── ARCHITECTURE.md         # System architecture
-│
-├── features/                   # Feature documentation
-│   ├── QUERY_INTERFACE.md
-│   ├── PROFILE_VIEWER.md
-│   ├── SUMMARY_GENERATOR.md
-│   ├── DATA_IMPORT.md
-│   ├── CITATION_MANAGEMENT.md
-│   ├── REFERENCES.md
-│   ├── PHARMACOGENOMIC.md
-│   └── DATABASE_QUERIES.md
-│
-├── troubleshooting/            # Troubleshooting docs
-│   ├── README.md               # Troubleshooting index
-│   ├── DEBUGGING_GUIDE.md      # Comprehensive debugging
-│   ├── DEBUGGING_JAVASCRIPT.md # JavaScript debugging
-│   └── COMMON_ISSUES.md        # Common issues quick reference
-│
-├── templates/                  # Template files
-│   └── GENE_SECTION.md         # Gene section template
-│
-└── archive/                    # Historical/summary files
-    ├── CITATION_OVERHAUL_SUMMARY.md
-    ├── DISPLAY_INCONSISTENCIES.md
-    └── center_for_human_genetics_*
-```
-
----
-
-## 🚀 Quick Commands
-
-```bash
-# Start web server
-python3 app.py
-
-# All content is generated dynamically from database
-# No static HTML generation needed
-
-# Query database
-python3 scripts/query_examples.py
-
-# Import data from markdown
-python3 scripts/import_from_markdown.py
-```
-
----
-
-## 📊 Current Database Status
-
-**Last Verified:** December 7, 2025
-
-- **Genes** fully documented
-- **SNPs** associated with genes
-- **Genotypes** recorded per gene
-- **Trait associations** with gene and citation links
-- **Health condition associations** with gene and citation links
-- **Citations** linked to what they support
-- **Gene-gene interactions**
-- **21 primary sources** integrated
-- **Health metrics** read out of imported documents
-
-**Database Quality:** ⭐⭐⭐⭐⭐ (5/5) - Excellent
-
----
-
-## 🔄 Recent Updates
-
-### December 7, 2025 - Documentation Overhaul
-
-- ✅ Reorganized documentation structure
-- ✅ Consolidated duplicate files
-- ✅ Updated all database statistics
-- ✅ Created comprehensive troubleshooting guide
-- ✅ Improved navigation and cross-references
-
-### December 7, 2025 - Database Fixes
-
-- ✅ Fixed data import (SNPs, genotypes, traits, conditions)
-- ✅ Removed 201 duplicate genotypes
-- ✅ Fixed gene-gene interactions import
-- ✅ Updated all documentation with current statistics
-
----
-
-## 📖 Main Project Files
-
-- **[Main README](../README.md)** - What it is and how to install it
-- **[Development](DEVELOPMENT.md)** - Running from source, structure, the rules
-- **[Current work](../CURRENT_WORK.md)** - State of play and roadmap
-- **[Changelog](../CHANGELOG.md)** - What changed, by version
-- **[Packaging](../packaging/README.md)** - Building the downloadable apps
-
----
-
-**Last Updated:** December 7, 2025  
-**Status:** Production-Ready ✅  
-**Version:** 1.0.0
+| Path | Holds |
+| --- | --- |
+| `README.md` | This index. |
+| `DEVELOPMENT.md`, `PRIVACY.md`, `DATABASE_README.md` | Top-level pages: development rules, privacy and security, a pointer to the database docs. |
+| `guides/` | Walkthroughs for using the app. |
+| `database/` | Database overview and reference. |
+| `api/` | The API reference. |
+| `architecture/` | How the modules fit together. |
+| `features/` | One page per page or feature of the app. |
+| `troubleshooting/` | Common problems and debugging. |
+| `templates/` | A template for a gene section. |
+| `archive/` | Notes from past work, kept as written. They describe the earlier program this one was renamed from, and are not kept up to date. |
