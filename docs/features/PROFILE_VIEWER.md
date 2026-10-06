@@ -1,357 +1,57 @@
-# Profile Viewer Feature
+# Full Profile
 
-**Last Updated**: 2026-09-20
+The full profile is the long version of the Summary page: every gene in the
+ledger and what is recorded about each. It lives at `/summary?full=1`
+(the Summary page's Show everything link). `/profile` redirects there, so old links still work.
+In the sidebar the page is called Summary.
 
-> The full write-up no longer has a page of its own. Summary and Profile were
-> the same document at two lengths, so they were merged: it is `/summary`
-> with **Show everything** pressed (`?full=1`), and `/profile` redirects
-> there. Everything below about how the document is generated, its citations
-> and its section nav still holds.
+The short version is described in [`SUMMARY_GENERATOR.md`](SUMMARY_GENERATOR.md).
 
-## Overview
+## How it is built
 
-The Profile Viewer displays the complete genetic profile document with all gene information, trait associations, health conditions, citations, and pharmacogenomic data. It provides a comprehensive view of the entire genetic profile in a readable, navigable format.
+`app.summary()` in `app.py` calls `generate_profile_html(db)` from
+`profile_generator.py` when `full=1`, and renders it in `templates/summary.html`.
+Nothing is stored; the HTML is generated from the database on each request. An
+empty ledger (no rows in `genes`) shows a message and a link to Import instead.
+A generation error, or output shorter than 100 characters, answers 500.
 
-**Key Features:**
+## What the document contains
 
-- 📄 Complete genetic profile document display
-- 🔗 Clickable citation links
-- 📑 Table of contents navigation
-- 🎨 Clean, readable formatting
-- 📱 Responsive design
+In this order:
 
----
+1. A title and a header with the test provider and test date (from
+   `db.get_genetic_test_info()`, left out when there is none) and the date it
+   was generated.
+2. A numbered table of contents linking to each gene.
+3. One section per gene, in the order of `get_all_genes()`. Each shows, when
+   the ledger has them: the genotype and phenotype, the SNP rs numbers, trait
+   associations, health-condition associations, database sources, gene-gene
+   interactions and research findings.
+4. A References list built from `get_all_references()`.
 
-## Table of Contents
+Trait and condition lines carry citation numbers. Each is a link to the
+matching reference (`#ref-<number>`), and each reference list item has
+`id="ref-<number>"`. When a line cites more than one source, only the first
+number shows, followed by `+`; clicking it expands the full list (the small
+script at the bottom of `summary.html`).
 
-- [Route](#route)
-- [HTML Generation](#html-generation)
-- [Citation Links](#citation-links)
-- [Template Structure](#template-structure)
-- [Styling](#styling)
-- [Error Handling](#error-handling)
-- [Related Files](#related-files)
+## Navigation and PDF
 
----
-
-## Route
-
-### GET /summary?full=1
-
-**Purpose**: Display the full genetic profile HTML document.
-
-**Handler**: `app.summary()`. `/profile` redirects here.
-
-**Process**:
-
-1. **Queries database** for all genes, traits, conditions, and citations
-2. **Generates HTML dynamically** from database using `profile_generator.py`
-3. Renders with `templates/summary.html`, which carries both lengths
-4. Includes the section nav and the length toggle
-
-**Error Handling**:
-
-- 500 if database query fails
-- 500 if HTML generation fails
-
-**Example Request**:
-
-```text
-GET /summary?full=1
-```
-
-**Response**: HTML page with full profile content
-
----
-
-## HTML Generation
-
-The profile HTML is **generated dynamically from the database** using `profile_generator.py`.
-
-### Generation Process
-
-1. **Query Database**: Retrieves all genes, SNPs, genotypes, traits, health conditions, and citations
-2. **Build Document Structure**: Organizes data by gene sections
-3. **Format Citations**: Transforms citation numbers to clickable links
-4. **Generate HTML**: Creates HTML markup with proper structure
-5. **Render Template**: Wraps content in `templates/summary.html` with navigation
-
-### Citation Conversion
-
-```python
-def convert_citations(text):
-    """Convert [1,2,3] to clickable links"""
-    pattern = r'\[(\d+(?:,\s*\d+)*)\]'
-    # Creates: <a href="#ref-1"><span class="cite-num">1</span></a>
-```
-
-### Reference Anchors
-
-```python
-def add_reference_anchors(html_content):
-    """Add id="ref-{number}" to list items"""
-    # <li id="ref-1">1. Citation text...</li>
-```
-
----
-
-## Citation Links
-
-Citations in the document are clickable and link to the references section.
-
-### Link Format
-
-```html
-<sup class="citation">
-    <a href="#ref-1" class="cite-link">
-        <span class="cite-num">1</span>
-    </a>
-</sup>
-```
-
-### Reference Format
-
-```html
-<li id="ref-1">1. Author, A. (Year). Title. Journal.</li>
-```
-
-### CSS Styling
-
-```css
-.cite-num {
-    background: #e3f2fd;
-    color: #1565c0;
-    padding: 2px 4px;
-    border-radius: 2px;
-    font-weight: 600;
-}
-
-.cite-link {
-    text-decoration: none;
-}
-
-.cite-link:hover {
-    text-decoration: underline;
-}
-
-ol > li[id^="ref-"] {
-    scroll-margin-top: 80px; /* Smooth scroll offset */
-}
-```
-
----
-
-## Template Structure
-
-### Base Template
-
-```html
-{% extends "base.html" %}
-```
-
-### Document Template
-
-The page title and description come from `base.html` blocks, and the body is
-whichever length was asked for.
-
-```html
-{% block page_title %}Summary{% endblock %}
-
-{% block content %}
-<div class="doc-layout">
-    <aside class="doc-nav" id="docNav" hidden aria-label="Sections">...</aside>
-    <div class="doc-main">
-        <div class="doc-main-title">
-            <span>Document</span>
-            <a class="doc-length-toggle" href="...">Show everything</a>
-        </div>
-        <div class="summary-content" id="docBody">{{ summary_html|safe }}</div>
-    </div>
-</div>
-{% endblock %}
-```
-
-### Content Sections
-
-The profile includes:
-
-1. **Header**: Test provider, version, primary sources
-2. **Table of Contents**: Links to all gene sections
-3. **17 Gene Sections**: Each with:
-   - Genotype and SNP information
-   - Trait associations
-   - Health condition associations
-   - Database sources
-   - Gene-gene interactions
-   - Research findings
-4. **Pharmacogenomic Section**: Drug metabolism information
-5. **Gene-Gene Interaction Networks**: Summary of interactions
-6. **Summary by Category**: Key genes grouped by trait type
-7. **References**: All citations (164 total)
-
----
+`static/js/doc-nav.ts` builds the Sections list from the document's `h2`
+headings (one per gene, plus References) and marks the section in view. The
+page's Save as PDF link goes to `/api/pdf/profile`; see
+[`SUMMARY_GENERATOR.md`](SUMMARY_GENERATOR.md) for what happens when the PDF
+libraries are missing.
 
 ## Styling
 
-### Profile Content Styles
+The document sits in `.summary-content` inside `.doc-layout`. Those rules are
+in `static/css/pages.css`; they use design-system tokens, the dark theme is
+`html[data-theme="dark"]`, and the built bundle is
+`static/css/dist/health-ledger.css` (`npm run build:css`).
 
-```css
-.profile-content {
-    background: white;
-    padding: 30px;
-    border-radius: 8px;
-    box-shadow: 0 2px 4px rgba(0,0,0,0.1);
-    max-width: 900px;
-    margin: 0 auto;
-}
+## Files
 
-.profile-content h1 {
-    font-size: 2em;
-    color: #000;
-    margin-bottom: 20px;
-    padding-bottom: 10px;
-    border-bottom: 2px solid #000;
-}
-
-.profile-content h2 {
-    font-size: 1.5em;
-    color: #000;
-    margin-top: 40px;
-    margin-bottom: 15px;
-    padding-bottom: 8px;
-    border-bottom: 1px solid #ccc;
-}
-```
-
-### Typography
-
-- **Font**: System font stack (-apple-system, BlinkMacSystemFont, "Segoe UI", Roboto)
-- **Line Height**: 1.6 for readability
-- **Max Width**: 900px for optimal reading width
-- **Spacing**: Generous margins and padding
-
----
-
-## Error Handling
-
-### Database Connection Errors
-
-```python
-try:
-    db = get_db()
-    profile_html = generate_profile_html(db)
-except Exception as e:
-    logger.error(f"Error generating profile from database: {e}")
-    return f"Error generating profile: {str(e)}", 500
-```
-
-### Generation Errors
-
-```python
-try:
-    profile_html = generate_profile_html(db)
-    if not profile_html or len(profile_html.strip()) < 100:
-        return "Profile content is missing. Please check database.", 500
-except Exception as e:
-    logger.error(f"Error generating profile: {e}", exc_info=True)
-    return f"Error generating profile: {str(e)}", 500
-```
-
-### Template Errors
-
-Flask will catch template rendering errors and return 500 with error details (in debug mode).
-
----
-
-## Data Updates
-
-The profile is **always up-to-date** because it's generated directly from the database.
-
-### Updating Profile Content
-
-To update the profile, modify the database:
-
-```bash
-# Import new data from markdown
-python3 scripts/import_from_markdown.py
-
-# Add new genes, traits, or conditions via database API
-# The profile will automatically reflect changes on next page load
-```
-
-**No regeneration needed** - the profile is generated fresh from the database on every request.
-
----
-
-## Related Files
-
-### Templates
-
-- `templates/base.html` - Base template with header/footer
-- `templates/summary.html` - the document page, both lengths
-
-### Scripts
-
-- `scripts/generate_html.py` - HTML generation script
-
-### Source Files
-
-- `genetic_profile.db` - Database (source of all data)
-- `profile_generator.py` - Database-to-HTML generator
-
-### Python
-
-- `app.py` - Profile route handler
-
----
-
-## Debugging
-
-### Profile Not Displaying
-
-1. **Check file exists**:
-
-   ```bash
-   ls -la output/genetic_profile.html
-   ```
-
-2. **Regenerate HTML**:
-
-   ```bash
-   python3 scripts/generate_html.py
-   ```
-
-3. **Check server logs**:
-
-   ```bash
-   tail -f logs/app.log
-   ```
-
-### Citations Not Clickable
-
-1. **Verify citation conversion**:
-   - Check HTML source for `<a href="#ref-1">` links
-   - Verify reference list has `id="ref-1"` attributes
-
-2. **Check CSS**:
-   - Verify `.cite-link` styles are loaded
-   - Check for CSS conflicts
-
-### Styling Issues
-
-1. **Inspect element** in browser DevTools
-2. **Check CSS specificity** - profile styles may be overridden
-3. **Verify template inheritance** - ensure base.html styles are loaded
-
----
-
-## Future Enhancements
-
-- [ ] Search functionality within profile
-- [ ] Print-friendly stylesheet
-- [ ] PDF export
-- [ ] Section navigation sidebar
-- [ ] Highlight search terms
-- [ ] Copy citation links
-- [ ] Share specific sections
-- [ ] Dark mode support
+- `profile_generator.py`: `generate_profile_html`, `format_citation_numbers`.
+- `app.py`: `/summary`, `/profile`, `/api/pdf/profile`.
+- `templates/summary.html`, `static/js/doc-nav.ts`.
