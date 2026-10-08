@@ -6,8 +6,8 @@ it. Patches are welcome; please read this first so neither of us wastes time.
 ## Before you write code
 
 Open an issue and describe what you want to change. For anything larger than a
-bug fix, wait for a reply — the roadmap in `CURRENT_WORK.md` is deliberately
-ordered, and a change that jumps it may not be merged however good it is.
+bug fix, wait for a reply — the roadmap is deliberately ordered, and a change
+that jumps it may not be merged however good it is.
 
 Two things will be declined on sight, so please do not spend time on them:
 
