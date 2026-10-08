@@ -2,6 +2,8 @@
 
 Research your own results, and bring what you find to your care providers.
 
+![Health Ledger's first screen: choose the folder your records live in, then start an empty ledger or import a database. Everything stays on this computer.](docs/images/setup.png)
+
 A test report hands you a conclusion and a list of gene names; lab results
 arrive as PDFs with numbers and no story. Health Ledger is where you work
 through them. It keeps lab results, visit notes, letters, portal exports and
